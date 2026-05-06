@@ -90,10 +90,25 @@ const products = [
     gummyColor: "#E8917A",
     icon: <Sparkles size={18} />,
     ingredients: ["Marine Collagen", "Vitamin C", "Biotin", "Hyaluronic Acid"],
-    badge: null,
+     badge: null,
+  },
+  {
+    id: 6,
+    name: "Gut",
+    tagline: "Digestive harmony, daily",
+    image: "https://d2xsxph8kpxj0f.cloudfront.net/310519663633783733/NP8W4PN5hdBACVumhQ3AtE/luma_gut_bottle-XRZKo6DKmqn38DjNUJpCzw.webp",
+    description: "Probiotics, Prebiotics & Digestive Enzymes for a balanced gut microbiome and smooth digestion.",
+    price: "$38",
+    originalPrice: "$48",
+    color: "#7AAE6E",
+    bgColor: "#EFF6EC",
+    textColor: "#2A5C1A",
+    gummyColor: "#A8D49A",
+    icon: <Leaf size={18} />,
+    ingredients: ["Probiotics (10B CFU)", "Inulin Prebiotic", "Digestive Enzymes", "Ginger Root"],
+    badge: "New",
   },
 ];
-
 const bundles = [
   {
     id: 1,
@@ -179,7 +194,7 @@ const bundles = [
     id: 9,
     name: "Daily Ritual Bundle",
     subtitle: "Energy + Calm + Sleep + Focus + Glow",
-    description: "Your complete daily ritual. All five formulas working in harmony, morning to night.",
+    description: "Your complete daily ritual. All six formulas working in harmony, morning to night.",
     price: "$169",
     originalPrice: "$190",
     image: "/manus-storage/daily_ritual_bundle_48b2976a.png",
@@ -189,7 +204,7 @@ const bundles = [
   {
     id: 10,
     name: "Essential Five Bundle",
-    subtitle: "All Five Formulas",
+    subtitle: "All Six Formulas",
     description: "The complete Luma system. Every need, every moment, every day — fully covered.",
     price: "$169",
     originalPrice: "$190",
@@ -575,7 +590,7 @@ export default function Home() {
                 className="inline-flex items-center gap-2 bg-[#C8813A]/10 text-[#C8813A] text-xs font-body font-600 tracking-widest uppercase px-4 py-2 rounded-full mb-6"
               >
                 <span className="w-1.5 h-1.5 rounded-full bg-[#C8813A] animate-pulse" />
-                Five Formulas. One Daily Ritual.
+                Six Formulas. One Daily Ritual.
               </motion.div>
 
               <motion.h1
@@ -594,7 +609,7 @@ export default function Home() {
                 transition={{ duration: 0.6, delay: 0.35 }}
                 className="font-body text-lg text-[#1E1B16]/60 leading-relaxed mb-8 max-w-md"
               >
-                Science-backed formulas for energy, calm, sleep, focus, and glow. 
+                Science-backed formulas for energy, calm, sleep, focus, glow, and gut health. 
                 Clean ingredients, clearly explained. A ritual you'll actually keep.
               </motion.p>
 
@@ -710,7 +725,7 @@ export default function Home() {
           <AnimatedSection className="text-center mb-16">
             <SectionLabel>Choose Your Daily Support</SectionLabel>
             <h2 className="font-display font-700 text-4xl lg:text-5xl text-[#1E1B16] mb-4">
-              Five formulas.{" "}
+              Six formulas.{" "}
               <em className="italic text-[#C8813A]">One daily ritual.</em>
             </h2>
             <p className="font-body text-lg text-[#1E1B16]/55 max-w-xl mx-auto leading-relaxed">
@@ -742,7 +757,7 @@ export default function Home() {
           </div>
 
           {/* Product grid */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-5">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-5">
             {products
               .filter((p) => activeCategory === null || p.id === activeCategory)
               .map((product, index) => (
@@ -1150,7 +1165,7 @@ export default function Home() {
             {[
               {
                 title: "Shop",
-                links: ["Energy", "Calm", "Sleep", "Focus", "Glow", "Bundles"],
+                links: ["Energy", "Calm", "Sleep", "Focus", "Glow", "Gut", "Bundles"],
               },
               {
                 title: "Company",
