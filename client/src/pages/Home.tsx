@@ -7,7 +7,7 @@
 import { useState, useEffect, useRef } from "react";
 import { useLocation } from "wouter";
 import { motion, useInView, AnimatePresence } from "framer-motion";
-import { ChevronDown, Star, Check, ArrowRight, Menu, X, ShoppingBag, Leaf, Zap, Moon, Brain, Sparkles } from "lucide-react";
+import { ChevronDown, ChevronLeft, ChevronRight, Star, Check, ArrowRight, Menu, X, ShoppingBag, Leaf, Zap, Moon, Brain, Sparkles } from "lucide-react";
 
 // ─── Product Data ────────────────────────────────────────────────────────────
 
@@ -27,6 +27,7 @@ const products = [
     icon: <Zap size={18} />,
     ingredients: ["Ginseng Root", "Vitamin B12", "Green Tea Extract", "CoQ10"],
     badge: "Best Seller",
+    flavor: "Blood Orange Mango",
   },
   {
     id: 2,
@@ -75,6 +76,7 @@ const products = [
     icon: <Brain size={18} />,
     ingredients: ["Lion's Mane", "Bacopa Monnieri", "Ginkgo Biloba", "Vitamin B6"],
     badge: "New",
+    flavor: "Spearmint Green Tea",
   },
   {
     id: 5,
@@ -90,7 +92,8 @@ const products = [
     gummyColor: "#E8917A",
     icon: <Sparkles size={18} />,
     ingredients: ["Marine Collagen", "Vitamin C", "Biotin", "Hyaluronic Acid"],
-     badge: null,
+    badge: null,
+    flavor: "Strawberry Peach",
   },
   {
     id: 6,
@@ -107,6 +110,7 @@ const products = [
     icon: <Leaf size={18} />,
     ingredients: ["Probiotics (10B CFU)", "Inulin Prebiotic", "Digestive Enzymes", "Ginger Root"],
     badge: "New",
+    flavor: "Citrus Mint",
   },
 ];
 const bundles = [
@@ -193,23 +197,23 @@ const bundles = [
   {
     id: 9,
     name: "Daily Ritual Bundle",
-    subtitle: "Energy + Calm + Sleep + Focus + Glow",
+    subtitle: "Energy + Calm + Sleep + Focus + Glow + Gut",
     description: "Your complete daily ritual. All six formulas working in harmony, morning to night.",
-    price: "$169",
-    originalPrice: "$190",
+    price: "$199",
+    originalPrice: "$228",
     image: "/manus-storage/daily_ritual_bundle_48b2976a.png",
-    products: ["Energy", "Calm", "Sleep", "Focus", "Glow"],
+    products: ["Energy", "Calm", "Sleep", "Focus", "Glow", "Gut"],
     featured: true,
   },
   {
     id: 10,
-    name: "Essential Five Bundle",
+    name: "Essential Six Bundle",
     subtitle: "All Six Formulas",
     description: "The complete Luma system. Every need, every moment, every day — fully covered.",
-    price: "$169",
-    originalPrice: "$190",
+    price: "$199",
+    originalPrice: "$228",
     image: "/manus-storage/essential_five_bundle_f256b0c0.png",
-    products: ["Energy", "Calm", "Sleep", "Focus", "Glow"],
+    products: ["Energy", "Calm", "Sleep", "Focus", "Glow", "Gut"],
   },
 ];
 
@@ -366,6 +370,14 @@ function ProductCard({ product, index }: { product: typeof products[0]; index: n
           <div>
             <h3 className="font-display font-700 text-xl text-[#1E1B16]">{product.name}</h3>
             <p className="font-body text-xs text-[#1E1B16]/50 italic mt-0.5">{product.tagline}</p>
+            {(product as any).flavor && (
+              <span
+                className="inline-block mt-1.5 text-[10px] font-body font-600 px-2.5 py-0.5 rounded-full tracking-wide"
+                style={{ backgroundColor: product.bgColor, color: product.textColor }}
+              >
+                {(product as any).flavor}
+              </span>
+            )}
           </div>
           <div className="text-right">
             <div className="font-body font-600 text-[#1E1B16]">{product.price}</div>
@@ -466,6 +478,12 @@ export default function Home() {
   const [, navigate] = useLocation();
   const [scrolled, setScrolled] = useState(false);
   const [activeCategory, setActiveCategory] = useState<number | null>(null);
+  const carouselRef = useRef<HTMLDivElement>(null);
+  const scrollCarousel = (dir: "left" | "right") => {
+    if (!carouselRef.current) return;
+    const amount = 600;
+    carouselRef.current.scrollBy({ left: dir === "left" ? -amount : amount, behavior: "smooth" });
+  };
 
   useEffect(() => {
     const handleScroll = () => setScrolled(window.scrollY > 60);
@@ -819,6 +837,7 @@ export default function Home() {
           <div className="relative">
             {/* Scroll container */}
             <div
+              ref={carouselRef}
               className="flex gap-5 overflow-x-auto pb-4 snap-x snap-mandatory scrollbar-hide"
               style={{ scrollbarWidth: "none", msOverflowStyle: "none" }}
             >
@@ -877,6 +896,21 @@ export default function Home() {
             {/* Fade edges */}
             <div className="pointer-events-none absolute top-0 left-0 h-full w-16 bg-gradient-to-r from-[#F5EDD8]/60 to-transparent z-10" />
             <div className="pointer-events-none absolute top-0 right-0 h-full w-16 bg-gradient-to-l from-[#F5EDD8]/60 to-transparent z-10" />
+            {/* Arrow buttons */}
+            <button
+              onClick={() => scrollCarousel("left")}
+              className="absolute left-2 top-1/2 -translate-y-1/2 z-20 w-10 h-10 rounded-full bg-white shadow-lg border border-[#E8E0D4] flex items-center justify-center text-[#1E1B16] hover:bg-[#FAF7F2] transition-colors"
+              aria-label="Scroll left"
+            >
+              <ChevronLeft size={20} />
+            </button>
+            <button
+              onClick={() => scrollCarousel("right")}
+              className="absolute right-2 top-1/2 -translate-y-1/2 z-20 w-10 h-10 rounded-full bg-white shadow-lg border border-[#E8E0D4] flex items-center justify-center text-[#1E1B16] hover:bg-[#FAF7F2] transition-colors"
+              aria-label="Scroll right"
+            >
+              <ChevronRight size={20} />
+            </button>
           </div>
         </div>
       </section>
