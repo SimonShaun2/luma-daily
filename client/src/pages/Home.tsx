@@ -16,7 +16,7 @@ const products = [
     id: 1,
     name: "Energy",
     tagline: "Natural vitality, sustained",
-    image: "https://d2xsxph8kpxj0f.cloudfront.net/310519663633783733/NP8W4PN5hdBACVumhQ3AtE/luma_energy_bottle-cvYNKNP3tibNNfeoANANbe.webp",
+    image: "/manus-storage/luma_daily_packaging_1_ba62d885.png",
     description: "Ginseng, B12 & Green Tea Extract to power your day without the crash.",
     price: "$38",
     originalPrice: "$48",
@@ -32,7 +32,7 @@ const products = [
     id: 2,
     name: "Calm",
     tagline: "Stress less, live more",
-    image: "https://d2xsxph8kpxj0f.cloudfront.net/310519663633783733/NP8W4PN5hdBACVumhQ3AtE/luma_calm_bottle-4s8xH37yWtFyqjfCx7bpQB.webp",
+    image: "/manus-storage/luma_daily_packaging_1_ba62d885.png",
     description: "Ashwagandha & L-Theanine to quiet the noise and find your center.",
     price: "$38",
     originalPrice: "$48",
@@ -48,7 +48,7 @@ const products = [
     id: 3,
     name: "Sleep",
     tagline: "Rest deeply, wake ready",
-    image: "https://d2xsxph8kpxj0f.cloudfront.net/310519663633783733/NP8W4PN5hdBACVumhQ3AtE/luma_sleep_bottle-eLiwUvYuG8USYuzG87CxLd.webp",
+    image: "/manus-storage/luma_daily_packaging_1_ba62d885.png",
     description: "Melatonin & Chamomile for restorative sleep that actually refreshes.",
     price: "$38",
     originalPrice: "$48",
@@ -64,7 +64,7 @@ const products = [
     id: 4,
     name: "Focus",
     tagline: "Clarity on demand",
-    image: "https://d2xsxph8kpxj0f.cloudfront.net/310519663633783733/NP8W4PN5hdBACVumhQ3AtE/luma_focus_bottle-kntCt5H5rBn5mV9QKvrTPf.webp",
+    image: "/manus-storage/luma_daily_packaging_2_64fb246e.png",
     description: "Lion's Mane & Bacopa for sharp thinking and sustained concentration.",
     price: "$38",
     originalPrice: "$48",
@@ -80,7 +80,7 @@ const products = [
     id: 5,
     name: "Glow",
     tagline: "Beauty from within",
-    image: "https://d2xsxph8kpxj0f.cloudfront.net/310519663633783733/NP8W4PN5hdBACVumhQ3AtE/luma_glow_bottle-9BCZUpncy5AWUKKLLgZyRL.webp",
+    image: "/manus-storage/luma_daily_packaging_2_64fb246e.png",
     description: "Collagen & Vitamin C for radiant skin, strong nails, and lustrous hair.",
     price: "$38",
     originalPrice: "$48",
@@ -97,34 +97,104 @@ const products = [
 const bundles = [
   {
     id: 1,
-    name: "The Morning Ritual",
-    subtitle: "Energy + Calm + Glow",
-    description: "Start your day with intention. This trio primes your body and mind for whatever comes next.",
-    price: "$99",
-    originalPrice: "$114",
-    image: "https://d2xsxph8kpxj0f.cloudfront.net/310519663633783733/NP8W4PN5hdBACVumhQ3AtE/luma_energy_bottle-cvYNKNP3tibNNfeoANANbe.webp",
-    products: ["Energy", "Calm", "Glow"],
+    name: "Energy + Calm",
+    subtitle: "Energy + Calm",
+    description: "The perfect pair for a productive, balanced day. Fuel your morning and stay centered through it all.",
+    price: "$69",
+    originalPrice: "$76",
+    image: "/manus-storage/energy_calm_bundle_7ba4902a.png",
+    products: ["Energy", "Calm"],
   },
   {
     id: 2,
-    name: "The Daily Ritual",
-    subtitle: "All Five Formulas",
-    description: "The complete Luma system. Every need, every moment, every day — covered.",
+    name: "Sleep + Glow",
+    subtitle: "Sleep + Glow",
+    description: "Rest deeply and wake radiant. Your overnight beauty and recovery ritual in one.",
+    price: "$69",
+    originalPrice: "$76",
+    image: "/manus-storage/sleep_glow_bundle_e2009a50.png",
+    products: ["Sleep", "Glow"],
+  },
+  {
+    id: 3,
+    name: "Glow Up Bundle",
+    subtitle: "Glow + Sleep + Calm",
+    description: "Radiant skin, restful nights, and a calm mind. The ultimate self-care trio.",
+    price: "$99",
+    originalPrice: "$114",
+    image: "/manus-storage/glow_up_bundle_d7d92b3b.png",
+    products: ["Glow", "Sleep", "Calm"],
+  },
+  {
+    id: 4,
+    name: "Performance Bundle",
+    subtitle: "Energy + Focus + Calm",
+    description: "Sharpen your edge. Designed for peak mental and physical performance every day.",
+    price: "$99",
+    originalPrice: "$114",
+    image: "/manus-storage/performance_bundle_3fa231f4.png",
+    products: ["Energy", "Focus", "Calm"],
+  },
+  {
+    id: 5,
+    name: "Focus + Gut Bundle",
+    subtitle: "Focus + Gut Health",
+    description: "The gut-brain connection, optimized. Think clearly and feel great from the inside out.",
+    price: "$99",
+    originalPrice: "$114",
+    image: "/manus-storage/focus_gut_bundle_3ab9febe.png",
+    products: ["Focus", "Gut"],
+  },
+  {
+    id: 6,
+    name: "Focus Wellness Bundle",
+    subtitle: "Focus + Calm + Sleep",
+    description: "Complete cognitive wellness — sharpen focus, reduce stress, and recover overnight.",
+    price: "$99",
+    originalPrice: "$114",
+    image: "/manus-storage/focus_wellness_bundle_2f0d84d6.png",
+    products: ["Focus", "Calm", "Sleep"],
+  },
+  {
+    id: 7,
+    name: "Beauty Wellness Bundle",
+    subtitle: "Glow + Calm + Energy",
+    description: "Look good, feel good. A beauty-forward ritual that nourishes inside and out.",
+    price: "$99",
+    originalPrice: "$114",
+    image: "/manus-storage/beauty_wellness_bundle_8f28c04d.png",
+    products: ["Glow", "Calm", "Energy"],
+  },
+  {
+    id: 8,
+    name: "Mind Body Gut Bundle",
+    subtitle: "Focus + Energy + Gut",
+    description: "Holistic wellness from the inside out. Mind, body, and gut in perfect harmony.",
+    price: "$99",
+    originalPrice: "$114",
+    image: "/manus-storage/mind_body_gut_bundle_6671797c.png",
+    products: ["Focus", "Energy", "Gut"],
+  },
+  {
+    id: 9,
+    name: "Daily Ritual Bundle",
+    subtitle: "Energy + Calm + Sleep + Focus + Glow",
+    description: "Your complete daily ritual. All five formulas working in harmony, morning to night.",
     price: "$169",
     originalPrice: "$190",
-    image: "/manus-storage/luma_hero_flatlay_f55f2492.png",
+    image: "/manus-storage/daily_ritual_bundle_48b2976a.png",
     products: ["Energy", "Calm", "Sleep", "Focus", "Glow"],
     featured: true,
   },
   {
-    id: 3,
-    name: "The Evening Wind-Down",
-    subtitle: "Sleep + Calm + Focus",
-    description: "Decompress, restore, and prepare your mind for tomorrow's clarity.",
-    price: "$99",
-    originalPrice: "$114",
-    image: "https://d2xsxph8kpxj0f.cloudfront.net/310519663633783733/NP8W4PN5hdBACVumhQ3AtE/luma_sleep_bottle-eLiwUvYuG8USYuzG87CxLd.webp",
-    products: ["Sleep", "Calm", "Focus"],
+    id: 10,
+    name: "Essential Five Bundle",
+    subtitle: "All Five Formulas",
+    description: "The complete Luma system. Every need, every moment, every day — fully covered.",
+    price: "$169",
+    originalPrice: "$190",
+    image: "/manus-storage/essential_five_bundle_f256b0c0.png",
+    products: ["Energy", "Calm", "Sleep", "Focus", "Glow"],
   },
 ];
 
@@ -571,7 +641,7 @@ export default function Home() {
             >
               <div className="relative rounded-3xl overflow-hidden shadow-2xl">
                 <img
-                  src="/manus-storage/luma_hero_flatlay_f55f2492.png"
+                  src="/manus-storage/luma_daily_packaging_master_v2_fe19e1c8.png"
                   alt="Luma Daily product lineup — Energy, Calm, Sleep, Focus, Glow"
                   className="w-full h-auto object-cover"
                 />
@@ -687,7 +757,7 @@ export default function Home() {
         <div
           className="absolute inset-0 opacity-20"
           style={{
-            backgroundImage: `url('/manus-storage/luma_hero_flatlay_f55f2492.png')`,
+            backgroundImage: `url('/manus-storage/luma_daily_packaging_master_v2_fe19e1c8.png')`,
             backgroundSize: "cover",
             backgroundPosition: "center",
           }}
@@ -730,7 +800,7 @@ export default function Home() {
             </div>
           </AnimatedSection>
 
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 xl:grid-cols-5 gap-5">
             {bundles.map((bundle, index) => (
               <motion.div
                 key={bundle.id}
@@ -789,7 +859,7 @@ export default function Home() {
       <section id="ingredients" className="py-24 bg-[#1A1510] relative overflow-hidden">
         <div className="absolute top-0 right-0 w-1/3 h-full opacity-10">
           <img
-                    src="https://d2xsxph8kpxj0f.cloudfront.net/310519663633783733/NP8W4PN5hdBACVumhQ3AtE/luma_calm_bottle-4s8xH37yWtFyqjfCx7bpQB.webp"
+                    src="/manus-storage/luma_daily_packaging_master_v2_fe19e1c8.png"
             alt=""
             className="w-full h-full object-cover"
           />
@@ -908,8 +978,8 @@ export default function Home() {
               <div className="relative">
                 <div className="rounded-3xl overflow-hidden shadow-xl">
                   <img
-                    src="https://d2xsxph8kpxj0f.cloudfront.net/310519663633783733/NP8W4PN5hdBACVumhQ3AtE/luma_glow_bottle-9BCZUpncy5AWUKKLLgZyRL.webp"
-                    alt="Woman enjoying her Luma Daily morning ritual"
+                    src="/manus-storage/luma_daily_packaging_master_69403cb3.png"
+                    alt="Luma Daily complete product lineup"
                     className="w-full h-auto object-cover"
                   />
                 </div>
