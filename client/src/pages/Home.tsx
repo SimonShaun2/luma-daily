@@ -338,18 +338,18 @@ function ProductCard({ product, index }: { product: typeof products[0]; index: n
       animate={isInView ? "visible" : "hidden"}
       variants={fadeUp}
       custom={index * 0.15}
-      className="product-card group"
+      className="product-card group flex-shrink-0 flex flex-col h-full"
       onMouseEnter={() => setHovered(true)}
       onMouseLeave={() => setHovered(false)}
     >
       {/* Product image area */}
       <div
-        className="relative h-56 flex items-center justify-center overflow-hidden"
-        style={{ backgroundColor: product.bgColor }}
+        className="relative flex items-center justify-center overflow-hidden rounded-t-2xl"
+        style={{ backgroundColor: product.bgColor, height: "220px" }}
       >
         {product.badge && (
           <div
-            className="absolute top-4 left-4 text-xs font-body font-600 px-3 py-1 rounded-full"
+            className="absolute top-3 left-3 text-xs font-body font-600 px-3 py-1 rounded-full z-10"
             style={{ backgroundColor: product.color, color: "white" }}
           >
             {product.badge}
@@ -360,12 +360,14 @@ function ProductCard({ product, index }: { product: typeof products[0]; index: n
           src={product.image}
           alt={`Luma ${product.name} gummies`}
           className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
-          style={{ objectPosition: 'center' }}
+          style={{ objectPosition: "center top" }}
+          animate={{ scale: hovered ? 1.05 : 1 }}
+          transition={{ duration: 0.4 }}
         />
       </div>
 
       {/* Product info */}
-      <div className="p-5">
+      <div className="p-5 flex flex-col flex-1">
         <div className="flex items-start justify-between mb-2">
           <div>
             <h3 className="font-display font-700 text-xl text-[#1E1B16]">{product.name}</h3>
@@ -413,7 +415,7 @@ function ProductCard({ product, index }: { product: typeof products[0]; index: n
           )}
         </AnimatePresence>
 
-        <div className="flex gap-2">
+        <div className="flex gap-2 mt-auto pt-3">
           <button className="btn-amber flex-1 justify-center text-xs py-2.5">
             Add to Ritual
           </button>
@@ -483,6 +485,12 @@ export default function Home() {
     if (!carouselRef.current) return;
     const amount = 600;
     carouselRef.current.scrollBy({ left: dir === "left" ? -amount : amount, behavior: "smooth" });
+  };
+  const productCarouselRef = useRef<HTMLDivElement>(null);
+  const scrollProductCarousel = (dir: "left" | "right") => {
+    if (!productCarouselRef.current) return;
+    const amount = 700;
+    productCarouselRef.current.scrollBy({ left: dir === "left" ? -amount : amount, behavior: "smooth" });
   };
 
   useEffect(() => {
@@ -774,13 +782,41 @@ export default function Home() {
             ))}
           </div>
 
-          {/* Product grid */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-5">
-            {products
-              .filter((p) => activeCategory === null || p.id === activeCategory)
-              .map((product, index) => (
-                <ProductCard key={product.id} product={product} index={index} />
-              ))}
+          {/* Product carousel */}
+          <div className="relative">
+            {/* Left arrow */}
+            <button
+              onClick={() => scrollProductCarousel("left")}
+              className="absolute left-0 top-1/2 -translate-y-1/2 -translate-x-4 z-20 w-10 h-10 rounded-full bg-white shadow-lg border border-[#E8E0D4] flex items-center justify-center text-[#1E1B16] hover:bg-[#FAF7F2] transition-colors"
+              aria-label="Scroll products left"
+            >
+              <ChevronLeft size={20} />
+            </button>
+            {/* Right arrow */}
+            <button
+              onClick={() => scrollProductCarousel("right")}
+              className="absolute right-0 top-1/2 -translate-y-1/2 translate-x-4 z-20 w-10 h-10 rounded-full bg-white shadow-lg border border-[#E8E0D4] flex items-center justify-center text-[#1E1B16] hover:bg-[#FAF7F2] transition-colors"
+              aria-label="Scroll products right"
+            >
+              <ChevronRight size={20} />
+            </button>
+            {/* Fade edges */}
+            <div className="pointer-events-none absolute top-0 left-0 h-full w-12 bg-gradient-to-r from-[#FAF7F2] to-transparent z-10" />
+            <div className="pointer-events-none absolute top-0 right-0 h-full w-12 bg-gradient-to-l from-[#FAF7F2] to-transparent z-10" />
+            {/* Scrollable row */}
+            <div
+              ref={productCarouselRef}
+              className="flex gap-5 overflow-x-auto pb-4 snap-x snap-mandatory"
+              style={{ scrollbarWidth: "none", msOverflowStyle: "none" }}
+            >
+              {products
+                .filter((p) => activeCategory === null || p.id === activeCategory)
+                .map((product, index) => (
+                  <div key={product.id} className="snap-start" style={{ minWidth: "280px", maxWidth: "280px" }}>
+                    <ProductCard product={product} index={index} />
+                  </div>
+                ))}
+            </div>
           </div>
         </div>
       </section>
