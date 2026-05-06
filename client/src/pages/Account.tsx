@@ -191,6 +191,277 @@ function OverviewTab({ setTab }: { setTab: (t: Tab) => void }) {
   );
 }
 
+// All 6 available Luma Daily formulas for the product picker
+const ALL_FORMULAS = [
+  {
+    id: 1,
+    name: "Energy",
+    flavor: "Blood Orange Mango",
+    tagline: "Natural vitality, sustained",
+    price: 30.4,
+    originalPrice: 38,
+    image: "/manus-storage/luma_energy_bottle_18c415cd.png",
+    color: "#F59E0B",
+    badge: "Best Seller",
+    badgeColor: "#C8813A",
+  },
+  {
+    id: 2,
+    name: "Calm",
+    flavor: "Raspberry Hibiscus",
+    tagline: "Stress less, live more",
+    price: 30.4,
+    originalPrice: 38,
+    image: "/manus-storage/luma_calm_bottle_14cc2d8f.png",
+    color: "#EC4899",
+    badge: "Fan Favorite",
+    badgeColor: "#10B981",
+  },
+  {
+    id: 3,
+    name: "Sleep",
+    flavor: "Blueberry Lavender",
+    tagline: "Rest deeply, wake ready",
+    price: 30.4,
+    originalPrice: 38,
+    image: "/manus-storage/luma_sleep_bottle_a6f93589.png",
+    color: "#8B5CF6",
+    badge: null,
+    badgeColor: "",
+  },
+  {
+    id: 4,
+    name: "Focus",
+    flavor: "Spearmint Green Tea",
+    tagline: "Clarity on demand",
+    price: 30.4,
+    originalPrice: 38,
+    image: "/manus-storage/luma_focus_bottle_4364c9ab.png",
+    color: "#0EA5E9",
+    badge: "New",
+    badgeColor: "#6366F1",
+  },
+  {
+    id: 5,
+    name: "Glow",
+    flavor: "Strawberry Peach",
+    tagline: "Beauty from within",
+    price: 30.4,
+    originalPrice: 38,
+    image: "/manus-storage/luma_glow_bottle_c1ab2dea.png",
+    color: "#F97316",
+    badge: null,
+    badgeColor: "",
+  },
+  {
+    id: 6,
+    name: "Gut",
+    flavor: "Citrus Mint",
+    tagline: "Digestive harmony, daily",
+    price: 30.4,
+    originalPrice: 38,
+    image: "https://d2xsxph8kpxj0f.cloudfront.net/310519663633783733/NP8W4PN5hdBACVumhQ3AtE/luma_gut_bottle-XRZKo6DKmqn38DjNUJpCzw.webp",
+    color: "#84CC16",
+    badge: "New",
+    badgeColor: "#6366F1",
+  },
+];
+
+function AddFormulaModal({
+  open,
+  onClose,
+  currentItemIds,
+  onAdd,
+}: {
+  open: boolean;
+  onClose: () => void;
+  currentItemIds: number[];
+  onAdd: (selected: typeof ALL_FORMULAS) => void;
+}) {
+  const [selected, setSelected] = useState<number[]>([]);
+
+  const toggle = (id: number) =>
+    setSelected((prev) =>
+      prev.includes(id) ? prev.filter((x) => x !== id) : [...prev, id]
+    );
+
+  const available = ALL_FORMULAS.filter((f) => !currentItemIds.includes(f.id));
+  const selectedFormulas = ALL_FORMULAS.filter((f) => selected.includes(f.id));
+  const totalAdd = selectedFormulas.reduce((sum, f) => sum + f.price, 0);
+
+  const handleAdd = () => {
+    onAdd(selectedFormulas);
+    setSelected([]);
+    onClose();
+  };
+
+  if (!open) return null;
+
+  return (
+    <AnimatePresence>
+      <motion.div
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        exit={{ opacity: 0 }}
+        className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-0 sm:p-4"
+        style={{ backgroundColor: "rgba(30,27,22,0.55)", backdropFilter: "blur(6px)" }}
+        onClick={onClose}
+      >
+        <motion.div
+          initial={{ opacity: 0, y: 40 }}
+          animate={{ opacity: 1, y: 0 }}
+          exit={{ opacity: 0, y: 40 }}
+          transition={{ duration: 0.25, ease: [0.22, 1, 0.36, 1] }}
+          className="bg-[#FAF7F2] rounded-t-3xl sm:rounded-3xl shadow-2xl w-full sm:max-w-2xl max-h-[90vh] flex flex-col overflow-hidden"
+          onClick={(e) => e.stopPropagation()}
+        >
+          {/* Header */}
+          <div className="flex items-center justify-between px-6 pt-6 pb-4 border-b border-[#E8E0D4]">
+            <div>
+              <h2 className="font-display font-700 text-xl text-[#1E1B16]">Add a Formula</h2>
+              <p className="font-body text-sm text-[#1E1B16]/50 mt-0.5">20% subscriber discount applied automatically</p>
+            </div>
+            <button
+              onClick={onClose}
+              className="w-8 h-8 rounded-full bg-[#E8E0D4] flex items-center justify-center text-[#1E1B16]/50 hover:text-[#1E1B16] hover:bg-[#DDD5C8] transition-colors"
+            >
+              <X size={16} />
+            </button>
+          </div>
+
+          {/* Formula grid */}
+          <div className="overflow-y-auto flex-1 p-6">
+            {available.length === 0 ? (
+              <div className="text-center py-12">
+                <p className="font-display font-700 text-lg text-[#1E1B16] mb-2">You have all formulas!</p>
+                <p className="font-body text-sm text-[#1E1B16]/50">All 6 Luma Daily formulas are already in your ritual.</p>
+              </div>
+            ) : (
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                {available.map((formula) => {
+                  const isSelected = selected.includes(formula.id);
+                  return (
+                    <button
+                      key={formula.id}
+                      onClick={() => toggle(formula.id)}
+                      className={`relative flex items-center gap-4 p-4 rounded-2xl border-2 text-left transition-all ${
+                        isSelected
+                          ? "border-[#C8813A] bg-white shadow-md"
+                          : "border-[#E8E0D4] bg-white hover:border-[#C8813A]/40 hover:shadow-sm"
+                      }`}
+                    >
+                      {/* Badge */}
+                      {formula.badge && (
+                        <span
+                          className="absolute top-3 left-3 font-body text-xs font-600 text-white px-2 py-0.5 rounded-full"
+                          style={{ backgroundColor: formula.badgeColor }}
+                        >
+                          {formula.badge}
+                        </span>
+                      )}
+
+                      {/* Checkmark */}
+                      <div
+                        className={`absolute top-3 right-3 w-5 h-5 rounded-full border-2 flex items-center justify-center transition-all ${
+                          isSelected
+                            ? "border-[#C8813A] bg-[#C8813A]"
+                            : "border-[#E8E0D4]"
+                        }`}
+                      >
+                        {isSelected && (
+                          <motion.svg
+                            initial={{ scale: 0 }}
+                            animate={{ scale: 1 }}
+                            width="10"
+                            height="8"
+                            viewBox="0 0 10 8"
+                            fill="none"
+                          >
+                            <path d="M1 4L3.5 6.5L9 1" stroke="white" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+                          </motion.svg>
+                        )}
+                      </div>
+
+                      {/* Product image */}
+                      <div
+                        className="w-16 h-16 rounded-xl overflow-hidden flex-shrink-0"
+                        style={{ backgroundColor: formula.color + "18" }}
+                      >
+                        <img
+                          src={formula.image}
+                          alt={formula.name}
+                          className="w-full h-full object-cover object-top"
+                        />
+                      </div>
+
+                      {/* Info */}
+                      <div className="flex-1 min-w-0">
+                        <p className="font-display font-700 text-base text-[#1E1B16]">Luma {formula.name}</p>
+                        <p className="font-body text-xs text-[#1E1B16]/50 mb-1.5">{formula.tagline}</p>
+                        <span
+                          className="inline-block font-body text-xs font-600 px-2 py-0.5 rounded-full"
+                          style={{ backgroundColor: formula.color + "20", color: formula.color }}
+                        >
+                          {formula.flavor}
+                        </span>
+                      </div>
+
+                      {/* Price */}
+                      <div className="text-right flex-shrink-0">
+                        <p className="font-body text-sm font-700 text-[#1E1B16]">${formula.price.toFixed(2)}</p>
+                        <p className="font-body text-xs text-[#1E1B16]/40 line-through">${formula.originalPrice.toFixed(2)}</p>
+                      </div>
+                    </button>
+                  );
+                })}
+              </div>
+            )}
+          </div>
+
+          {/* Footer */}
+          <div className="px-6 py-5 border-t border-[#E8E0D4] bg-white">
+            {selected.length > 0 && (
+              <motion.div
+                initial={{ opacity: 0, height: 0 }}
+                animate={{ opacity: 1, height: "auto" }}
+                className="flex items-center justify-between mb-4"
+              >
+                <p className="font-body text-sm text-[#1E1B16]/60">
+                  {selected.length} formula{selected.length > 1 ? "s" : ""} selected
+                </p>
+                <p className="font-body text-sm font-700 text-[#1E1B16]">
+                  +${totalAdd.toFixed(2)}/mo
+                </p>
+              </motion.div>
+            )}
+            <div className="flex gap-3">
+              <button
+                onClick={onClose}
+                className="flex-1 py-3 rounded-xl border border-[#E8E0D4] font-body text-sm font-600 text-[#1E1B16] hover:bg-[#FAF7F2] transition-colors"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleAdd}
+                disabled={selected.length === 0}
+                className={`flex-1 py-3 rounded-xl font-body text-sm font-600 text-white transition-all ${
+                  selected.length > 0
+                    ? "bg-[#C8813A] hover:bg-[#b8722e] shadow-md"
+                    : "bg-[#E8E0D4] text-[#1E1B16]/30 cursor-not-allowed"
+                }`}
+              >
+                {selected.length === 0
+                  ? "Select a formula"
+                  : `Add ${selected.length} Formula${selected.length > 1 ? "s" : ""} to Ritual`}
+              </button>
+            </div>
+          </div>
+        </motion.div>
+      </motion.div>
+    </AnimatePresence>
+  );
+}
+
 function ConfirmModal({
   open,
   onClose,
@@ -270,6 +541,26 @@ function SubscriptionTab() {
   const [modal, setModal] = useState<"pause" | "resume" | "skip" | "cancel" | null>(null);
   const [skipped, setSkipped] = useState(false);
   const [cancelled, setCancelled] = useState(false);
+  const [showFormulaModal, setShowFormulaModal] = useState(false);
+
+  const handleAddFormulas = (newFormulas: typeof ALL_FORMULAS) => {
+    setSub((prev) => ({
+      ...prev,
+      items: [
+        ...prev.items,
+        ...newFormulas.map((f) => ({
+          id: f.id,
+          name: f.name,
+          flavor: f.flavor,
+          price: f.price,
+          originalPrice: f.originalPrice,
+          image: f.image,
+          color: f.color,
+          quantity: 1,
+        })),
+      ],
+    }));
+  };
 
   const handlePause = () => setSub((s) => ({ ...s, status: "paused" }));
   const handleResume = () => setSub((s) => ({ ...s, status: "active" }));
@@ -341,7 +632,7 @@ function SubscriptionTab() {
             Your Formulas
           </h3>
           <button
-            onClick={() => navigate("/")}
+            onClick={() => setShowFormulaModal(true)}
             className="flex items-center gap-1.5 font-body text-sm text-[#C8813A] hover:underline"
           >
             <Plus size={14} /> Add Formula
@@ -470,10 +761,15 @@ function SubscriptionTab() {
         confirmClass="bg-red-500 hover:bg-red-600"
         icon={<AlertTriangle size={24} className="text-red-500" />}
       />
+      <AddFormulaModal
+        open={showFormulaModal}
+        onClose={() => setShowFormulaModal(false)}
+        currentItemIds={sub.items.map((i) => i.id)}
+        onAdd={handleAddFormulas}
+      />
     </div>
   );
 }
-
 function OrdersTab() {
   return (
     <div className="space-y-4">
