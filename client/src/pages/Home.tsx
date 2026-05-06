@@ -5,6 +5,7 @@
  */
 
 import { useState, useEffect, useRef } from "react";
+import { useLocation } from "wouter";
 import { motion, useInView, AnimatePresence } from "framer-motion";
 import { ChevronDown, Star, Check, ArrowRight, Menu, X, ShoppingBag, Leaf, Zap, Moon, Brain, Sparkles } from "lucide-react";
 
@@ -391,6 +392,7 @@ function FAQItem({ faq, index }: { faq: typeof faqs[0]; index: number }) {
 
 export default function Home() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [, navigate] = useLocation();
   const [scrolled, setScrolled] = useState(false);
   const [activeCategory, setActiveCategory] = useState<number | null>(null);
 
@@ -443,6 +445,12 @@ export default function Home() {
               <button className="btn-amber py-2 px-5 text-xs">
                 Shop Now
               </button>
+              <button
+                onClick={() => navigate("/quiz")}
+                className="font-body text-sm font-500 text-[#C8813A] hover:text-[#A66A2A] transition-colors border border-[#C8813A]/40 hover:border-[#C8813A] rounded-full px-4 py-2"
+              >
+                Find My Ritual
+              </button>
               <button className="relative text-[#1E1B16]/70 hover:text-[#1E1B16] transition-colors">
                 <ShoppingBag size={20} />
                 <span className="absolute -top-1 -right-1 w-4 h-4 bg-[#C8813A] rounded-full text-white text-[10px] flex items-center justify-center font-600">0</span>
@@ -479,6 +487,12 @@ export default function Home() {
                     {item}
                   </a>
                 ))}
+                <button
+                  className="font-body text-base font-500 text-[#C8813A] py-2 border-b border-[#1E1B16]/10 text-left"
+                  onClick={() => { setMobileMenuOpen(false); navigate("/quiz"); }}
+                >
+                  Find My Ritual
+                </button>
                 <button className="btn-amber mt-2 justify-center">Shop Now</button>
               </div>
             </motion.div>
@@ -534,10 +548,10 @@ export default function Home() {
                 transition={{ duration: 0.6, delay: 0.45 }}
                 className="flex flex-wrap gap-3 mb-10"
               >
-                <button className="btn-amber">
+                <button className="btn-amber" onClick={() => navigate("/quiz")}>
                   Build Your Ritual <ArrowRight size={14} />
                 </button>
-                <button className="btn-outline-dark">
+                <button className="btn-outline-dark" onClick={() => navigate("/quiz")}>
                   Take the Quiz
                 </button>
               </motion.div>
@@ -707,7 +721,7 @@ export default function Home() {
             <p className="font-body text-lg text-[#FAF7F2]/55 max-w-lg mx-auto mb-10 leading-relaxed">
               Answer a few questions about your wellness goals and we'll recommend the perfect formula — or combination — for your needs.
             </p>
-            <button className="btn-amber text-base px-8 py-4">
+            <button className="btn-amber text-base px-8 py-4" onClick={() => navigate("/quiz")}>
               Start the Ritual Quiz <ArrowRight size={16} />
             </button>
           </AnimatedSection>
@@ -1030,7 +1044,7 @@ export default function Home() {
               <button className="bg-white text-[#C8813A] font-body font-600 text-sm tracking-wider uppercase px-8 py-4 rounded-full hover:bg-[#FAF7F2] transition-colors">
                 Shop All Products
               </button>
-              <button className="btn-outline-cream">
+              <button className="btn-outline-cream" onClick={() => navigate("/quiz")}>
                 Take the Quiz
               </button>
             </div>
