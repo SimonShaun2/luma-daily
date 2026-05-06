@@ -16,6 +16,7 @@ const products = [
     id: 1,
     name: "Energy",
     tagline: "Natural vitality, sustained",
+    image: "https://d2xsxph8kpxj0f.cloudfront.net/310519663633783733/NP8W4PN5hdBACVumhQ3AtE/luma_energy_bottle-cvYNKNP3tibNNfeoANANbe.webp",
     description: "Ginseng, B12 & Green Tea Extract to power your day without the crash.",
     price: "$38",
     originalPrice: "$48",
@@ -31,6 +32,7 @@ const products = [
     id: 2,
     name: "Calm",
     tagline: "Stress less, live more",
+    image: "https://d2xsxph8kpxj0f.cloudfront.net/310519663633783733/NP8W4PN5hdBACVumhQ3AtE/luma_calm_bottle-4s8xH37yWtFyqjfCx7bpQB.webp",
     description: "Ashwagandha & L-Theanine to quiet the noise and find your center.",
     price: "$38",
     originalPrice: "$48",
@@ -46,6 +48,7 @@ const products = [
     id: 3,
     name: "Sleep",
     tagline: "Rest deeply, wake ready",
+    image: "https://d2xsxph8kpxj0f.cloudfront.net/310519663633783733/NP8W4PN5hdBACVumhQ3AtE/luma_sleep_bottle-eLiwUvYuG8USYuzG87CxLd.webp",
     description: "Melatonin & Chamomile for restorative sleep that actually refreshes.",
     price: "$38",
     originalPrice: "$48",
@@ -61,6 +64,7 @@ const products = [
     id: 4,
     name: "Focus",
     tagline: "Clarity on demand",
+    image: "https://d2xsxph8kpxj0f.cloudfront.net/310519663633783733/NP8W4PN5hdBACVumhQ3AtE/luma_focus_bottle-kntCt5H5rBn5mV9QKvrTPf.webp",
     description: "Lion's Mane & Bacopa for sharp thinking and sustained concentration.",
     price: "$38",
     originalPrice: "$48",
@@ -76,6 +80,7 @@ const products = [
     id: 5,
     name: "Glow",
     tagline: "Beauty from within",
+    image: "https://d2xsxph8kpxj0f.cloudfront.net/310519663633783733/NP8W4PN5hdBACVumhQ3AtE/luma_glow_bottle-9BCZUpncy5AWUKKLLgZyRL.webp",
     description: "Collagen & Vitamin C for radiant skin, strong nails, and lustrous hair.",
     price: "$38",
     originalPrice: "$48",
@@ -97,7 +102,7 @@ const bundles = [
     description: "Start your day with intention. This trio primes your body and mind for whatever comes next.",
     price: "$99",
     originalPrice: "$114",
-    image: "/manus-storage/luma_bundle_morning_1a67ecad.png",
+    image: "https://d2xsxph8kpxj0f.cloudfront.net/310519663633783733/NP8W4PN5hdBACVumhQ3AtE/luma_energy_bottle-cvYNKNP3tibNNfeoANANbe.webp",
     products: ["Energy", "Calm", "Glow"],
   },
   {
@@ -107,7 +112,7 @@ const bundles = [
     description: "The complete Luma system. Every need, every moment, every day — covered.",
     price: "$169",
     originalPrice: "$190",
-    image: "https://d2xsxph8kpxj0f.cloudfront.net/310519663633783733/NP8W4PN5hdBACVumhQ3AtE/luma_hero_bottles_v2-hMNdnGJ5nzF2mi3mPSPBgj.webp",
+    image: "/manus-storage/luma_hero_flatlay_f55f2492.png",
     products: ["Energy", "Calm", "Sleep", "Focus", "Glow"],
     featured: true,
   },
@@ -118,7 +123,7 @@ const bundles = [
     description: "Decompress, restore, and prepare your mind for tomorrow's clarity.",
     price: "$99",
     originalPrice: "$114",
-    image: "/manus-storage/luma_hero_flat_8facdfd1.png",
+    image: "https://d2xsxph8kpxj0f.cloudfront.net/310519663633783733/NP8W4PN5hdBACVumhQ3AtE/luma_sleep_bottle-eLiwUvYuG8USYuzG87CxLd.webp",
     products: ["Sleep", "Calm", "Focus"],
   },
 ];
@@ -261,32 +266,13 @@ function ProductCard({ product, index }: { product: typeof products[0]; index: n
             {product.badge}
           </div>
         )}
-        {/* Gummy illustration */}
-        <div className="relative flex flex-col items-center">
-          <div
-            className="w-24 h-32 rounded-2xl flex items-center justify-center shadow-lg transition-transform duration-300 group-hover:scale-105"
-            style={{ backgroundColor: product.color }}
-          >
-            <div className="text-white text-center px-3">
-              <div className="text-2xl mb-1">{product.icon}</div>
-              <div className="font-display font-700 text-lg leading-tight">{product.name}</div>
-              <div className="text-xs opacity-80 mt-1">60 gummies</div>
-            </div>
-          </div>
-          {/* Scattered gummies */}
-          <div
-            className="absolute -bottom-3 -left-6 w-5 h-5 rounded-full opacity-70"
-            style={{ backgroundColor: product.gummyColor }}
-          />
-          <div
-            className="absolute -top-2 -right-4 w-4 h-4 rounded-full opacity-50"
-            style={{ backgroundColor: product.gummyColor }}
-          />
-          <div
-            className="absolute top-8 -left-8 w-3 h-3 rounded-full opacity-40"
-            style={{ backgroundColor: product.gummyColor }}
-          />
-        </div>
+        {/* Real product bottle image */}
+        <motion.img
+          src={product.image}
+          alt={`Luma ${product.name} gummies`}
+          className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+          style={{ objectPosition: 'center' }}
+        />
       </div>
 
       {/* Product info */}
@@ -585,7 +571,7 @@ export default function Home() {
             >
               <div className="relative rounded-3xl overflow-hidden shadow-2xl">
                 <img
-                  src="https://d2xsxph8kpxj0f.cloudfront.net/310519663633783733/NP8W4PN5hdBACVumhQ3AtE/luma_hero_bottles_v2-hMNdnGJ5nzF2mi3mPSPBgj.webp"
+                  src="/manus-storage/luma_hero_flatlay_f55f2492.png"
                   alt="Luma Daily product lineup — Energy, Calm, Sleep, Focus, Glow"
                   className="w-full h-auto object-cover"
                 />
@@ -701,7 +687,7 @@ export default function Home() {
         <div
           className="absolute inset-0 opacity-20"
           style={{
-            backgroundImage: `url('/manus-storage/luma_quiz_bg_eba659a9.png')`,
+            backgroundImage: `url('/manus-storage/luma_hero_flatlay_f55f2492.png')`,
             backgroundSize: "cover",
             backgroundPosition: "center",
           }}
@@ -803,7 +789,7 @@ export default function Home() {
       <section id="ingredients" className="py-24 bg-[#1A1510] relative overflow-hidden">
         <div className="absolute top-0 right-0 w-1/3 h-full opacity-10">
           <img
-            src="/manus-storage/luma_ingredients_a11e6776.png"
+                    src="https://d2xsxph8kpxj0f.cloudfront.net/310519663633783733/NP8W4PN5hdBACVumhQ3AtE/luma_calm_bottle-4s8xH37yWtFyqjfCx7bpQB.webp"
             alt=""
             className="w-full h-full object-cover"
           />
@@ -922,7 +908,7 @@ export default function Home() {
               <div className="relative">
                 <div className="rounded-3xl overflow-hidden shadow-xl">
                   <img
-                    src="/manus-storage/luma_lifestyle_morning_7221cf7b.png"
+                    src="https://d2xsxph8kpxj0f.cloudfront.net/310519663633783733/NP8W4PN5hdBACVumhQ3AtE/luma_glow_bottle-9BCZUpncy5AWUKKLLgZyRL.webp"
                     alt="Woman enjoying her Luma Daily morning ritual"
                     className="w-full h-auto object-cover"
                   />

@@ -25,6 +25,7 @@ interface ProductRecommendation {
   description: string;
   price: number;
   color: string;
+  image?: string;
 }
 
 // ── Quiz Data ─────────────────────────────────────────────────────────────────
@@ -70,6 +71,7 @@ function getRecommendations(
       description: "Supports your natural energy levels and mental focus for a productive morning",
       price: 22.4,
       color: "#FEF3C7",
+      image: "https://d2xsxph8kpxj0f.cloudfront.net/310519663633783733/NP8W4PN5hdBACVumhQ3AtE/luma_energy_bottle-cvYNKNP3tibNNfeoANANbe.webp",
     },
     calm: {
       name: "Luma Calm",
@@ -79,6 +81,7 @@ function getRecommendations(
       description: "Supports a calm, focused mind through the demands of your afternoon",
       price: 22.4,
       color: "#D1FAE5",
+      image: "https://d2xsxph8kpxj0f.cloudfront.net/310519663633783733/NP8W4PN5hdBACVumhQ3AtE/luma_calm_bottle-4s8xH37yWtFyqjfCx7bpQB.webp",
     },
     sleep: {
       name: "Luma Sleep",
@@ -88,6 +91,7 @@ function getRecommendations(
       description: "Supports healthy wind down and more restful, restorative sleep quality",
       price: 22.4,
       color: "#EDE9FE",
+      image: "https://d2xsxph8kpxj0f.cloudfront.net/310519663633783733/NP8W4PN5hdBACVumhQ3AtE/luma_sleep_bottle-eLiwUvYuG8USYuzG87CxLd.webp",
     },
     glow: {
       name: "Luma Glow",
@@ -97,6 +101,7 @@ function getRecommendations(
       description: "Nourishes skin from within with collagen-supporting botanicals and antioxidants",
       price: 22.4,
       color: "#FCE7F3",
+      image: "https://d2xsxph8kpxj0f.cloudfront.net/310519663633783733/NP8W4PN5hdBACVumhQ3AtE/luma_glow_bottle-9BCZUpncy5AWUKKLLgZyRL.webp",
     },
     focus: {
       name: "Luma Focus",
@@ -106,6 +111,7 @@ function getRecommendations(
       description: "Sharpens concentration and mental clarity for sustained deep work",
       price: 22.4,
       color: "#DBEAFE",
+      image: "https://d2xsxph8kpxj0f.cloudfront.net/310519663633783733/NP8W4PN5hdBACVumhQ3AtE/luma_focus_bottle-kntCt5H5rBn5mV9QKvrTPf.webp",
     },
   };
 
@@ -506,12 +512,16 @@ export default function Quiz() {
                         {product.timing}
                       </div>
 
-                      {/* Emoji circle */}
+                      {/* Product bottle image */}
                       <div
-                        className="shrink-0 w-12 h-12 rounded-full flex items-center justify-center text-2xl"
+                        className="shrink-0 w-14 h-14 rounded-xl overflow-hidden border border-black/5"
                         style={{ backgroundColor: product.color }}
                       >
-                        {product.emoji}
+                        {product.image ? (
+                          <img src={product.image} alt={product.name} className="w-full h-full object-cover" />
+                        ) : (
+                          <div className="w-full h-full flex items-center justify-center text-2xl">{product.emoji}</div>
+                        )}
                       </div>
 
                       {/* Info */}
