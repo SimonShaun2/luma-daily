@@ -16,7 +16,7 @@ const products = [
     id: 1,
     name: "Energy",
     tagline: "Natural vitality, sustained",
-    image: "/manus-storage/luma_daily_packaging_1_ba62d885.png",
+    image: "/manus-storage/luma_energy_bottle_18c415cd.png",
     description: "Ginseng, B12 & Green Tea Extract to power your day without the crash.",
     price: "$38",
     originalPrice: "$48",
@@ -32,7 +32,7 @@ const products = [
     id: 2,
     name: "Calm",
     tagline: "Stress less, live more",
-    image: "/manus-storage/luma_daily_packaging_1_ba62d885.png",
+    image: "/manus-storage/luma_calm_bottle_14cc2d8f.png",
     description: "Ashwagandha & L-Theanine to quiet the noise and find your center.",
     price: "$38",
     originalPrice: "$48",
@@ -48,7 +48,7 @@ const products = [
     id: 3,
     name: "Sleep",
     tagline: "Rest deeply, wake ready",
-    image: "/manus-storage/luma_daily_packaging_1_ba62d885.png",
+    image: "/manus-storage/luma_sleep_bottle_a6f93589.png",
     description: "Melatonin & Chamomile for restorative sleep that actually refreshes.",
     price: "$38",
     originalPrice: "$48",
@@ -64,7 +64,7 @@ const products = [
     id: 4,
     name: "Focus",
     tagline: "Clarity on demand",
-    image: "/manus-storage/luma_daily_packaging_2_64fb246e.png",
+    image: "/manus-storage/luma_focus_bottle_4364c9ab.png",
     description: "Lion's Mane & Bacopa for sharp thinking and sustained concentration.",
     price: "$38",
     originalPrice: "$48",
@@ -80,7 +80,7 @@ const products = [
     id: 5,
     name: "Glow",
     tagline: "Beauty from within",
-    image: "/manus-storage/luma_daily_packaging_2_64fb246e.png",
+    image: "/manus-storage/luma_glow_bottle_c1ab2dea.png",
     description: "Collagen & Vitamin C for radiant skin, strong nails, and lustrous hair.",
     price: "$38",
     originalPrice: "$48",
@@ -800,57 +800,68 @@ export default function Home() {
             </div>
           </AnimatedSection>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 xl:grid-cols-5 gap-5">
-            {bundles.map((bundle, index) => (
-              <motion.div
-                key={bundle.id}
-                initial="hidden"
-                whileInView="visible"
-                viewport={{ once: true, margin: "-60px" }}
-                variants={fadeUp}
-                custom={index * 0.15}
-                className={`relative rounded-2xl overflow-hidden group cursor-pointer ${
-                  bundle.featured ? "ring-2 ring-[#C8813A]" : ""
-                }`}
-              >
-                {bundle.featured && (
-                  <div className="absolute top-4 right-4 z-10 bg-[#C8813A] text-white text-xs font-body font-600 px-3 py-1 rounded-full">
-                    Most Popular
-                  </div>
-                )}
-                <div className="relative h-64 overflow-hidden">
-                  <img
-                    src={bundle.image}
-                    alt={bundle.name}
-                    className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
-                  />
-                  <div className="absolute inset-0 bg-gradient-to-t from-[#1E1B16]/70 via-[#1E1B16]/20 to-transparent" />
-                  <div className="absolute bottom-4 left-4 right-4">
-                    <div className="flex flex-wrap gap-1.5 mb-2">
-                      {bundle.products.map((p) => (
-                        <span key={p} className="text-xs font-body bg-white/20 backdrop-blur-sm text-white px-2.5 py-0.5 rounded-full">
-                          {p}
-                        </span>
-                      ))}
+          {/* Horizontal Carousel */}
+          <div className="relative">
+            {/* Scroll container */}
+            <div
+              className="flex gap-5 overflow-x-auto pb-4 snap-x snap-mandatory scrollbar-hide"
+              style={{ scrollbarWidth: "none", msOverflowStyle: "none" }}
+            >
+              {bundles.map((bundle, index) => (
+                <motion.div
+                  key={bundle.id}
+                  initial="hidden"
+                  whileInView="visible"
+                  viewport={{ once: true, margin: "-60px" }}
+                  variants={fadeUp}
+                  custom={index * 0.08}
+                  className={`relative rounded-2xl overflow-hidden group cursor-pointer shrink-0 snap-start ${
+                    bundle.featured ? "ring-2 ring-[#C8813A]" : ""
+                  }`}
+                  style={{ width: "280px" }}
+                >
+                  {bundle.featured && (
+                    <div className="absolute top-4 right-4 z-10 bg-[#C8813A] text-white text-xs font-body font-600 px-3 py-1 rounded-full">
+                      Most Popular
+                    </div>
+                  )}
+                  <div className="relative h-60 overflow-hidden">
+                    <img
+                      src={bundle.image}
+                      alt={bundle.name}
+                      className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+                    />
+                    <div className="absolute inset-0 bg-gradient-to-t from-[#1E1B16]/70 via-[#1E1B16]/20 to-transparent" />
+                    <div className="absolute bottom-4 left-4 right-4">
+                      <div className="flex flex-wrap gap-1.5">
+                        {bundle.products.map((p) => (
+                          <span key={p} className="text-xs font-body bg-white/20 backdrop-blur-sm text-white px-2.5 py-0.5 rounded-full">
+                            {p}
+                          </span>
+                        ))}
+                      </div>
                     </div>
                   </div>
-                </div>
-                <div className="bg-white p-5">
-                  <h3 className="font-display font-700 text-xl text-[#1E1B16] mb-1">{bundle.name}</h3>
-                  <p className="font-body text-sm text-[#C8813A] font-500 mb-2">{bundle.subtitle}</p>
-                  <p className="font-body text-sm text-[#1E1B16]/60 leading-relaxed mb-4">{bundle.description}</p>
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-baseline gap-2">
-                      <span className="font-display font-700 text-2xl text-[#1E1B16]">{bundle.price}</span>
-                      <span className="font-body text-sm text-[#1E1B16]/40 line-through">{bundle.originalPrice}</span>
+                  <div className="bg-white p-4">
+                    <h3 className="font-display font-700 text-lg text-[#1E1B16] mb-0.5">{bundle.name}</h3>
+                    <p className="font-body text-xs text-[#C8813A] font-500 mb-2">{bundle.subtitle}</p>
+                    <p className="font-body text-xs text-[#1E1B16]/60 leading-relaxed mb-3 line-clamp-2">{bundle.description}</p>
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-baseline gap-1.5">
+                        <span className="font-display font-700 text-xl text-[#1E1B16]">{bundle.price}</span>
+                        <span className="font-body text-xs text-[#1E1B16]/40 line-through">{bundle.originalPrice}</span>
+                      </div>
+                      <button className="btn-amber py-2 px-4 text-xs">
+                        Add to Cart
+                      </button>
                     </div>
-                    <button className="btn-amber py-2.5 px-5 text-xs">
-                      Add to Cart
-                    </button>
                   </div>
-                </div>
-              </motion.div>
-            ))}
+                </motion.div>
+              ))}
+            </div>
+            {/* Fade edges */}
+            <div className="pointer-events-none absolute top-0 left-0 h-full w-16 bg-gradient-to-r from-[#F5EDD8]/60 to-transparent z-10" />
+            <div className="pointer-events-none absolute top-0 right-0 h-full w-16 bg-gradient-to-l from-[#F5EDD8]/60 to-transparent z-10" />
           </div>
         </div>
       </section>
