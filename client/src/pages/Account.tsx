@@ -24,6 +24,9 @@ import {
   Calendar,
   Settings,
   User,
+  AlertTriangle,
+  X,
+  SkipForward,
 } from "lucide-react";
 
 type Tab = "overview" | "subscription" | "orders" | "profile" | "billing";
@@ -188,15 +191,96 @@ function OverviewTab({ setTab }: { setTab: (t: Tab) => void }) {
   );
 }
 
+function ConfirmModal({
+  open,
+  onClose,
+  onConfirm,
+  title,
+  description,
+  confirmLabel,
+  confirmClass,
+  icon,
+}: {
+  open: boolean;
+  onClose: () => void;
+  onConfirm: () => void;
+  title: string;
+  description: string;
+  confirmLabel: string;
+  confirmClass: string;
+  icon: React.ReactNode;
+}) {
+  if (!open) return null;
+  return (
+    <AnimatePresence>
+      <motion.div
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        exit={{ opacity: 0 }}
+        className="fixed inset-0 z-50 flex items-center justify-center p-4"
+        style={{ backgroundColor: "rgba(30,27,22,0.5)", backdropFilter: "blur(4px)" }}
+        onClick={onClose}
+      >
+        <motion.div
+          initial={{ opacity: 0, scale: 0.95, y: 16 }}
+          animate={{ opacity: 1, scale: 1, y: 0 }}
+          exit={{ opacity: 0, scale: 0.95, y: 16 }}
+          transition={{ duration: 0.2 }}
+          className="bg-white rounded-2xl shadow-2xl w-full max-w-sm p-6 relative"
+          onClick={(e) => e.stopPropagation()}
+        >
+          <button
+            onClick={onClose}
+            className="absolute top-4 right-4 text-[#1E1B16]/30 hover:text-[#1E1B16] transition-colors"
+          >
+            <X size={18} />
+          </button>
+          <div className="flex flex-col items-center text-center gap-4">
+            <div className="w-14 h-14 rounded-full flex items-center justify-center bg-[#FAF7F2]">
+              {icon}
+            </div>
+            <div>
+              <h3 className="font-display font-700 text-xl text-[#1E1B16] mb-2">{title}</h3>
+              <p className="font-body text-sm text-[#1E1B16]/60 leading-relaxed">{description}</p>
+            </div>
+            <div className="flex gap-3 w-full mt-2">
+              <button
+                onClick={onClose}
+                className="flex-1 py-3 rounded-xl border border-[#E8E0D4] font-body text-sm font-600 text-[#1E1B16] hover:bg-[#FAF7F2] transition-colors"
+              >
+                Keep Active
+              </button>
+              <button
+                onClick={() => { onConfirm(); onClose(); }}
+                className={`flex-1 py-3 rounded-xl font-body text-sm font-600 text-white transition-colors ${confirmClass}`}
+              >
+                {confirmLabel}
+              </button>
+            </div>
+          </div>
+        </motion.div>
+      </motion.div>
+    </AnimatePresence>
+  );
+}
+
 function SubscriptionTab() {
   const [sub, setSub] = useState(MOCK_SUBSCRIPTION);
   const [, navigate] = useLocation();
+  const [modal, setModal] = useState<"pause" | "resume" | "skip" | "cancel" | null>(null);
+  const [skipped, setSkipped] = useState(false);
+  const [cancelled, setCancelled] = useState(false);
 
-  const togglePause = () =>
-    setSub((s) => ({
-      ...s,
-      status: s.status === "active" ? "paused" : "active",
-    }));
+  const handlePause = () => setSub((s) => ({ ...s, status: "paused" }));
+  const handleResume = () => setSub((s) => ({ ...s, status: "active" }));
+  const handleSkip = () => {
+    setSkipped(true);
+    setSub((s) => ({ ...s, nextShipDate: "July 3, 2026", nextBillingDate: "July 6, 2026" }));
+  };
+  const handleCancel = () => {
+    setCancelled(true);
+    setSub((s) => ({ ...s, status: "cancelled" }));
+  };
 
   return (
     <div className="space-y-5">
@@ -223,7 +307,7 @@ function SubscriptionTab() {
         </div>
         <div className="flex gap-3">
           <button
-            onClick={togglePause}
+            onClick={() => setModal(sub.status === "active" ? "pause" : "resume")}
             className="flex-1 flex items-center justify-center gap-2 border border-[#E8E0D4] rounded-xl py-3 font-body text-sm font-600 text-[#1E1B16] hover:bg-[#FAF7F2] transition-colors"
           >
             {sub.status === "active" ? (
@@ -232,8 +316,20 @@ function SubscriptionTab() {
               <><Play size={14} /> Resume</>
             )}
           </button>
-          <button className="flex-1 flex items-center justify-center gap-2 border border-[#E8E0D4] rounded-xl py-3 font-body text-sm font-600 text-[#1E1B16] hover:bg-[#FAF7F2] transition-colors">
-            <Calendar size={14} /> Skip Next
+          <button
+            onClick={() => !skipped && setModal("skip")}
+            disabled={skipped}
+            className={`flex-1 flex items-center justify-center gap-2 border rounded-xl py-3 font-body text-sm font-600 transition-colors ${
+              skipped
+                ? "border-green-200 bg-green-50 text-green-600 cursor-default"
+                : "border-[#E8E0D4] text-[#1E1B16] hover:bg-[#FAF7F2]"
+            }`}
+          >
+            {skipped ? (
+              <><CheckCircle2 size={14} /> Skipped</>
+            ) : (
+              <><SkipForward size={14} /> Skip Next</>
+            )}
           </button>
         </div>
       </div>
@@ -309,11 +405,71 @@ function SubscriptionTab() {
       </div>
 
       {/* Cancel */}
-      <div className="text-center">
-        <button className="font-body text-sm text-[#1E1B16]/40 hover:text-red-500 transition-colors">
-          Cancel subscription
-        </button>
-      </div>
+      {!cancelled ? (
+        <div className="text-center">
+          <button
+            onClick={() => setModal("cancel")}
+            className="font-body text-sm text-[#1E1B16]/40 hover:text-red-500 transition-colors"
+          >
+            Cancel subscription
+          </button>
+        </div>
+      ) : (
+        <div className="bg-red-50 border border-red-100 rounded-2xl p-5 text-center">
+          <p className="font-display font-700 text-base text-red-600 mb-1">Subscription Cancelled</p>
+          <p className="font-body text-sm text-red-400">
+            Your subscription has been cancelled. You won't be charged again.
+          </p>
+          <button
+            onClick={() => { setCancelled(false); setSub(MOCK_SUBSCRIPTION); }}
+            className="mt-3 font-body text-sm text-[#C8813A] hover:underline"
+          >
+            Reactivate subscription
+          </button>
+        </div>
+      )}
+
+      {/* Confirmation Modals */}
+      <ConfirmModal
+        open={modal === "pause"}
+        onClose={() => setModal(null)}
+        onConfirm={handlePause}
+        title="Pause your ritual?"
+        description="Your subscription will be paused and no shipments will go out until you resume. You can resume anytime from your account."
+        confirmLabel="Yes, Pause"
+        confirmClass="bg-[#C8813A] hover:bg-[#b8722e]"
+        icon={<Pause size={24} className="text-[#C8813A]" />}
+      />
+      <ConfirmModal
+        open={modal === "resume"}
+        onClose={() => setModal(null)}
+        onConfirm={handleResume}
+        title="Resume your ritual?"
+        description="Your subscription will be reactivated and your next shipment will go out on the scheduled date."
+        confirmLabel="Yes, Resume"
+        confirmClass="bg-[#C8813A] hover:bg-[#b8722e]"
+        icon={<Play size={24} className="text-[#C8813A]" />}
+      />
+      <ConfirmModal
+        open={modal === "skip"}
+        onClose={() => setModal(null)}
+        onConfirm={handleSkip}
+        title="Skip next shipment?"
+        description="We'll skip your next shipment and push your next delivery to July 3, 2026. Your subscription will continue as normal after that."
+        confirmLabel="Skip Shipment"
+        confirmClass="bg-[#1E1B16] hover:bg-[#2d2a24]"
+        icon={<SkipForward size={24} className="text-[#1E1B16]" />}
+      />
+      <ConfirmModal
+        open={modal === "cancel"}
+        onClose={() => setModal(null)}
+        onConfirm={handleCancel}
+        title="Cancel subscription?"
+        description="This will permanently cancel your subscription. You'll lose your 20% subscriber discount and won't receive future shipments. This cannot be undone."
+        confirmLabel="Cancel Subscription"
+        confirmClass="bg-red-500 hover:bg-red-600"
+        icon={<AlertTriangle size={24} className="text-red-500" />}
+      />
     </div>
   );
 }
