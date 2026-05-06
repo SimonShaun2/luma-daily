@@ -106,7 +106,7 @@ const bundles = [
     description: "The complete Luma system. Every need, every moment, every day — covered.",
     price: "$169",
     originalPrice: "$190",
-    image: "/manus-storage/luma_hero_products_3da16c5b.png",
+    image: "https://d2xsxph8kpxj0f.cloudfront.net/310519663633783733/NP8W4PN5hdBACVumhQ3AtE/luma_hero_bottles_v2-hMNdnGJ5nzF2mi3mPSPBgj.webp",
     products: ["Energy", "Calm", "Sleep", "Focus", "Glow"],
     featured: true,
   },
@@ -571,7 +571,7 @@ export default function Home() {
             >
               <div className="relative rounded-3xl overflow-hidden shadow-2xl">
                 <img
-                  src="/manus-storage/luma_hero_products_3da16c5b.png"
+                  src="https://d2xsxph8kpxj0f.cloudfront.net/310519663633783733/NP8W4PN5hdBACVumhQ3AtE/luma_hero_bottles_v2-hMNdnGJ5nzF2mi3mPSPBgj.webp"
                   alt="Luma Daily product lineup — Energy, Calm, Sleep, Focus, Glow"
                   className="w-full h-auto object-cover"
                 />
