@@ -8,6 +8,7 @@ import { useState, useEffect, useRef } from "react";
 import { useLocation } from "wouter";
 import { motion, useInView, AnimatePresence } from "framer-motion";
 import { ChevronDown, ChevronLeft, ChevronRight, Star, Check, ArrowRight, Menu, X, ShoppingBag, Leaf, Zap, Moon, Brain, Sparkles } from "lucide-react";
+import { useCart } from "@/contexts/CartContext";
 
 // ─── Product Data ────────────────────────────────────────────────────────────
 
@@ -330,6 +331,19 @@ function ProductCard({ product, index }: { product: typeof products[0]; index: n
   const [hovered, setHovered] = useState(false);
   const ref = useRef(null);
   const isInView = useInView(ref, { once: true, margin: "-60px" });
+  const { addItem } = useCart();
+  const handleAddToCart = () => {
+    addItem({
+      id: product.id,
+      name: product.name,
+      flavor: (product as any).flavor || product.name,
+      price: parseFloat(product.price.replace("$", "")),
+      originalPrice: parseFloat(product.originalPrice.replace("$", "")),
+      image: product.image,
+      color: product.color,
+      isSubscription: false,
+    });
+  };
 
   return (
     <motion.div
@@ -416,7 +430,7 @@ function ProductCard({ product, index }: { product: typeof products[0]; index: n
         </AnimatePresence>
 
         <div className="flex gap-2 mt-auto pt-3">
-          <button className="btn-amber flex-1 justify-center text-xs py-2.5">
+          <button onClick={handleAddToCart} className="btn-amber flex-1 justify-center text-xs py-2.5">
             Add to Ritual
           </button>
           <button className="btn-outline-dark px-3 py-2.5 text-xs">
@@ -478,6 +492,7 @@ function FAQItem({ faq, index }: { faq: typeof faqs[0]; index: number }) {
 export default function Home() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [, navigate] = useLocation();
+  const { openCart, totalItems } = useCart();
   const [scrolled, setScrolled] = useState(false);
   const [activeCategory, setActiveCategory] = useState<number | null>(null);
   const carouselRef = useRef<HTMLDivElement>(null);
@@ -536,7 +551,7 @@ export default function Home() {
 
             {/* CTA */}
             <div className="hidden lg:flex items-center gap-4">
-              <button className="font-body text-sm font-500 text-[#1E1B16]/70 hover:text-[#1E1B16] transition-colors">
+              <button onClick={() => navigate("/signin")} className="font-body text-sm font-500 text-[#1E1B16]/70 hover:text-[#1E1B16] transition-colors">
                 Sign In
               </button>
               <button className="btn-amber py-2 px-5 text-xs">
@@ -548,9 +563,11 @@ export default function Home() {
               >
                 Find My Ritual
               </button>
-              <button className="relative text-[#1E1B16]/70 hover:text-[#1E1B16] transition-colors">
+              <button onClick={openCart} className="relative text-[#1E1B16]/70 hover:text-[#1E1B16] transition-colors">
                 <ShoppingBag size={20} />
-                <span className="absolute -top-1 -right-1 w-4 h-4 bg-[#C8813A] rounded-full text-white text-[10px] flex items-center justify-center font-600">0</span>
+                {totalItems > 0 && (
+                  <span className="absolute -top-1 -right-1 w-4 h-4 bg-[#C8813A] rounded-full text-white text-[10px] flex items-center justify-center font-600">{totalItems}</span>
+                )}
               </button>
             </div>
 
