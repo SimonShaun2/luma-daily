@@ -771,6 +771,7 @@ function SubscriptionTab() {
   );
 }
 function OrdersTab() {
+  const [, navigate] = useLocation();
   return (
     <div className="space-y-4">
       {MOCK_ORDERS.map((order) => (
@@ -793,10 +794,16 @@ function OrdersTab() {
             </p>
           </div>
           <div className="flex gap-3 mt-4">
-            <button className="flex-1 border border-[#E8E0D4] rounded-xl py-2.5 font-body text-sm text-[#1E1B16] hover:bg-[#FAF7F2] transition-colors">
+            <button
+              onClick={() => { import("sonner").then(m => m.toast.info(`Order #${order.id} — ${order.status}. Tracking details sent to your email.`)); }}
+              className="flex-1 border border-[#E8E0D4] rounded-xl py-2.5 font-body text-sm text-[#1E1B16] hover:bg-[#FAF7F2] transition-colors"
+            >
               View Details
             </button>
-            <button className="flex-1 border border-[#E8E0D4] rounded-xl py-2.5 font-body text-sm text-[#1E1B16] hover:bg-[#FAF7F2] transition-colors">
+            <button
+              onClick={() => { navigate("/shop"); }}
+              className="flex-1 border border-[#E8E0D4] rounded-xl py-2.5 font-body text-sm text-[#1E1B16] hover:bg-[#FAF7F2] transition-colors"
+            >
               Reorder
             </button>
           </div>

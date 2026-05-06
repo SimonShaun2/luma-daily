@@ -71,7 +71,7 @@ export default function CartDrawer() {
                     Add your formulas to get started.
                   </p>
                   <button
-                    onClick={closeCart}
+                    onClick={() => { closeCart(); navigate("/shop"); }}
                     className="btn-amber text-sm px-6 py-2.5"
                   >
                     Shop Formulas

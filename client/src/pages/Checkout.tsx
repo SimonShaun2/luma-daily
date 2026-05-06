@@ -560,7 +560,7 @@ function ConfirmationStep({ shipping, orderNumber }: { shipping: ShippingForm; o
         <p className="font-body text-white/60 text-sm mb-4">
           Switch to a subscription and save 20% on every order.
         </p>
-        <button className="btn-amber text-sm px-5 py-2.5 w-full justify-center">
+        <button onClick={() => { clearCart(); navigate("/account"); }} className="btn-amber text-sm px-5 py-2.5 w-full justify-center">
           Start My Subscription
         </button>
       </div>

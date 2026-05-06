@@ -9,6 +9,7 @@ import { useLocation } from "wouter";
 import { motion, useInView, AnimatePresence } from "framer-motion";
 import { ChevronDown, ChevronLeft, ChevronRight, Star, Check, ArrowRight, Menu, X, ShoppingBag, Leaf, Zap, Moon, Brain, Sparkles } from "lucide-react";
 import { useCart } from "@/contexts/CartContext";
+import { toast } from "sonner";
 
 // ─── Product Data ────────────────────────────────────────────────────────────
 
@@ -332,6 +333,7 @@ function ProductCard({ product, index }: { product: typeof products[0]; index: n
   const ref = useRef(null);
   const isInView = useInView(ref, { once: true, margin: "-60px" });
   const { addItem } = useCart();
+  const [, navigate] = useLocation();
   const handleAddToCart = () => {
     addItem({
       id: product.id,
@@ -433,7 +435,7 @@ function ProductCard({ product, index }: { product: typeof products[0]; index: n
           <button onClick={handleAddToCart} className="btn-amber flex-1 justify-center text-xs py-2.5">
             Add to Ritual
           </button>
-          <button className="btn-outline-dark px-3 py-2.5 text-xs">
+          <button onClick={() => navigate(`/products/${product.name.toLowerCase()}`)} className="btn-outline-dark px-3 py-2.5 text-xs">
             Learn More
           </button>
         </div>
@@ -492,7 +494,24 @@ function FAQItem({ faq, index }: { faq: typeof faqs[0]; index: number }) {
 export default function Home() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [, navigate] = useLocation();
-  const { openCart, totalItems } = useCart();
+  const { openCart, totalItems, addItem } = useCart();
+
+  const addBundleToCart = (bundle: typeof bundles[0]) => {
+    const numPrice = typeof bundle.price === "string" ? parseFloat(bundle.price.replace("$", "")) : bundle.price;
+    const numOriginal = typeof bundle.originalPrice === "string" ? parseFloat(bundle.originalPrice.replace("$", "")) : bundle.originalPrice;
+    addItem({
+      id: bundle.id + 100,
+      name: bundle.name,
+      flavor: bundle.subtitle,
+      price: numPrice,
+      originalPrice: numOriginal,
+      image: bundle.image,
+      color: "#C8813A",
+      isSubscription: false,
+    });
+    openCart();
+    toast.success(`${bundle.name} added to cart`);
+  };
   const [scrolled, setScrolled] = useState(false);
   const [activeCategory, setActiveCategory] = useState<number | null>(null);
   const carouselRef = useRef<HTMLDivElement>(null);
@@ -528,24 +547,29 @@ export default function Home() {
         <div className="container">
           <nav className="flex items-center justify-between h-16 lg:h-20">
             {/* Logo */}
-            <a href="#" className="flex items-center gap-2">
+            <button onClick={() => navigate("/")} className="flex items-center gap-2">
               <div className="w-8 h-8 rounded-full bg-[#C8813A] flex items-center justify-center">
                 <span className="text-white font-display font-700 text-sm">L</span>
               </div>
               <span className="font-display font-700 text-xl text-[#1E1B16]">Luma Daily</span>
-            </a>
+            </button>
 
             {/* Desktop nav */}
             <div className="hidden lg:flex items-center gap-8">
-              {["Products", "Bundles", "Ingredients", "Subscribe", "About"].map((item) => (
-                <a
-                  key={item}
-                  href={`#${item.toLowerCase()}`}
+              {[
+                { label: "Products", href: "/shop" },
+                { label: "Bundles", href: "/shop" },
+                { label: "Ingredients", href: "/ingredients" },
+                { label: "About", href: "/about" },
+              ].map((item) => (
+                <button
+                  key={item.label}
+                  onClick={() => navigate(item.href)}
                   className="font-body text-sm font-500 text-[#1E1B16]/70 hover:text-[#1E1B16] transition-colors relative group"
                 >
-                  {item}
+                  {item.label}
                   <span className="absolute -bottom-0.5 left-0 w-0 h-px bg-[#C8813A] transition-all duration-300 group-hover:w-full" />
-                </a>
+                </button>
               ))}
             </div>
 
@@ -554,7 +578,10 @@ export default function Home() {
               <button onClick={() => navigate("/signin")} className="font-body text-sm font-500 text-[#1E1B16]/70 hover:text-[#1E1B16] transition-colors">
                 Sign In
               </button>
-              <button className="btn-amber py-2 px-5 text-xs">
+              <button onClick={() => navigate("/register")} className="font-body text-sm font-500 text-[#1E1B16]/70 hover:text-[#1E1B16] transition-colors">
+                Register
+              </button>
+              <button onClick={() => navigate("/shop")} className="btn-amber py-2 px-5 text-xs">
                 Shop Now
               </button>
               <button
@@ -591,15 +618,20 @@ export default function Home() {
               className="lg:hidden bg-[#FAF7F2] border-t border-[#1E1B16]/10 overflow-hidden"
             >
               <div className="container py-6 flex flex-col gap-4">
-                {["Products", "Bundles", "Ingredients", "Subscribe", "About"].map((item) => (
-                  <a
-                    key={item}
-                    href={`#${item.toLowerCase()}`}
-                    className="font-body text-base font-500 text-[#1E1B16] py-2 border-b border-[#1E1B16]/10"
-                    onClick={() => setMobileMenuOpen(false)}
+                {[
+                  { label: "Products", href: "/shop" },
+                  { label: "Bundles", href: "/shop" },
+                  { label: "Ingredients", href: "/ingredients" },
+                  { label: "About", href: "/about" },
+                  { label: "Contact", href: "/contact" },
+                ].map((item) => (
+                  <button
+                    key={item.label}
+                    onClick={() => { setMobileMenuOpen(false); navigate(item.href); }}
+                    className="font-body text-base font-500 text-[#1E1B16] py-2 border-b border-[#1E1B16]/10 text-left"
                   >
-                    {item}
-                  </a>
+                    {item.label}
+                  </button>
                 ))}
                 <button
                   className="font-body text-base font-500 text-[#C8813A] py-2 border-b border-[#1E1B16]/10 text-left"
@@ -607,7 +639,7 @@ export default function Home() {
                 >
                   Find My Ritual
                 </button>
-                <button className="btn-amber mt-2 justify-center">Shop Now</button>
+                <button onClick={() => { setMobileMenuOpen(false); navigate("/shop"); }} className="btn-amber mt-2 justify-center">Shop Now</button>
               </div>
             </motion.div>
           )}
@@ -938,7 +970,7 @@ export default function Home() {
                         <span className="font-display font-700 text-xl text-[#1E1B16]">{bundle.price}</span>
                         <span className="font-body text-xs text-[#1E1B16]/40 line-through">{bundle.originalPrice}</span>
                       </div>
-                      <button className="btn-amber py-2 px-4 text-xs">
+                      <button onClick={() => { addBundleToCart(bundle); }} className="btn-amber py-2 px-4 text-xs">
                         Add to Cart
                       </button>
                     </div>
@@ -1031,7 +1063,7 @@ export default function Home() {
                 ))}
               </div>
 
-              <button className="btn-outline-cream">
+              <button onClick={() => navigate("/ingredients")} className="btn-outline-cream">
                 View Full Ingredient List <ArrowRight size={14} />
               </button>
             </AnimatedSection>
@@ -1081,7 +1113,7 @@ export default function Home() {
                 ))}
               </div>
 
-              <button className="btn-amber">
+              <button onClick={() => navigate("/shop")} className="btn-amber">
                 Start Your Subscription <ArrowRight size={14} />
               </button>
             </AnimatedSection>
@@ -1184,7 +1216,7 @@ export default function Home() {
               <p className="font-body text-base text-[#1E1B16]/55 leading-relaxed mb-8">
                 We believe in full transparency. If you don't find your answer here, our team is always happy to help.
               </p>
-              <button className="btn-outline-dark">
+              <button onClick={() => navigate("/contact")} className="btn-outline-dark">
                 Contact Support <ArrowRight size={14} />
               </button>
             </AnimatedSection>
@@ -1210,7 +1242,7 @@ export default function Home() {
               Join 50,000+ people who've made wellness a daily habit they love.
             </p>
             <div className="flex flex-wrap justify-center gap-4">
-              <button className="bg-white text-[#C8813A] font-body font-600 text-sm tracking-wider uppercase px-8 py-4 rounded-full hover:bg-[#FAF7F2] transition-colors">
+              <button onClick={() => navigate("/shop")} className="bg-white text-[#C8813A] font-body font-600 text-sm tracking-wider uppercase px-8 py-4 rounded-full hover:bg-[#FAF7F2] transition-colors">
                 Shop All Products
               </button>
               <button className="btn-outline-cream" onClick={() => navigate("/quiz")}>
@@ -1238,12 +1270,15 @@ export default function Home() {
               </p>
               <div className="flex gap-3">
                 {["Instagram", "TikTok", "Pinterest"].map((social) => (
-                  <button
+                  <a
                     key={social}
+                    href={`https://www.${social.toLowerCase()}.com`}
+                    target="_blank"
+                    rel="noopener noreferrer"
                     className="w-9 h-9 rounded-full border border-[#FAF7F2]/15 flex items-center justify-center text-[#FAF7F2]/50 hover:text-[#FAF7F2] hover:border-[#FAF7F2]/40 transition-colors text-xs font-body"
                   >
                     {social[0]}
-                  </button>
+                  </a>
                 ))}
               </div>
             </div>
@@ -1252,15 +1287,35 @@ export default function Home() {
             {[
               {
                 title: "Shop",
-                links: ["Energy", "Calm", "Sleep", "Focus", "Glow", "Gut", "Bundles"],
+                links: [
+                  { label: "Energy", href: "/products/energy" },
+                  { label: "Calm", href: "/products/calm" },
+                  { label: "Sleep", href: "/products/sleep" },
+                  { label: "Focus", href: "/products/focus" },
+                  { label: "Glow", href: "/products/glow" },
+                  { label: "Gut", href: "/products/gut" },
+                  { label: "Bundles", href: "/shop" },
+                ],
               },
               {
                 title: "Company",
-                links: ["About Us", "Our Story", "Ingredients", "Sustainability", "Press"],
+                links: [
+                  { label: "About Us", href: "/about" },
+                  { label: "Our Story", href: "/about" },
+                  { label: "Ingredients", href: "/ingredients" },
+                  { label: "Sustainability", href: "/about" },
+                  { label: "Press", href: "/contact" },
+                ],
               },
               {
                 title: "Support",
-                links: ["FAQ", "Contact Us", "Shipping", "Returns", "Subscription"],
+                links: [
+                  { label: "FAQ", href: "/#faq" },
+                  { label: "Contact Us", href: "/contact" },
+                  { label: "Shipping", href: "/shipping" },
+                  { label: "Returns", href: "/shipping" },
+                  { label: "Subscription", href: "/account" },
+                ],
               },
             ].map((col) => (
               <div key={col.title}>
@@ -1269,13 +1324,13 @@ export default function Home() {
                 </h4>
                 <ul className="space-y-2.5">
                   {col.links.map((link) => (
-                    <li key={link}>
-                      <a
-                        href="#"
-                        className="font-body text-sm text-[#FAF7F2]/55 hover:text-[#FAF7F2] transition-colors"
+                    <li key={link.label}>
+                      <button
+                        onClick={() => navigate(link.href)}
+                        className="font-body text-sm text-[#FAF7F2]/55 hover:text-[#FAF7F2] transition-colors text-left"
                       >
-                        {link}
-                      </a>
+                        {link.label}
+                      </button>
                     </li>
                   ))}
                 </ul>
@@ -1289,14 +1344,18 @@ export default function Home() {
               © 2026 Luma Daily. All rights reserved.
             </p>
             <div className="flex gap-6">
-              {["Privacy Policy", "Terms of Service", "Cookie Settings"].map((link) => (
-                <a
-                  key={link}
-                  href="#"
+              {[
+                { label: "Privacy Policy", href: "/privacy" },
+                { label: "Terms of Service", href: "/terms" },
+                { label: "Cookie Settings", href: "/privacy" },
+              ].map((link) => (
+                <button
+                  key={link.label}
+                  onClick={() => navigate(link.href)}
                   className="font-body text-xs text-[#FAF7F2]/30 hover:text-[#FAF7F2]/60 transition-colors"
                 >
-                  {link}
-                </a>
+                  {link.label}
+                </button>
               ))}
             </div>
             <p className="font-body text-xs text-[#FAF7F2]/20">

@@ -229,8 +229,8 @@ export default function SignIn() {
                   </div>
                   <p className="font-body text-xs text-[#1E1B16]/40">
                     By creating an account you agree to our{" "}
-                    <span className="text-[#C8813A] cursor-pointer hover:underline">Terms</span> and{" "}
-                    <span className="text-[#C8813A] cursor-pointer hover:underline">Privacy Policy</span>.
+                    <button type="button" onClick={() => navigate("/terms")} className="text-[#C8813A] cursor-pointer hover:underline">Terms</button> and{" "}
+                    <button type="button" onClick={() => navigate("/privacy")} className="text-[#C8813A] cursor-pointer hover:underline">Privacy Policy</button>.
                   </p>
                   <button type="submit" className="btn-amber w-full justify-center py-4 text-base flex items-center gap-2">
                     Create Account
@@ -303,7 +303,7 @@ export default function SignIn() {
                 <>
                   New to Luma Daily?{" "}
                   <button
-                    onClick={() => setMode("signup")}
+                    onClick={() => navigate("/register")}
                     className="text-[#C8813A] font-600 hover:underline"
                   >
                     Create an account

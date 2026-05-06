@@ -6,8 +6,10 @@
 
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Link } from "wouter";
+import { Link, useLocation } from "wouter";
 import { ShoppingCart, ArrowLeft, ArrowRight, Check } from "lucide-react";
+import { toast } from "sonner";
+import { useCart } from "@/contexts/CartContext";
 
 // ── Types ────────────────────────────────────────────────────────────────────
 interface QuizOption {
@@ -220,6 +222,10 @@ export default function Quiz() {
   const [routine, setRoutine] = useState<string>("");
   const [cartCount] = useState(4);
   const [showResults, setShowResults] = useState(false);
+  const [email, setEmail] = useState("");
+  const [emailSubmitted, setEmailSubmitted] = useState(false);
+  const [, navigate] = useLocation();
+  const { addItem, openCart } = useCart();
   const totalSteps = 5;
 
   const toggleSecondary = (id: string) => {
@@ -285,18 +291,21 @@ export default function Quiz() {
           </Link>
 
           <nav className="hidden md:flex items-center gap-8">
-            {["Shop All", "Bundles", "Ingredients", "Reviews", "FAQ", "About"].map((item) => (
-              <a
-                key={item}
-                href="#"
-                className={`text-sm transition-colors ${
-                  item === "Find My Ritual"
-                    ? "text-[#1E1B16] font-semibold border-b-2 border-[#1E1B16] pb-0.5"
-                    : "text-[#5C4F3A] hover:text-[#1E1B16]"
-                }`}
+            {[
+              { label: "Shop All", href: "/shop" },
+              { label: "Bundles", href: "/shop" },
+              { label: "Ingredients", href: "/ingredients" },
+              { label: "Reviews", href: "/#testimonials" },
+              { label: "FAQ", href: "/#faq" },
+              { label: "About", href: "/about" },
+            ].map((item) => (
+              <button
+                key={item.label}
+                onClick={() => navigate(item.href)}
+                className="text-sm text-[#5C4F3A] hover:text-[#1E1B16] transition-colors"
               >
-                {item}
-              </a>
+                {item.label}
+              </button>
             ))}
             <a
               href="#"
@@ -306,12 +315,9 @@ export default function Quiz() {
             </a>
           </nav>
 
-          <button className="flex items-center gap-2 bg-[#1E1B16] text-white text-sm font-medium px-4 py-2 rounded-full hover:bg-[#2D2820] transition-colors">
+          <button onClick={openCart} className="flex items-center gap-2 bg-[#1E1B16] text-white text-sm font-medium px-4 py-2 rounded-full hover:bg-[#2D2820] transition-colors">
             <ShoppingCart size={15} />
             Cart
-            <span className="bg-[#C8813A] text-white text-xs w-5 h-5 rounded-full flex items-center justify-center font-bold">
-              {cartCount}
-            </span>
           </button>
         </div>
       </header>
@@ -563,6 +569,55 @@ export default function Quiz() {
                   </div>
                 </motion.div>
 
+                {/* Email capture */}
+                {!emailSubmitted ? (
+                  <motion.div
+                    initial={{ opacity: 0, y: 12 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: 0.55 }}
+                    className="bg-[#FAF7F2] rounded-2xl p-4 border border-[#E8E0D4]"
+                  >
+                    <p className="text-sm font-semibold text-[#1E1B16] mb-1" style={{ fontFamily: "'Playfair Display', serif" }}>
+                      Save your ritual recommendations
+                    </p>
+                    <p className="text-xs text-[#8B7355] mb-3">Get your personalized formula guide + 15% off your first order.</p>
+                    <div className="flex gap-2">
+                      <input
+                        type="email"
+                        value={email}
+                        onChange={(e) => setEmail(e.target.value)}
+                        placeholder="your@email.com"
+                        className="flex-1 border border-[#E8E0D4] rounded-xl px-3 py-2.5 text-sm text-[#1E1B16] placeholder:text-[#1E1B16]/30 focus:outline-none focus:border-[#C8813A] bg-white"
+                        style={{ fontFamily: "'DM Sans', sans-serif" }}
+                      />
+                      <button
+                        onClick={() => {
+                          if (!email.includes("@")) { toast.error("Please enter a valid email"); return; }
+                          setEmailSubmitted(true);
+                          toast.success("15% off code sent to " + email + "!");
+                        }}
+                        className="bg-[#C8813A] text-white px-4 py-2.5 rounded-xl text-sm font-600 hover:bg-[#A66A2A] transition-colors shrink-0"
+                        style={{ fontFamily: "'DM Sans', sans-serif" }}
+                      >
+                        Get 15% Off
+                      </button>
+                    </div>
+                  </motion.div>
+                ) : (
+                  <motion.div
+                    initial={{ opacity: 0, scale: 0.95 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    className="bg-green-50 rounded-2xl p-4 border border-green-200 flex items-center gap-3"
+                  >
+                    <div className="w-8 h-8 rounded-full bg-green-100 flex items-center justify-center shrink-0">
+                      <Check size={14} className="text-green-600" />
+                    </div>
+                    <div>
+                      <p className="text-sm font-600 text-green-800" style={{ fontFamily: "'DM Sans', sans-serif" }}>15% off code sent!</p>
+                      <p className="text-xs text-green-600">Check {email} for your discount code.</p>
+                    </div>
+                  </motion.div>
+                )}
                 {/* CTA Button */}
                 <motion.button
                   initial={{ opacity: 0, y: 16 }}
@@ -572,6 +627,7 @@ export default function Quiz() {
                   whileTap={{ scale: 0.99 }}
                   className="w-full bg-[#1E1B16] text-white py-4 rounded-2xl text-base font-semibold hover:bg-[#2D2820] transition-colors cursor-pointer"
                   style={{ fontFamily: "'DM Sans', sans-serif" }}
+                  onClick={() => { navigate("/shop"); toast.success("Building your ritual — choose your formulas!"); }}
                 >
                   Subscribe to My Daily Ritual — ${bundlePrice}/mo
                 </motion.button>
@@ -583,7 +639,7 @@ export default function Quiz() {
                   transition={{ delay: 0.8 }}
                   className="text-center mt-4"
                 >
-                  <button className="text-sm text-[#8B7355] underline underline-offset-2 hover:text-[#1E1B16] transition-colors">
+                  <button onClick={() => navigate("/shop")} className="text-sm text-[#8B7355] underline underline-offset-2 hover:text-[#1E1B16] transition-colors">
                     Or buy once for ${totalPrice.toFixed(2)} — no commitment
                   </button>
                 </motion.div>
