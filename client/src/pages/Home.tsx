@@ -1,25 +1,1127 @@
-import { Button } from "@/components/ui/button";
-import { Loader2 } from "lucide-react";
-import { Streamdown } from 'streamdown';
-
-/**
- * All content in this page are only for example, replace with your own feature implementation
- * When building pages, remember your instructions in Frontend Best Practices, Design Guide and Common Pitfalls
+/*
+ * LUMA DAILY — Home Page
+ * Design: Warm Editorial — luxury magazine meets wellness DTC
+ * Sections: Nav, Hero, Marquee, Categories, Products, Quiz CTA, Bundles, Ingredients, Subscribe, Testimonials, FAQ, Footer
  */
-export default function Home() {
-  // If theme is switchable in App.tsx, we can implement theme toggling like this:
-  // const { theme, toggleTheme } = useTheme();
+
+import { useState, useEffect, useRef } from "react";
+import { motion, useInView, AnimatePresence } from "framer-motion";
+import { ChevronDown, Star, Check, ArrowRight, Menu, X, ShoppingBag, Leaf, Zap, Moon, Brain, Sparkles } from "lucide-react";
+
+// ─── Product Data ────────────────────────────────────────────────────────────
+
+const products = [
+  {
+    id: 1,
+    name: "Energy",
+    tagline: "Natural vitality, sustained",
+    description: "Ginseng, B12 & Green Tea Extract to power your day without the crash.",
+    price: "$38",
+    originalPrice: "$48",
+    color: "#F5C842",
+    bgColor: "#FEF9E7",
+    textColor: "#7A5C00",
+    gummyColor: "#F5C842",
+    icon: <Zap size={18} />,
+    ingredients: ["Ginseng Root", "Vitamin B12", "Green Tea Extract", "CoQ10"],
+    badge: "Best Seller",
+  },
+  {
+    id: 2,
+    name: "Calm",
+    tagline: "Stress less, live more",
+    description: "Ashwagandha & L-Theanine to quiet the noise and find your center.",
+    price: "$38",
+    originalPrice: "$48",
+    color: "#7A9E7E",
+    bgColor: "#EEF5EF",
+    textColor: "#2D5A32",
+    gummyColor: "#7DC47E",
+    icon: <Leaf size={18} />,
+    ingredients: ["Ashwagandha KSM-66", "L-Theanine", "Lemon Balm", "Magnesium"],
+    badge: "Fan Favorite",
+  },
+  {
+    id: 3,
+    name: "Sleep",
+    tagline: "Rest deeply, wake ready",
+    description: "Melatonin & Chamomile for restorative sleep that actually refreshes.",
+    price: "$38",
+    originalPrice: "$48",
+    color: "#9B8EC4",
+    bgColor: "#F3F0FA",
+    textColor: "#3D2B7A",
+    gummyColor: "#B8A8E0",
+    icon: <Moon size={18} />,
+    ingredients: ["Melatonin 3mg", "Chamomile Extract", "Passionflower", "GABA"],
+    badge: null,
+  },
+  {
+    id: 4,
+    name: "Focus",
+    tagline: "Clarity on demand",
+    description: "Lion's Mane & Bacopa for sharp thinking and sustained concentration.",
+    price: "$38",
+    originalPrice: "$48",
+    color: "#6AACCC",
+    bgColor: "#EBF5FA",
+    textColor: "#1A4E6A",
+    gummyColor: "#6AACCC",
+    icon: <Brain size={18} />,
+    ingredients: ["Lion's Mane", "Bacopa Monnieri", "Ginkgo Biloba", "Vitamin B6"],
+    badge: "New",
+  },
+  {
+    id: 5,
+    name: "Glow",
+    tagline: "Beauty from within",
+    description: "Collagen & Vitamin C for radiant skin, strong nails, and lustrous hair.",
+    price: "$38",
+    originalPrice: "$48",
+    color: "#E8917A",
+    bgColor: "#FDF0EC",
+    textColor: "#7A2A14",
+    gummyColor: "#E8917A",
+    icon: <Sparkles size={18} />,
+    ingredients: ["Marine Collagen", "Vitamin C", "Biotin", "Hyaluronic Acid"],
+    badge: null,
+  },
+];
+
+const bundles = [
+  {
+    id: 1,
+    name: "The Morning Ritual",
+    subtitle: "Energy + Calm + Glow",
+    description: "Start your day with intention. This trio primes your body and mind for whatever comes next.",
+    price: "$99",
+    originalPrice: "$114",
+    image: "/manus-storage/luma_bundle_morning_1a67ecad.png",
+    products: ["Energy", "Calm", "Glow"],
+  },
+  {
+    id: 2,
+    name: "The Daily Ritual",
+    subtitle: "All Five Formulas",
+    description: "The complete Luma system. Every need, every moment, every day — covered.",
+    price: "$169",
+    originalPrice: "$190",
+    image: "/manus-storage/luma_hero_products_3da16c5b.png",
+    products: ["Energy", "Calm", "Sleep", "Focus", "Glow"],
+    featured: true,
+  },
+  {
+    id: 3,
+    name: "The Evening Wind-Down",
+    subtitle: "Sleep + Calm + Focus",
+    description: "Decompress, restore, and prepare your mind for tomorrow's clarity.",
+    price: "$99",
+    originalPrice: "$114",
+    image: "/manus-storage/luma_hero_flat_8facdfd1.png",
+    products: ["Sleep", "Calm", "Focus"],
+  },
+];
+
+const testimonials = [
+  {
+    name: "Sarah M.",
+    location: "New York, NY",
+    stars: 5,
+    text: "The Calm gummies have genuinely changed my mornings. I used to dread the anxiety spike before big meetings — now I just feel... steady. It's subtle but real.",
+    product: "Calm",
+  },
+  {
+    name: "James T.",
+    location: "Austin, TX",
+    stars: 5,
+    text: "I was skeptical about gummies for adults, but the Energy formula is legitimately effective. No jitters, no crash — just clean, sustained focus all morning.",
+    product: "Energy",
+  },
+  {
+    name: "Priya K.",
+    location: "San Francisco, CA",
+    stars: 5,
+    text: "The subscription makes it so easy. My ritual is stocked automatically and I never have to think about it. The Sleep gummies have transformed my nights.",
+    product: "Sleep",
+  },
+  {
+    name: "Elena R.",
+    location: "Chicago, IL",
+    stars: 5,
+    text: "Glow is the one I recommend to everyone. My skin looks noticeably better after 6 weeks and my nails stopped breaking. Clean ingredients, clearly explained.",
+    product: "Glow",
+  },
+];
+
+const faqs = [
+  {
+    q: "Are Luma Daily gummies suitable for everyone?",
+    a: "Our formulas are designed for adults 18+. If you are pregnant, nursing, or taking medications, please consult your healthcare provider before starting any supplement routine.",
+  },
+  {
+    q: "Can I take more than one formula at a time?",
+    a: "Absolutely. Our formulas are designed to work together. Many customers take Energy in the morning, Calm in the afternoon, and Sleep at night. Our bundles are curated for exactly this purpose.",
+  },
+  {
+    q: "How long until I notice results?",
+    a: "Most customers notice effects from Energy and Calm within the first week. Sleep typically shows results in 3–5 days. Focus and Glow are designed for cumulative benefit and are best assessed after 4–6 weeks of consistent use.",
+  },
+  {
+    q: "What does the subscription include?",
+    a: "Subscribe and save 20% on every order, with free shipping on all subscription orders. You can pause, skip, or cancel anytime — no fees, no questions asked.",
+  },
+  {
+    q: "Are your ingredients third-party tested?",
+    a: "Yes. Every batch is tested by an independent ISO-certified lab for purity, potency, and safety. We publish our certificates of analysis on each product page.",
+  },
+];
+
+const marqueeItems = [
+  "Free shipping over $60",
+  "Subscribe & save 20%",
+  "Third-party tested",
+  "Vegan & gluten-free",
+  "No artificial colors",
+  "60-day guarantee",
+  "Clean ingredients",
+  "Science-backed formulas",
+];
+
+// ─── Animation Variants ───────────────────────────────────────────────────────
+
+const fadeUp = {
+  hidden: { opacity: 0, y: 28 },
+  visible: (i = 0) => ({
+    opacity: 1,
+    y: 0,
+    transition: { duration: 0.6, delay: i * 0.1 },
+  }),
+};
+
+const fadeIn = {
+  hidden: { opacity: 0 },
+  visible: { opacity: 1, transition: { duration: 0.8, ease: "easeOut" } },
+};
+
+// ─── Sub-Components ───────────────────────────────────────────────────────────
+
+function AnimatedSection({ children, className = "" }: { children: React.ReactNode; className?: string }) {
+  const ref = useRef(null);
+  const isInView = useInView(ref, { once: true, margin: "-80px" });
+  return (
+    <motion.div
+      ref={ref}
+      initial="hidden"
+      animate={isInView ? "visible" : "hidden"}
+      variants={fadeUp}
+      className={className}
+    >
+      {children}
+    </motion.div>
+  );
+}
+
+function SectionLabel({ children }: { children: React.ReactNode }) {
+  return (
+    <div className="flex items-center gap-3 mb-4">
+      <div className="h-px flex-1 bg-[#1E1B16]/15" />
+      <span className="font-body text-xs font-600 tracking-[0.15em] uppercase text-[#1E1B16]/50">{children}</span>
+      <div className="h-px flex-1 bg-[#1E1B16]/15" />
+    </div>
+  );
+}
+
+function ProductCard({ product, index }: { product: typeof products[0]; index: number }) {
+  const [hovered, setHovered] = useState(false);
+  const ref = useRef(null);
+  const isInView = useInView(ref, { once: true, margin: "-60px" });
 
   return (
-    <div className="min-h-screen flex flex-col">
-      <main>
-        {/* Example: lucide-react for icons */}
-        <Loader2 className="animate-spin" />
-        Example Page
-        {/* Example: Streamdown for markdown rendering */}
-        <Streamdown>Any **markdown** content</Streamdown>
-        <Button variant="default">Example Button</Button>
-      </main>
+    <motion.div
+      ref={ref}
+      initial="hidden"
+      animate={isInView ? "visible" : "hidden"}
+      variants={fadeUp}
+      custom={index * 0.15}
+      className="product-card group"
+      onMouseEnter={() => setHovered(true)}
+      onMouseLeave={() => setHovered(false)}
+    >
+      {/* Product image area */}
+      <div
+        className="relative h-56 flex items-center justify-center overflow-hidden"
+        style={{ backgroundColor: product.bgColor }}
+      >
+        {product.badge && (
+          <div
+            className="absolute top-4 left-4 text-xs font-body font-600 px-3 py-1 rounded-full"
+            style={{ backgroundColor: product.color, color: "white" }}
+          >
+            {product.badge}
+          </div>
+        )}
+        {/* Gummy illustration */}
+        <div className="relative flex flex-col items-center">
+          <div
+            className="w-24 h-32 rounded-2xl flex items-center justify-center shadow-lg transition-transform duration-300 group-hover:scale-105"
+            style={{ backgroundColor: product.color }}
+          >
+            <div className="text-white text-center px-3">
+              <div className="text-2xl mb-1">{product.icon}</div>
+              <div className="font-display font-700 text-lg leading-tight">{product.name}</div>
+              <div className="text-xs opacity-80 mt-1">60 gummies</div>
+            </div>
+          </div>
+          {/* Scattered gummies */}
+          <div
+            className="absolute -bottom-3 -left-6 w-5 h-5 rounded-full opacity-70"
+            style={{ backgroundColor: product.gummyColor }}
+          />
+          <div
+            className="absolute -top-2 -right-4 w-4 h-4 rounded-full opacity-50"
+            style={{ backgroundColor: product.gummyColor }}
+          />
+          <div
+            className="absolute top-8 -left-8 w-3 h-3 rounded-full opacity-40"
+            style={{ backgroundColor: product.gummyColor }}
+          />
+        </div>
+      </div>
+
+      {/* Product info */}
+      <div className="p-5">
+        <div className="flex items-start justify-between mb-2">
+          <div>
+            <h3 className="font-display font-700 text-xl text-[#1E1B16]">{product.name}</h3>
+            <p className="font-body text-xs text-[#1E1B16]/50 italic mt-0.5">{product.tagline}</p>
+          </div>
+          <div className="text-right">
+            <div className="font-body font-600 text-[#1E1B16]">{product.price}</div>
+            <div className="font-body text-xs text-[#1E1B16]/40 line-through">{product.originalPrice}</div>
+          </div>
+        </div>
+
+        <p className="font-body text-sm text-[#1E1B16]/65 leading-relaxed mb-4">{product.description}</p>
+
+        {/* Ingredients */}
+        <AnimatePresence>
+          {hovered && (
+            <motion.div
+              initial={{ opacity: 0, height: 0 }}
+              animate={{ opacity: 1, height: "auto" }}
+              exit={{ opacity: 0, height: 0 }}
+              transition={{ duration: 0.25 }}
+              className="mb-4 overflow-hidden"
+            >
+              <div className="text-xs font-body font-600 text-[#1E1B16]/40 uppercase tracking-wider mb-2">Key Ingredients</div>
+              <div className="flex flex-wrap gap-1.5">
+                {product.ingredients.map((ing) => (
+                  <span
+                    key={ing}
+                    className="text-xs font-body px-2.5 py-1 rounded-full"
+                    style={{ backgroundColor: product.bgColor, color: product.textColor }}
+                  >
+                    {ing}
+                  </span>
+                ))}
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
+
+        <div className="flex gap-2">
+          <button className="btn-amber flex-1 justify-center text-xs py-2.5">
+            Add to Ritual
+          </button>
+          <button className="btn-outline-dark px-3 py-2.5 text-xs">
+            Learn More
+          </button>
+        </div>
+      </div>
+    </motion.div>
+  );
+}
+
+function FAQItem({ faq, index }: { faq: typeof faqs[0]; index: number }) {
+  const [open, setOpen] = useState(false);
+  return (
+    <motion.div
+      initial="hidden"
+      whileInView="visible"
+      viewport={{ once: true, margin: "-40px" }}
+      variants={fadeUp}
+      custom={index * 0.1}
+      className="border-b border-[#1E1B16]/10"
+    >
+      <button
+        className="w-full flex items-center justify-between py-5 text-left group"
+        onClick={() => setOpen(!open)}
+      >
+        <span className="font-display font-600 text-lg text-[#1E1B16] group-hover:text-[#C8813A] transition-colors pr-4">
+          {faq.q}
+        </span>
+        <motion.div
+          animate={{ rotate: open ? 180 : 0 }}
+          transition={{ duration: 0.25 }}
+          className="shrink-0 text-[#C8813A]"
+        >
+          <ChevronDown size={20} />
+        </motion.div>
+      </button>
+      <AnimatePresence>
+        {open && (
+          <motion.div
+            initial={{ height: 0, opacity: 0 }}
+            animate={{ height: "auto", opacity: 1 }}
+            exit={{ height: 0, opacity: 0 }}
+            transition={{ duration: 0.3, ease: "easeInOut" }}
+            className="overflow-hidden"
+          >
+            <p className="font-body text-[#1E1B16]/65 leading-relaxed pb-5 text-base">
+              {faq.a}
+            </p>
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </motion.div>
+  );
+}
+
+// ─── Main Component ───────────────────────────────────────────────────────────
+
+export default function Home() {
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [scrolled, setScrolled] = useState(false);
+  const [activeCategory, setActiveCategory] = useState<number | null>(null);
+
+  useEffect(() => {
+    const handleScroll = () => setScrolled(window.scrollY > 60);
+    window.addEventListener("scroll", handleScroll);
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, []);
+
+  return (
+    <div className="min-h-screen bg-[#FAF7F2]">
+
+      {/* ── Navigation ──────────────────────────────────────────────────── */}
+      <header
+        className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
+          scrolled
+            ? "bg-[#FAF7F2]/95 backdrop-blur-md shadow-sm"
+            : "bg-transparent"
+        }`}
+      >
+        <div className="container">
+          <nav className="flex items-center justify-between h-16 lg:h-20">
+            {/* Logo */}
+            <a href="#" className="flex items-center gap-2">
+              <div className="w-8 h-8 rounded-full bg-[#C8813A] flex items-center justify-center">
+                <span className="text-white font-display font-700 text-sm">L</span>
+              </div>
+              <span className="font-display font-700 text-xl text-[#1E1B16]">Luma Daily</span>
+            </a>
+
+            {/* Desktop nav */}
+            <div className="hidden lg:flex items-center gap-8">
+              {["Products", "Bundles", "Ingredients", "Subscribe", "About"].map((item) => (
+                <a
+                  key={item}
+                  href={`#${item.toLowerCase()}`}
+                  className="font-body text-sm font-500 text-[#1E1B16]/70 hover:text-[#1E1B16] transition-colors relative group"
+                >
+                  {item}
+                  <span className="absolute -bottom-0.5 left-0 w-0 h-px bg-[#C8813A] transition-all duration-300 group-hover:w-full" />
+                </a>
+              ))}
+            </div>
+
+            {/* CTA */}
+            <div className="hidden lg:flex items-center gap-4">
+              <button className="font-body text-sm font-500 text-[#1E1B16]/70 hover:text-[#1E1B16] transition-colors">
+                Sign In
+              </button>
+              <button className="btn-amber py-2 px-5 text-xs">
+                Shop Now
+              </button>
+              <button className="relative text-[#1E1B16]/70 hover:text-[#1E1B16] transition-colors">
+                <ShoppingBag size={20} />
+                <span className="absolute -top-1 -right-1 w-4 h-4 bg-[#C8813A] rounded-full text-white text-[10px] flex items-center justify-center font-600">0</span>
+              </button>
+            </div>
+
+            {/* Mobile menu toggle */}
+            <button
+              className="lg:hidden text-[#1E1B16]"
+              onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+            >
+              {mobileMenuOpen ? <X size={24} /> : <Menu size={24} />}
+            </button>
+          </nav>
+        </div>
+
+        {/* Mobile menu */}
+        <AnimatePresence>
+          {mobileMenuOpen && (
+            <motion.div
+              initial={{ opacity: 0, height: 0 }}
+              animate={{ opacity: 1, height: "auto" }}
+              exit={{ opacity: 0, height: 0 }}
+              className="lg:hidden bg-[#FAF7F2] border-t border-[#1E1B16]/10 overflow-hidden"
+            >
+              <div className="container py-6 flex flex-col gap-4">
+                {["Products", "Bundles", "Ingredients", "Subscribe", "About"].map((item) => (
+                  <a
+                    key={item}
+                    href={`#${item.toLowerCase()}`}
+                    className="font-body text-base font-500 text-[#1E1B16] py-2 border-b border-[#1E1B16]/10"
+                    onClick={() => setMobileMenuOpen(false)}
+                  >
+                    {item}
+                  </a>
+                ))}
+                <button className="btn-amber mt-2 justify-center">Shop Now</button>
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
+      </header>
+
+      {/* ── Hero Section ────────────────────────────────────────────────── */}
+      <section className="relative min-h-screen flex items-center pt-16 overflow-hidden bg-[#FAF7F2]">
+        {/* Background texture */}
+        <div className="absolute inset-0 bg-[#FAF7F2]">
+          <div className="absolute top-0 right-0 w-1/2 h-full bg-gradient-to-l from-[#F5EDD8]/60 to-transparent" />
+          <div className="absolute bottom-0 left-0 w-96 h-96 rounded-full bg-[#C8813A]/5 blur-3xl" />
+        </div>
+
+        <div className="container relative z-10">
+          <div className="grid lg:grid-cols-2 gap-12 lg:gap-8 items-center min-h-[calc(100vh-5rem)] py-16">
+            {/* Left: Copy */}
+            <div className="max-w-xl">
+              <motion.div
+                initial={{ opacity: 0, y: 16 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.6, delay: 0.1 }}
+                className="inline-flex items-center gap-2 bg-[#C8813A]/10 text-[#C8813A] text-xs font-body font-600 tracking-widest uppercase px-4 py-2 rounded-full mb-6"
+              >
+                <span className="w-1.5 h-1.5 rounded-full bg-[#C8813A] animate-pulse" />
+                Five Formulas. One Daily Ritual.
+              </motion.div>
+
+              <motion.h1
+                initial={{ opacity: 0, y: 24 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.7, delay: 0.2 }}
+                className="font-display font-800 text-5xl lg:text-6xl xl:text-7xl text-[#1E1B16] leading-[1.05] mb-6"
+              >
+                The gummies that make wellness{" "}
+                <em className="italic text-[#C8813A] font-700">feel like a ritual.</em>
+              </motion.h1>
+
+              <motion.p
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.6, delay: 0.35 }}
+                className="font-body text-lg text-[#1E1B16]/60 leading-relaxed mb-8 max-w-md"
+              >
+                Science-backed formulas for energy, calm, sleep, focus, and glow. 
+                Clean ingredients, clearly explained. A ritual you'll actually keep.
+              </motion.p>
+
+              <motion.div
+                initial={{ opacity: 0, y: 16 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.6, delay: 0.45 }}
+                className="flex flex-wrap gap-3 mb-10"
+              >
+                <button className="btn-amber">
+                  Build Your Ritual <ArrowRight size={14} />
+                </button>
+                <button className="btn-outline-dark">
+                  Take the Quiz
+                </button>
+              </motion.div>
+
+              {/* Trust badges */}
+              <motion.div
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                transition={{ duration: 0.6, delay: 0.6 }}
+                className="flex flex-wrap items-center gap-6"
+              >
+                {[
+                  { icon: <Check size={14} />, text: "Vegan & gluten-free" },
+                  { icon: <Check size={14} />, text: "Third-party tested" },
+                  { icon: <Check size={14} />, text: "60-day guarantee" },
+                ].map((badge) => (
+                  <div key={badge.text} className="flex items-center gap-2 text-sm font-body text-[#1E1B16]/55">
+                    <span className="text-[#C8813A]">{badge.icon}</span>
+                    {badge.text}
+                  </div>
+                ))}
+              </motion.div>
+            </div>
+
+            {/* Right: Product image */}
+            <motion.div
+              initial={{ opacity: 0, scale: 0.95, x: 20 }}
+              animate={{ opacity: 1, scale: 1, x: 0 }}
+              transition={{ duration: 0.9, delay: 0.3 }}
+              className="relative"
+            >
+              <div className="relative rounded-3xl overflow-hidden shadow-2xl">
+                <img
+                  src="/manus-storage/luma_hero_products_3da16c5b.png"
+                  alt="Luma Daily product lineup — Energy, Calm, Sleep, Focus, Glow"
+                  className="w-full h-auto object-cover"
+                />
+                <div className="absolute inset-0 bg-gradient-to-t from-[#1E1B16]/10 to-transparent" />
+              </div>
+
+              {/* Floating stat cards */}
+              <motion.div
+                initial={{ opacity: 0, y: 12 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.8, duration: 0.5 }}
+                className="absolute -bottom-4 -left-4 bg-white rounded-2xl shadow-lg px-5 py-4"
+              >
+                <div className="font-display font-700 text-2xl text-[#1E1B16]">50K+</div>
+                <div className="font-body text-xs text-[#1E1B16]/50 mt-0.5">Daily rituals kept</div>
+              </motion.div>
+
+              <motion.div
+                initial={{ opacity: 0, y: -12 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 1, duration: 0.5 }}
+                className="absolute -top-4 -right-4 bg-white rounded-2xl shadow-lg px-5 py-4"
+              >
+                <div className="flex items-center gap-1 mb-1">
+                  {[...Array(5)].map((_, i) => (
+                    <Star key={i} size={12} fill="#C8813A" stroke="none" />
+                  ))}
+                </div>
+                <div className="font-body text-xs text-[#1E1B16]/50">4.9 / 5 average</div>
+              </motion.div>
+            </motion.div>
+          </div>
+        </div>
+
+        {/* Scroll indicator */}
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ delay: 1.2 }}
+          className="absolute bottom-8 left-1/2 -translate-x-1/2 flex flex-col items-center gap-2"
+        >
+          <span className="font-body text-xs text-[#1E1B16]/30 tracking-widest uppercase">Scroll</span>
+          <motion.div
+            animate={{ y: [0, 6, 0] }}
+            transition={{ repeat: Infinity, duration: 1.5, ease: "easeInOut" }}
+            className="w-px h-8 bg-gradient-to-b from-[#1E1B16]/30 to-transparent"
+          />
+        </motion.div>
+      </section>
+
+      {/* ── Marquee Banner ───────────────────────────────────────────────── */}
+      <div className="bg-[#1A1510] py-3.5 overflow-hidden">
+        <div className="flex animate-marquee whitespace-nowrap">
+          {[...marqueeItems, ...marqueeItems].map((item, i) => (
+            <span key={i} className="inline-flex items-center gap-4 mx-8">
+              <span className="font-body text-sm font-500 text-[#FAF7F2]/80 tracking-wide">{item}</span>
+              <span className="text-[#C8813A] text-lg">·</span>
+            </span>
+          ))}
+        </div>
+      </div>
+
+      {/* ── Choose Your Support ──────────────────────────────────────────── */}
+      <section id="products" className="py-24 bg-[#FAF7F2]">
+        <div className="container">
+          <AnimatedSection className="text-center mb-16">
+            <SectionLabel>Choose Your Daily Support</SectionLabel>
+            <h2 className="font-display font-700 text-4xl lg:text-5xl text-[#1E1B16] mb-4">
+              Five formulas.{" "}
+              <em className="italic text-[#C8813A]">One daily ritual.</em>
+            </h2>
+            <p className="font-body text-lg text-[#1E1B16]/55 max-w-xl mx-auto leading-relaxed">
+              Each formula is designed to address a specific wellness need, with ingredients chosen for efficacy and transparency.
+            </p>
+          </AnimatedSection>
+
+          {/* Category pills */}
+          <div className="flex flex-wrap justify-center gap-3 mb-12">
+            {products.map((p, i) => (
+              <motion.button
+                key={p.id}
+                initial={{ opacity: 0, scale: 0.9 }}
+                whileInView={{ opacity: 1, scale: 1 }}
+                viewport={{ once: true }}
+                transition={{ delay: i * 0.08 }}
+                onClick={() => setActiveCategory(activeCategory === p.id ? null : p.id)}
+                className="flex items-center gap-2 px-5 py-2.5 rounded-full font-body text-sm font-500 transition-all duration-200 border"
+                style={{
+                  backgroundColor: activeCategory === p.id ? p.color : "transparent",
+                  borderColor: p.color,
+                  color: activeCategory === p.id ? "white" : p.textColor,
+                }}
+              >
+                {p.icon}
+                {p.name}
+              </motion.button>
+            ))}
+          </div>
+
+          {/* Product grid */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-5">
+            {products
+              .filter((p) => activeCategory === null || p.id === activeCategory)
+              .map((product, index) => (
+                <ProductCard key={product.id} product={product} index={index} />
+              ))}
+          </div>
+        </div>
+      </section>
+
+      {/* ── Quiz CTA (Dark Section) ──────────────────────────────────────── */}
+      <section className="relative py-28 bg-[#1A1510] overflow-hidden">
+        <div
+          className="absolute inset-0 opacity-20"
+          style={{
+            backgroundImage: `url('/manus-storage/luma_quiz_bg_eba659a9.png')`,
+            backgroundSize: "cover",
+            backgroundPosition: "center",
+          }}
+        />
+        <div className="absolute inset-0 bg-gradient-to-r from-[#1A1510] via-[#1A1510]/80 to-[#1A1510]" />
+
+        <div className="container relative z-10 text-center">
+          <AnimatedSection>
+            <div className="inline-flex items-center gap-2 bg-[#C8813A]/20 text-[#C8813A] text-xs font-body font-600 tracking-widest uppercase px-4 py-2 rounded-full mb-6">
+              <span className="w-1.5 h-1.5 rounded-full bg-[#C8813A]" />
+              Personalized for You
+            </div>
+            <h2 className="font-display font-700 text-4xl lg:text-6xl text-[#FAF7F2] leading-tight mb-6 max-w-3xl mx-auto">
+              Take 60 seconds.{" "}
+              <em className="italic text-[#C8813A]">We'll build your ritual.</em>
+            </h2>
+            <p className="font-body text-lg text-[#FAF7F2]/55 max-w-lg mx-auto mb-10 leading-relaxed">
+              Answer a few questions about your wellness goals and we'll recommend the perfect formula — or combination — for your needs.
+            </p>
+            <button className="btn-amber text-base px-8 py-4">
+              Start the Ritual Quiz <ArrowRight size={16} />
+            </button>
+          </AnimatedSection>
+        </div>
+      </section>
+
+      {/* ── Bundles ──────────────────────────────────────────────────────── */}
+      <section id="bundles" className="py-24 bg-[#F5EDD8]/40">
+        <div className="container">
+          <AnimatedSection className="mb-16">
+            <SectionLabel>Curated Sets</SectionLabel>
+            <div className="flex flex-col lg:flex-row lg:items-end lg:justify-between gap-4">
+              <h2 className="font-display font-700 text-4xl lg:text-5xl text-[#1E1B16]">
+                Build your 30-day{" "}
+                <em className="italic text-[#C8813A]">wellness ritual.</em>
+              </h2>
+              <p className="font-body text-base text-[#1E1B16]/55 max-w-sm leading-relaxed">
+                Save up to 20% when you bundle. Each set is designed around a specific wellness intention.
+              </p>
+            </div>
+          </AnimatedSection>
+
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            {bundles.map((bundle, index) => (
+              <motion.div
+                key={bundle.id}
+                initial="hidden"
+                whileInView="visible"
+                viewport={{ once: true, margin: "-60px" }}
+                variants={fadeUp}
+                custom={index * 0.15}
+                className={`relative rounded-2xl overflow-hidden group cursor-pointer ${
+                  bundle.featured ? "ring-2 ring-[#C8813A]" : ""
+                }`}
+              >
+                {bundle.featured && (
+                  <div className="absolute top-4 right-4 z-10 bg-[#C8813A] text-white text-xs font-body font-600 px-3 py-1 rounded-full">
+                    Most Popular
+                  </div>
+                )}
+                <div className="relative h-64 overflow-hidden">
+                  <img
+                    src={bundle.image}
+                    alt={bundle.name}
+                    className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+                  />
+                  <div className="absolute inset-0 bg-gradient-to-t from-[#1E1B16]/70 via-[#1E1B16]/20 to-transparent" />
+                  <div className="absolute bottom-4 left-4 right-4">
+                    <div className="flex flex-wrap gap-1.5 mb-2">
+                      {bundle.products.map((p) => (
+                        <span key={p} className="text-xs font-body bg-white/20 backdrop-blur-sm text-white px-2.5 py-0.5 rounded-full">
+                          {p}
+                        </span>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+                <div className="bg-white p-5">
+                  <h3 className="font-display font-700 text-xl text-[#1E1B16] mb-1">{bundle.name}</h3>
+                  <p className="font-body text-sm text-[#C8813A] font-500 mb-2">{bundle.subtitle}</p>
+                  <p className="font-body text-sm text-[#1E1B16]/60 leading-relaxed mb-4">{bundle.description}</p>
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-baseline gap-2">
+                      <span className="font-display font-700 text-2xl text-[#1E1B16]">{bundle.price}</span>
+                      <span className="font-body text-sm text-[#1E1B16]/40 line-through">{bundle.originalPrice}</span>
+                    </div>
+                    <button className="btn-amber py-2.5 px-5 text-xs">
+                      Add to Cart
+                    </button>
+                  </div>
+                </div>
+              </motion.div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* ── Ingredients Section ──────────────────────────────────────────── */}
+      <section id="ingredients" className="py-24 bg-[#1A1510] relative overflow-hidden">
+        <div className="absolute top-0 right-0 w-1/3 h-full opacity-10">
+          <img
+            src="/manus-storage/luma_ingredients_a11e6776.png"
+            alt=""
+            className="w-full h-full object-cover"
+          />
+        </div>
+
+        <div className="container relative z-10">
+          <div className="grid lg:grid-cols-2 gap-16 items-center">
+            {/* Left: Image */}
+            <AnimatedSection>
+              <div className="relative rounded-3xl overflow-hidden">
+                <img
+                  src="/manus-storage/luma_ingredients_a11e6776.png"
+                  alt="Clean, natural ingredients used in Luma Daily formulas"
+                  className="w-full h-auto object-cover rounded-3xl"
+                />
+              </div>
+            </AnimatedSection>
+
+            {/* Right: Copy */}
+            <AnimatedSection>
+              <SectionLabel>
+                <span className="text-[#FAF7F2]/40">Clean Ingredients</span>
+              </SectionLabel>
+              <h2 className="font-display font-700 text-4xl lg:text-5xl text-[#FAF7F2] leading-tight mb-6">
+                Clean ingredients,{" "}
+                <em className="italic text-[#C8813A]">clearly explained.</em>
+              </h2>
+              <p className="font-body text-base text-[#FAF7F2]/55 leading-relaxed mb-8">
+                We believe you deserve to know exactly what you're putting in your body. Every ingredient in every formula is chosen for a specific reason — and we'll tell you exactly what that reason is.
+              </p>
+
+              <div className="space-y-4 mb-10">
+                {[
+                  { title: "No artificial colors or flavors", desc: "Natural fruit extracts give our gummies their color and taste." },
+                  { title: "No proprietary blends", desc: "We list exact doses for every active ingredient, always." },
+                  { title: "Third-party tested every batch", desc: "ISO-certified lab verification for purity and potency." },
+                  { title: "Vegan, gluten-free, non-GMO", desc: "Formulated to fit every lifestyle and dietary need." },
+                ].map((item, i) => (
+                  <motion.div
+                    key={item.title}
+                    initial="hidden"
+                    whileInView="visible"
+                    viewport={{ once: true }}
+                    variants={fadeUp}
+                    custom={i * 0.1}
+                    className="flex gap-4 items-start"
+                  >
+                    <div className="w-6 h-6 rounded-full bg-[#C8813A]/20 flex items-center justify-center shrink-0 mt-0.5">
+                      <Check size={12} className="text-[#C8813A]" />
+                    </div>
+                    <div>
+                      <div className="font-body font-600 text-[#FAF7F2] text-sm mb-0.5">{item.title}</div>
+                      <div className="font-body text-sm text-[#FAF7F2]/45">{item.desc}</div>
+                    </div>
+                  </motion.div>
+                ))}
+              </div>
+
+              <button className="btn-outline-cream">
+                View Full Ingredient List <ArrowRight size={14} />
+              </button>
+            </AnimatedSection>
+          </div>
+        </div>
+      </section>
+
+      {/* ── Subscribe Section ────────────────────────────────────────────── */}
+      <section id="subscribe" className="py-24 bg-[#FAF7F2]">
+        <div className="container">
+          <div className="grid lg:grid-cols-2 gap-16 items-center">
+            {/* Left: Copy */}
+            <AnimatedSection>
+              <SectionLabel>Subscribe & Save</SectionLabel>
+              <h2 className="font-display font-700 text-4xl lg:text-5xl text-[#1E1B16] leading-tight mb-6">
+                Subscribe once.{" "}
+                <em className="italic text-[#C8813A]">Keep your ritual stocked.</em>
+              </h2>
+              <p className="font-body text-base text-[#1E1B16]/60 leading-relaxed mb-8">
+                Never run out. Never overpay. Subscribe and your ritual ships automatically — with 20% off every order, free shipping, and the freedom to pause or cancel anytime.
+              </p>
+
+              <div className="space-y-5 mb-10">
+                {[
+                  { title: "Save 20% on every order", desc: "Automatically applied to all subscription orders." },
+                  { title: "Free shipping, always", desc: "No minimum, no surprises — free on every subscription shipment." },
+                  { title: "Pause, skip, or cancel anytime", desc: "Complete flexibility. No fees, no questions asked." },
+                  { title: "Priority customer support", desc: "Subscribers get dedicated support with faster response times." },
+                ].map((item, i) => (
+                  <motion.div
+                    key={item.title}
+                    initial="hidden"
+                    whileInView="visible"
+                    viewport={{ once: true }}
+                    variants={fadeUp}
+                    custom={i * 0.1}
+                    className="flex gap-4 items-start"
+                  >
+                    <div className="w-6 h-6 rounded-full bg-[#C8813A]/15 flex items-center justify-center shrink-0 mt-0.5">
+                      <Check size={12} className="text-[#C8813A]" />
+                    </div>
+                    <div>
+                      <div className="font-body font-600 text-[#1E1B16] text-sm mb-0.5">{item.title}</div>
+                      <div className="font-body text-sm text-[#1E1B16]/50">{item.desc}</div>
+                    </div>
+                  </motion.div>
+                ))}
+              </div>
+
+              <button className="btn-amber">
+                Start Your Subscription <ArrowRight size={14} />
+              </button>
+            </AnimatedSection>
+
+            {/* Right: Image */}
+            <AnimatedSection>
+              <div className="relative">
+                <div className="rounded-3xl overflow-hidden shadow-xl">
+                  <img
+                    src="/manus-storage/luma_lifestyle_morning_7221cf7b.png"
+                    alt="Woman enjoying her Luma Daily morning ritual"
+                    className="w-full h-auto object-cover"
+                  />
+                </div>
+                {/* Savings badge */}
+                <motion.div
+                  initial={{ opacity: 0, scale: 0.8 }}
+                  whileInView={{ opacity: 1, scale: 1 }}
+                  viewport={{ once: true }}
+                  transition={{ delay: 0.4 }}
+                  className="absolute -bottom-6 -right-6 bg-[#C8813A] text-white rounded-2xl p-5 shadow-xl"
+                >
+                  <div className="font-display font-700 text-3xl">20%</div>
+                  <div className="font-body text-xs mt-0.5 opacity-80">off every order</div>
+                </motion.div>
+              </div>
+            </AnimatedSection>
+          </div>
+        </div>
+      </section>
+
+      {/* ── Testimonials ─────────────────────────────────────────────────── */}
+      <section className="py-24 bg-[#F5EDD8]/50">
+        <div className="container">
+          <AnimatedSection className="text-center mb-16">
+            <SectionLabel>Real Results</SectionLabel>
+            <h2 className="font-display font-700 text-4xl lg:text-5xl text-[#1E1B16] mb-4">
+              Daily rituals people{" "}
+              <em className="italic text-[#C8813A]">actually keep.</em>
+            </h2>
+            <div className="flex items-center justify-center gap-2 mt-4">
+              {[...Array(5)].map((_, i) => (
+                <Star key={i} size={18} fill="#C8813A" stroke="none" />
+              ))}
+              <span className="font-body text-sm text-[#1E1B16]/60 ml-2">4.9 out of 5 — 2,400+ reviews</span>
+            </div>
+          </AnimatedSection>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-5">
+            {testimonials.map((t, index) => (
+              <motion.div
+                key={t.name}
+                initial="hidden"
+                whileInView="visible"
+                viewport={{ once: true, margin: "-40px" }}
+                variants={fadeUp}
+                custom={index * 0.1}
+                className="bg-white rounded-2xl p-6 shadow-sm hover:shadow-md transition-shadow"
+              >
+                <div className="flex gap-1 mb-4">
+                  {[...Array(t.stars)].map((_, i) => (
+                    <Star key={i} size={14} fill="#C8813A" stroke="none" />
+                  ))}
+                </div>
+                <p className="font-body text-sm text-[#1E1B16]/70 leading-relaxed mb-5 italic">
+                  "{t.text}"
+                </p>
+                <div className="flex items-center justify-between">
+                  <div>
+                    <div className="font-body font-600 text-sm text-[#1E1B16]">{t.name}</div>
+                    <div className="font-body text-xs text-[#1E1B16]/40">{t.location}</div>
+                  </div>
+                  <span
+                    className="text-xs font-body font-500 px-2.5 py-1 rounded-full"
+                    style={{
+                      backgroundColor: products.find((p) => p.name === t.product)?.bgColor,
+                      color: products.find((p) => p.name === t.product)?.textColor,
+                    }}
+                  >
+                    {t.product}
+                  </span>
+                </div>
+              </motion.div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* ── FAQ Section ──────────────────────────────────────────────────── */}
+      <section className="py-24 bg-[#FAF7F2]">
+        <div className="container">
+          <div className="grid lg:grid-cols-2 gap-16">
+            {/* Left: Header */}
+            <AnimatedSection>
+              <SectionLabel>Common Questions</SectionLabel>
+              <h2 className="font-display font-700 text-4xl lg:text-5xl text-[#1E1B16] leading-tight mb-6">
+                Questions before{" "}
+                <em className="italic text-[#C8813A]">you start?</em>
+              </h2>
+              <p className="font-body text-base text-[#1E1B16]/55 leading-relaxed mb-8">
+                We believe in full transparency. If you don't find your answer here, our team is always happy to help.
+              </p>
+              <button className="btn-outline-dark">
+                Contact Support <ArrowRight size={14} />
+              </button>
+            </AnimatedSection>
+
+            {/* Right: FAQ accordion */}
+            <div>
+              {faqs.map((faq, index) => (
+                <FAQItem key={faq.q} faq={faq} index={index} />
+              ))}
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* ── Final CTA Banner ─────────────────────────────────────────────── */}
+      <section className="py-20 bg-[#C8813A]">
+        <div className="container text-center">
+          <AnimatedSection>
+            <h2 className="font-display font-700 text-4xl lg:text-5xl text-white mb-4">
+              Ready to start your ritual?
+            </h2>
+            <p className="font-body text-lg text-white/75 mb-8 max-w-md mx-auto">
+              Join 50,000+ people who've made wellness a daily habit they love.
+            </p>
+            <div className="flex flex-wrap justify-center gap-4">
+              <button className="bg-white text-[#C8813A] font-body font-600 text-sm tracking-wider uppercase px-8 py-4 rounded-full hover:bg-[#FAF7F2] transition-colors">
+                Shop All Products
+              </button>
+              <button className="btn-outline-cream">
+                Take the Quiz
+              </button>
+            </div>
+          </AnimatedSection>
+        </div>
+      </section>
+
+      {/* ── Footer ───────────────────────────────────────────────────────── */}
+      <footer className="bg-[#1A1510] text-[#FAF7F2]">
+        <div className="container py-16">
+          <div className="grid grid-cols-2 lg:grid-cols-5 gap-10 mb-12">
+            {/* Brand */}
+            <div className="col-span-2">
+              <div className="flex items-center gap-2 mb-4">
+                <div className="w-8 h-8 rounded-full bg-[#C8813A] flex items-center justify-center">
+                  <span className="text-white font-display font-700 text-sm">L</span>
+                </div>
+                <span className="font-display font-700 text-xl text-[#FAF7F2]">Luma Daily</span>
+              </div>
+              <p className="font-body text-sm text-[#FAF7F2]/45 leading-relaxed max-w-xs mb-6">
+                Science-backed wellness gummies designed to make your daily rituals feel effortless and meaningful.
+              </p>
+              <div className="flex gap-3">
+                {["Instagram", "TikTok", "Pinterest"].map((social) => (
+                  <button
+                    key={social}
+                    className="w-9 h-9 rounded-full border border-[#FAF7F2]/15 flex items-center justify-center text-[#FAF7F2]/50 hover:text-[#FAF7F2] hover:border-[#FAF7F2]/40 transition-colors text-xs font-body"
+                  >
+                    {social[0]}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            {/* Links */}
+            {[
+              {
+                title: "Shop",
+                links: ["Energy", "Calm", "Sleep", "Focus", "Glow", "Bundles"],
+              },
+              {
+                title: "Company",
+                links: ["About Us", "Our Story", "Ingredients", "Sustainability", "Press"],
+              },
+              {
+                title: "Support",
+                links: ["FAQ", "Contact Us", "Shipping", "Returns", "Subscription"],
+              },
+            ].map((col) => (
+              <div key={col.title}>
+                <h4 className="font-body font-600 text-xs tracking-widest uppercase text-[#FAF7F2]/40 mb-4">
+                  {col.title}
+                </h4>
+                <ul className="space-y-2.5">
+                  {col.links.map((link) => (
+                    <li key={link}>
+                      <a
+                        href="#"
+                        className="font-body text-sm text-[#FAF7F2]/55 hover:text-[#FAF7F2] transition-colors"
+                      >
+                        {link}
+                      </a>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            ))}
+          </div>
+
+          {/* Bottom bar */}
+          <div className="border-t border-[#FAF7F2]/10 pt-8 flex flex-col md:flex-row items-center justify-between gap-4">
+            <p className="font-body text-xs text-[#FAF7F2]/30">
+              © 2026 Luma Daily. All rights reserved.
+            </p>
+            <div className="flex gap-6">
+              {["Privacy Policy", "Terms of Service", "Cookie Settings"].map((link) => (
+                <a
+                  key={link}
+                  href="#"
+                  className="font-body text-xs text-[#FAF7F2]/30 hover:text-[#FAF7F2]/60 transition-colors"
+                >
+                  {link}
+                </a>
+              ))}
+            </div>
+            <p className="font-body text-xs text-[#FAF7F2]/20">
+              *These statements have not been evaluated by the FDA.
+            </p>
+          </div>
+        </div>
+      </footer>
     </div>
   );
 }
