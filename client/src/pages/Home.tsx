@@ -339,8 +339,8 @@ function ProductCard({ product, index }: { product: typeof products[0]; index: n
       id: product.id,
       name: product.name,
       flavor: (product as any).flavor || product.name,
-      price: parseFloat(product.price.replace("$", "")),
-      originalPrice: parseFloat(product.originalPrice.replace("$", "")),
+      price: typeof product.price === 'string' ? parseFloat((product.price as string).replace("$", "")) : product.price,
+      originalPrice: typeof product.originalPrice === 'string' ? parseFloat((product.originalPrice as string).replace("$", "")) : product.originalPrice,
       image: product.image,
       color: product.color,
       isSubscription: false,
@@ -398,8 +398,8 @@ function ProductCard({ product, index }: { product: typeof products[0]; index: n
             )}
           </div>
           <div className="text-right">
-            <div className="font-body font-600 text-[#1E1B16]">{product.price}</div>
-            <div className="font-body text-xs text-[#1E1B16]/40 line-through">{product.originalPrice}</div>
+            <div className="font-body font-600 text-[#1E1B16]">${Number(product.price).toFixed(2)}</div>
+            <div className="font-body text-xs text-[#1E1B16]/40 line-through">${Number(product.originalPrice).toFixed(2)}</div>
           </div>
         </div>
 
@@ -967,8 +967,8 @@ export default function Home() {
                     <p className="font-body text-xs text-[#1E1B16]/60 leading-relaxed mb-3 line-clamp-2">{bundle.description}</p>
                     <div className="flex items-center justify-between">
                       <div className="flex items-baseline gap-1.5">
-                        <span className="font-display font-700 text-xl text-[#1E1B16]">{bundle.price}</span>
-                        <span className="font-body text-xs text-[#1E1B16]/40 line-through">{bundle.originalPrice}</span>
+                        <span className="font-display font-700 text-xl text-[#1E1B16]">${Number(bundle.price).toFixed(2)}</span>
+                        <span className="font-body text-xs text-[#1E1B16]/40 line-through">${Number(bundle.originalPrice).toFixed(2)}</span>
                       </div>
                       <button onClick={() => { addBundleToCart(bundle); }} className="btn-amber py-2 px-4 text-xs">
                         Add to Cart

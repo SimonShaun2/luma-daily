@@ -211,8 +211,8 @@ export default function Shop() {
                         )}
                       </div>
                       <div className="text-right shrink-0 ml-3">
-                        <div className="font-display font-700 text-xl text-[#1E1B16]">${product.price}</div>
-                        <div className="font-body text-xs text-[#1E1B16]/35 line-through">${product.originalPrice}</div>
+                        <div className="font-display font-700 text-xl text-[#1E1B16]">${Number(product.price).toFixed(2)}</div>
+                        <div className="font-body text-xs text-[#1E1B16]/35 line-through">${Number(product.originalPrice).toFixed(2)}</div>
                       </div>
                     </div>
 
@@ -248,7 +248,7 @@ export default function Shop() {
 
                     {/* Subscribe price hint */}
                     <p className="font-body text-[10px] text-[#C8813A] mt-2 text-center">
-                      Subscribe for ${product.subscribePrice}/mo · Save 20%
+                      Subscribe for ${Number(product.subscribePrice).toFixed(2)}/mo · Save 20%
                     </p>
                   </div>
                 </motion.div>
@@ -298,10 +298,10 @@ export default function Shop() {
 
                   <div className="flex items-center justify-between">
                     <div className="flex items-baseline gap-2">
-                      <span className="font-display font-700 text-2xl text-[#1E1B16]">${bundle.price}</span>
-                      <span className="font-body text-sm text-[#1E1B16]/35 line-through">${bundle.originalPrice}</span>
+                      <span className="font-display font-700 text-2xl text-[#1E1B16]">${Number(bundle.price).toFixed(2)}</span>
+                      <span className="font-body text-sm text-[#1E1B16]/35 line-through">${Number(bundle.originalPrice).toFixed(2)}</span>
                       <span className="font-body text-xs text-[#C8813A] font-600">
-                        Save ${bundle.originalPrice - bundle.price}
+                        Save ${(Number(bundle.originalPrice) - Number(bundle.price)).toFixed(2)}
                       </span>
                     </div>
                   </div>

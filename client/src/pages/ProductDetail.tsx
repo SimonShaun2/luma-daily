@@ -523,7 +523,7 @@ export default function ProductDetail() {
                   </div>
                   <div className="font-display font-700 text-base text-[#1E1B16] mb-0.5">Luma {p.name}</div>
                   <div className="font-body text-xs text-[#1E1B16]/50 italic mb-1">{p.tagline}</div>
-                  <div className="font-body font-600 text-sm text-[#C8813A]">${p.price}</div>
+                  <div className="font-body font-600 text-sm text-[#C8813A]">${Number(p.price).toFixed(2)}</div>
                 </motion.button>
               ))}
           </div>
