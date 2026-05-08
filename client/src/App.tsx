@@ -6,6 +6,7 @@ import ErrorBoundary from "./components/ErrorBoundary";
 import { ThemeProvider } from "./contexts/ThemeContext";
 import { CartProvider } from "./contexts/CartContext";
 import CartDrawer from "./components/CartDrawer";
+import RouteSeo from "./components/RouteSeo";
 import Home from "./pages/Home";
 import Quiz from "./pages/Quiz";
 import Checkout from "./pages/Checkout";
@@ -50,6 +51,7 @@ function App() {
         <CartProvider>
           <TooltipProvider>
             <Toaster />
+            <RouteSeo />
             <CartDrawer />
             <Router />
           </TooltipProvider>
