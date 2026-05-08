@@ -12,6 +12,8 @@ import { useCart } from "@/contexts/CartContext";
 import { products, bundles, type Bundle, type Product } from "@/lib/products";
 import { toast } from "sonner";
 import { useShopifyProducts } from "@/hooks/useShopifyProducts";
+import ExploreByGoal from "@/components/seo/ExploreByGoal";
+import InlineQuizCta from "@/components/seo/InlineQuizCta";
 
 const fadeUp = {
   hidden: { opacity: 0, y: 20 },
@@ -365,6 +367,16 @@ export default function Shop() {
             ))}
           </div>
         )}
+      </div>
+
+      <ExploreByGoal />
+
+      <div className="container pb-16">
+        <InlineQuizCta
+          eyebrow="Build before you buy"
+          title="Get a ritual recommendation in 60 seconds."
+          copy="Not sure which gummies belong together? Take the quiz and let Luma Daily recommend a simple, balanced, or full routine."
+        />
       </div>
 
       {/* Subscribe CTA */}

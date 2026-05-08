@@ -12,6 +12,7 @@ import { useCart } from "@/contexts/CartContext";
 import { toast } from "sonner";
 import { products, bundles, type Bundle, type Product } from "@/lib/products";
 import { useShopifyProducts } from "@/hooks/useShopifyProducts";
+import ExploreByGoal from "@/components/seo/ExploreByGoal";
 
 const testimonials = [
   {
@@ -719,6 +720,8 @@ export default function Home() {
       </section>
 
       {/* ── Quiz CTA (Dark Section) ──────────────────────────────────────── */}
+      <ExploreByGoal />
+
       <section className="relative py-28 bg-[#1A1510] overflow-hidden">
         <div
           className="absolute inset-0 opacity-20"

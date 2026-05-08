@@ -16,6 +16,7 @@ import { products } from "@/lib/products";
 import { toast } from "sonner";
 import { useShopifyProducts } from "@/hooks/useShopifyProducts";
 import { getMonthlySellingPlan } from "@/lib/shopify";
+import RelatedArticles from "@/components/seo/RelatedArticles";
 
 const fadeUp = {
   hidden: { opacity: 0, y: 24 },
@@ -571,6 +572,14 @@ export default function ProductDetail() {
           </div>
         </div>
       </section>
+
+      <RelatedArticles
+        slugs={[
+          "how-to-build-a-daily-wellness-ritual",
+          "energy-calm-sleep-routine",
+          "supplement-routine-gummies",
+        ]}
+      />
 
       {/* Final CTA */}
       <section className="py-16 bg-[#1A1510]">

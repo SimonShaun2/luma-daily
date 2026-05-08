@@ -13,6 +13,8 @@ import SignIn from "./pages/SignIn";
 import Account from "./pages/Account";
 import Shop from "./pages/Shop";
 import ProductDetail from "./pages/ProductDetail";
+import Article from "./pages/Article";
+import SeoLanding from "./pages/SeoLanding";
 import About from "./pages/About";
 import Ingredients from "./pages/Ingredients";
 import Contact from "./pages/Contact";
@@ -30,6 +32,8 @@ function Router() {
       <Route path="/account" component={Account} />
       <Route path="/shop" component={Shop} />
       <Route path="/products/:slug" component={ProductDetail} />
+      <Route path="/blog/:slug" component={Article} />
+      <Route path="/goals/:slug" component={SeoLanding} />
       <Route path="/about" component={About} />
       <Route path="/ingredients" component={Ingredients} />
       <Route path="/contact" component={Contact} />
