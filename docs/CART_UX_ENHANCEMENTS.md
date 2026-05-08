@@ -1263,3 +1263,136 @@ const pct = nextTier
 ```
 
 **Shopify port:** Replace `priorPoints = 150` with a call to your loyalty provider's REST API (e.g. Smile.io `GET /v1/customers?email={email}`, LoyaltyLion `GET /customers/{id}`) to fetch the real running balance. Fire a "Points Earned" event via the provider's webhook after order completion to credit the points server-side.
+
+---
+
+## 26. Smile.io Loyalty API Integration
+
+**Goal:** Replace the `priorPoints = 150` demo value with a live balance fetched from the Smile.io REST API when the confirmation step renders.
+
+### State
+
+```ts
+const [loyaltyPoints, setLoyaltyPoints] = useState<number | null>(null);
+const [loyaltyFetched, setLoyaltyFetched] = useState(false);
+```
+
+### Fetch useEffect (fires once on confirmation step with a known email)
+
+```ts
+useEffect(() => {
+  if (step !== "confirmation" || loyaltyFetched || !form.email) return;
+  setLoyaltyFetched(true);
+  (async () => {
+    try {
+      const res = await fetch(
+        `/api/loyalty-balance?email=${encodeURIComponent(form.email)}`,
+        { signal: AbortSignal.timeout(4000) }
+      );
+      if (res.ok) {
+        const data = await res.json();
+        setLoyaltyPoints(typeof data.points === "number" ? data.points : 150);
+      } else {
+        setLoyaltyPoints(150); // demo fallback
+      }
+    } catch {
+      setLoyaltyPoints(150); // demo fallback
+    }
+  })();
+}, [step, form.email, loyaltyFetched]);
+```
+
+### Backend proxy route (`GET /api/loyalty-balance?email=`)
+
+```ts
+// server/routes/loyaltyBalance.ts
+import type { Request, Response } from "express";
+
+const SMILE_API_KEY = process.env.SMILE_API_KEY!;
+
+export async function loyaltyBalance(req: Request, res: Response) {
+  const { email } = req.query as { email: string };
+  const smileRes = await fetch(
+    `https://api.smile.io/v1/customers?email=${encodeURIComponent(email)}`,
+    { headers: { Authorization: `Bearer ${SMILE_API_KEY}` } }
+  );
+  const { customers } = await smileRes.json();
+  const points = customers?.[0]?.points_balance ?? 0;
+  return res.json({ points });
+}
+```
+
+**Required secret:** `SMILE_API_KEY` (found in Smile.io Admin → Apps → API).
+
+---
+
+## 27. Redeem Points Row in Order Summary
+
+**Goal:** Let customers apply their loyalty points as a discount in the Order Summary step, with a range slider and live dollar-value preview.
+
+### State & derived values
+
+```ts
+const [redeemPointsOpen, setRedeemPointsOpen] = useState(false);
+const [pointsToRedeem, setPointsToRedeem] = useState<number>(0);
+
+const POINTS_PER_DOLLAR = 20; // 100 pts = $5 off
+const availablePoints = loyaltyPoints ?? 150;
+const maxRedeemablePoints = Math.min(availablePoints, Math.floor(total * POINTS_PER_DOLLAR));
+const pointsDiscount = +(pointsToRedeem / POINTS_PER_DOLLAR).toFixed(2);
+
+// Combined discount: promo code + points
+const discountedTotal = +Math.max(
+  0,
+  (appliedPromo ? total * (1 - appliedPromo.pct / 100) : total) - pointsDiscount
+).toFixed(2);
+```
+
+### UI pattern
+
+- "Redeem points (N available)" toggle link, identical in style to the promo code toggle.
+- Range slider (`min=0`, `max=maxRedeemablePoints`, `step=20`) with live "X pts = -$Y" label.
+- "Apply" button commits the selection; "Remove" resets `pointsToRedeem` to 0.
+- A "Points discount" line item appears in the totals card when `pointsToRedeem > 0`.
+
+**Shopify port:** After order completion, call `POST https://api.smile.io/v1/points_transactions` to deduct the redeemed points from the customer's balance server-side.
+
+---
+
+## 28. Exit-Intent Overlay
+
+**Goal:** Detect when the user moves their cursor out of the viewport through the top edge while the cart is non-empty, and show a one-time "Wait — here's 10% off" modal.
+
+### State
+
+```ts
+const [exitIntentShown, setExitIntentShown] = useState(false);
+const [exitIntentVisible, setExitIntentVisible] = useState(false);
+const [exitEmail, setExitEmail] = useState("");
+const [exitSubmitted, setExitSubmitted] = useState(false);
+```
+
+### Trigger useEffect
+
+```ts
+useEffect(() => {
+  const handleMouseLeave = (e: MouseEvent) => {
+    if (e.clientY > 20) return;           // only top-edge exits
+    if (exitIntentShown) return;           // fire once per session
+    if (count === 0) return;               // only when cart has items
+    setExitIntentShown(true);
+    setExitIntentVisible(true);
+  };
+  document.addEventListener("mouseleave", handleMouseLeave);
+  return () => document.removeEventListener("mouseleave", handleMouseLeave);
+}, [exitIntentShown, count]);
+```
+
+### Modal features
+
+- Backdrop blur overlay, click-outside to dismiss.
+- Shows item count from cart (`count` state).
+- Displays `LUMA10` promo badge with a Copy button.
+- Email field sends `_learnq.push(["identify", { $email }])` to Klaviyo on submit.
+- After submit: success state with "Code sent!" confirmation and "Return to my cart" CTA that re-opens the cart drawer.
+- "Return to my cart" CTA also available before submit.
