@@ -7,7 +7,7 @@
 import { useState, useEffect, useRef } from "react";
 import { useLocation } from "wouter";
 import { motion, useInView, AnimatePresence } from "framer-motion";
-import { ChevronDown, ChevronLeft, ChevronRight, Star, Check, ArrowRight, Menu, X, ShoppingBag, Leaf, Zap, Moon, Brain, Sparkles } from "lucide-react";
+import { ChevronDown, ChevronLeft, ChevronRight, Star, Check, ArrowRight, Menu, X, ShoppingBag, Leaf, Zap, Moon, Brain, Sparkles, Loader2 } from "lucide-react";
 import { useCart } from "@/contexts/CartContext";
 import { toast } from "sonner";
 import { products, bundles, type Bundle, type Product } from "@/lib/products";
@@ -138,7 +138,8 @@ function ProductCard({ product, index }: { product: Product; index: number }) {
   const [hovered, setHovered] = useState(false);
   const ref = useRef(null);
   const isInView = useInView(ref, { once: true, margin: "-60px" });
-  const { addItem } = useCart();
+  // Enhancement #1: consume addingId/successId for per-button loading/success states
+  const { addItem, addingId, successId } = useCart();
   const [, navigate] = useLocation();
   const { getProduct, getVariantId } = useShopifyProducts();
 
@@ -252,8 +253,22 @@ function ProductCard({ product, index }: { product: Product; index: number }) {
         </AnimatePresence>
 
         <div className="flex gap-2 mt-auto pt-3">
-          <button onClick={handleAddToCart} className="btn-amber flex-1 justify-center text-xs py-2.5">
-            Add to Ritual
+          {/* Enhancement #1: ATC button — idle → loading → success → idle */}
+          <button
+            onClick={handleAddToCart}
+            disabled={addingId === getStorefrontHandle(product) || successId === getStorefrontHandle(product)}
+            className={[
+              "btn-amber flex-1 justify-center text-xs py-2.5 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200",
+              successId === getStorefrontHandle(product) ? "!bg-green-600 !border-green-600" : "",
+            ].filter(Boolean).join(" ")}
+          >
+            {addingId === getStorefrontHandle(product) ? (
+              <><Loader2 size={13} className="spinner-icon" /> Adding...</>
+            ) : successId === getStorefrontHandle(product) ? (
+              <><Check size={13} className="success-pop" /> Added!</>
+            ) : (
+              "Add to Ritual"
+            )}
           </button>
           <button onClick={() => navigate(`/products/${product.slug}`)} className="btn-outline-dark px-3 py-2.5 text-xs">
             Learn More
@@ -315,6 +330,18 @@ export default function Home() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [, navigate] = useLocation();
   const { openCart, totalItems, addItem } = useCart();
+
+  // Enhancement #6: Cart badge pop on count increase
+  const [badgePop, setBadgePop] = useState(false);
+  const prevTotalRef = useRef(totalItems);
+  useEffect(() => {
+    if (totalItems > prevTotalRef.current) {
+      setBadgePop(true);
+      const t = setTimeout(() => setBadgePop(false), 500);
+      return () => clearTimeout(t);
+    }
+    prevTotalRef.current = totalItems;
+  }, [totalItems]);
   const { getProduct, getVariantId } = useShopifyProducts();
 
   const addFormulaToCart = async (product: Product) => {
@@ -441,7 +468,15 @@ export default function Home() {
               <button onClick={openCart} className="relative text-[#1E1B16]/70 hover:text-[#1E1B16] transition-colors">
                 <ShoppingBag size={20} />
                 {totalItems > 0 && (
-                  <span className="absolute -top-1 -right-1 w-4 h-4 bg-[#C8813A] rounded-full text-white text-[10px] flex items-center justify-center font-600">{totalItems}</span>
+                  <span
+                    key={badgePop ? "pop" : "idle"}
+                    className={[
+                      "absolute -top-1 -right-1 w-4 h-4 bg-[#C8813A] rounded-full text-white text-[10px] flex items-center justify-center font-600",
+                      badgePop ? "badge-pop" : "",
+                    ].filter(Boolean).join(" ")}
+                  >
+                    {totalItems}
+                  </span>
                 )}
               </button>
             </div>
