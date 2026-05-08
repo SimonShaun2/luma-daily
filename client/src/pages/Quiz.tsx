@@ -10,6 +10,18 @@ import { Link, useLocation } from "wouter";
 import { ShoppingCart, ArrowLeft, ArrowRight, Check } from "lucide-react";
 import { toast } from "sonner";
 import { useCart } from "@/contexts/CartContext";
+import { products, type Product } from "@/lib/products";
+import { useShopifyProducts } from "@/hooks/useShopifyProducts";
+
+interface KlaviyoQueue {
+  push: (event: unknown[]) => void;
+}
+
+declare global {
+  interface Window {
+    _learnq?: KlaviyoQueue;
+  }
+}
 
 // ── Types ────────────────────────────────────────────────────────────────────
 interface QuizOption {
@@ -226,6 +238,7 @@ export default function Quiz() {
   const [emailSubmitted, setEmailSubmitted] = useState(false);
   const [, navigate] = useLocation();
   const { addItem, openCart } = useCart();
+  const { getProduct, getVariantId, getSellingPlanId } = useShopifyProducts();
   const totalSteps = 5;
 
   const toggleSecondary = (id: string) => {
@@ -261,6 +274,53 @@ export default function Quiz() {
   const recommendations = getRecommendations(primaryGoal, timing, secondary);
   const totalPrice = recommendations.reduce((sum, r) => sum + r.price, 0);
   const bundlePrice = +(totalPrice * 0.75).toFixed(2);
+
+  const getRecommendedProducts = () =>
+    recommendations
+      .map((recommendation) =>
+        products.find((product) => product.fullName === recommendation.name),
+      )
+      .filter((product): product is Product => Boolean(product));
+
+  const addRecommendationsToCart = async (isSubscription: boolean) => {
+    const selectedProducts = getRecommendedProducts();
+
+    if (!selectedProducts.length) {
+      toast.error("We could not match your ritual to Shopify products yet.");
+      return;
+    }
+
+    try {
+      for (const product of selectedProducts) {
+        const handle = `luma-${product.slug}`;
+        const shopifyProduct = getProduct(handle);
+        const variantId = shopifyProduct?.variants.edges[0]?.node.id ?? (await getVariantId(handle));
+        const sellingPlanId = isSubscription ? getSellingPlanId(handle) : "";
+
+        if (!variantId) {
+          throw new Error(`Luma ${product.name} is not connected to Shopify yet.`);
+        }
+
+        await addItem({
+          variantId,
+          handle,
+          name: product.name,
+          flavor: product.flavor || product.name,
+          price: isSubscription ? product.subscribePrice : product.price,
+          originalPrice: product.originalPrice,
+          image: shopifyProduct?.images.edges[0]?.node.url ?? product.image,
+          color: product.color,
+          isSubscription: Boolean(isSubscription && sellingPlanId),
+          sellingPlanId: sellingPlanId || undefined,
+        });
+      }
+
+      openCart();
+      toast.success("Your personalized ritual is in your cart.");
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : "Unable to add your ritual to cart.");
+    }
+  };
 
   const pageVariants = {
     initial: { opacity: 0, x: 30 },
@@ -593,6 +653,22 @@ export default function Quiz() {
                       <button
                         onClick={() => {
                           if (!email.includes("@")) { toast.error("Please enter a valid email"); return; }
+                          try {
+                            window._learnq?.push(["identify", { $email: email }]);
+                            window._learnq?.push([
+                              "track",
+                              "Quiz Completed",
+                              {
+                                primaryGoal,
+                                timing,
+                                secondary,
+                                routine,
+                                recommendations: recommendations.map((recommendation) => recommendation.name),
+                              },
+                            ]);
+                          } catch {
+                            // Klaviyo should never block quiz completion.
+                          }
                           setEmailSubmitted(true);
                           toast.success("15% off code sent to " + email + "!");
                         }}
@@ -627,7 +703,7 @@ export default function Quiz() {
                   whileTap={{ scale: 0.99 }}
                   className="w-full bg-[#1E1B16] text-white py-4 rounded-2xl text-base font-semibold hover:bg-[#2D2820] transition-colors cursor-pointer"
                   style={{ fontFamily: "'DM Sans', sans-serif" }}
-                  onClick={() => { navigate("/shop"); toast.success("Building your ritual — choose your formulas!"); }}
+                  onClick={() => addRecommendationsToCart(true)}
                 >
                   Subscribe to My Daily Ritual — ${bundlePrice}/mo
                 </motion.button>
@@ -639,7 +715,7 @@ export default function Quiz() {
                   transition={{ delay: 0.8 }}
                   className="text-center mt-4"
                 >
-                  <button onClick={() => navigate("/shop")} className="text-sm text-[#8B7355] underline underline-offset-2 hover:text-[#1E1B16] transition-colors">
+                  <button onClick={() => addRecommendationsToCart(false)} className="text-sm text-[#8B7355] underline underline-offset-2 hover:text-[#1E1B16] transition-colors">
                     Or buy once for ${totalPrice.toFixed(2)} — no commitment
                   </button>
                 </motion.div>

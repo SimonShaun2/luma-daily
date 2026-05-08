@@ -9,8 +9,9 @@ import { useLocation } from "wouter";
 import { motion } from "framer-motion";
 import { ArrowRight, ShoppingBag, Star, Check, Filter } from "lucide-react";
 import { useCart } from "@/contexts/CartContext";
-import { products, bundles } from "@/lib/products";
+import { products, bundles, type Bundle, type Product } from "@/lib/products";
 import { toast } from "sonner";
+import { useShopifyProducts } from "@/hooks/useShopifyProducts";
 
 const fadeUp = {
   hidden: { opacity: 0, y: 20 },
@@ -22,6 +23,7 @@ const FILTERS = ["All", "Energy", "Sleep", "Stress", "Focus", "Beauty", "Gut"];
 export default function Shop() {
   const [, navigate] = useLocation();
   const { addItem, openCart } = useCart();
+  const { getProduct, getVariantId } = useShopifyProducts();
   const [activeFilter, setActiveFilter] = useState("All");
   const [activeTab, setActiveTab] = useState<"formulas" | "bundles">("formulas");
 
@@ -40,34 +42,73 @@ export default function Shop() {
       ? products
       : products.filter((p) => filterMap[activeFilter]?.includes(p.slug));
 
-  const handleAddToCart = (product: typeof products[0]) => {
-    addItem({
-      id: product.id,
+  const enrichedProducts = filteredProducts.map((product) => {
+    const handle = `luma-${product.slug}`;
+    const shopifyProduct = getProduct(handle);
+    const variant = shopifyProduct?.variants.edges[0]?.node ?? null;
+
+    return {
+      ...product,
+      shopifyHandle: handle,
+      shopifyImage: shopifyProduct?.images.edges[0]?.node.url,
+      shopifyVariantId: variant?.id ?? "",
+      outOfStock: variant ? !variant.availableForSale : false,
+    };
+  });
+
+  const handleAddToCart = async (product: Product) => {
+    const handle = `luma-${product.slug}`;
+    const shopifyProduct = getProduct(handle);
+    const variant = shopifyProduct?.variants.edges[0]?.node ?? null;
+
+    if (variant && !variant.availableForSale) {
+      toast.error(`Luma ${product.name} is currently out of stock.`);
+      return;
+    }
+
+    const variantId = variant?.id ?? (await getVariantId(handle));
+
+    if (!variantId) {
+      toast.error("This formula is not connected to Shopify yet.");
+      return;
+    }
+
+    await addItem({
+      variantId,
+      handle,
       name: product.name,
       flavor: product.flavor || product.name,
       price: product.price,
       originalPrice: product.originalPrice,
-      image: product.image,
+      image: shopifyProduct?.images.edges[0]?.node.url ?? product.image,
       color: product.color,
       isSubscription: false,
     });
+
     openCart();
     toast.success(`Luma ${product.name} added to cart`);
   };
 
-  const handleAddBundleToCart = (bundle: typeof bundles[0]) => {
-    addItem({
-      id: bundle.id + 100,
-      name: bundle.name,
-      flavor: bundle.subtitle,
-      price: bundle.price,
-      originalPrice: bundle.originalPrice,
-      image: bundle.image,
-      color: "#C8813A",
-      isSubscription: false,
-    });
+  const handleAddBundleToCart = async (bundle: Bundle) => {
+    const bundleProducts = bundle.products
+      .map((productName) => products.find((product) => product.name === productName))
+      .filter((product): product is Product => Boolean(product));
+
+    if (!bundleProducts.length) {
+      toast.error("This bundle is not connected to Shopify yet.");
+      return;
+    }
+
+    try {
+      for (const product of bundleProducts) {
+        await handleAddToCart(product);
+      }
+      toast.success(`${bundle.name} added to cart`);
+    } catch {
+      toast.error("Unable to add bundle to cart.");
+    }
+
     openCart();
-    toast.success(`${bundle.name} added to cart`);
   };
 
   return (
@@ -159,7 +200,7 @@ export default function Shop() {
 
             {/* Products grid */}
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-              {filteredProducts.map((product, i) => (
+              {enrichedProducts.map((product, i) => (
                 <motion.div
                   key={product.id}
                   initial="hidden"
@@ -183,8 +224,13 @@ export default function Shop() {
                         {product.badge}
                       </div>
                     )}
+                    {product.outOfStock && (
+                      <div className="absolute top-3 right-3 z-10 text-xs font-body font-600 px-3 py-1 rounded-full bg-[#1E1B16] text-white">
+                        Out of Stock
+                      </div>
+                    )}
                     <img
-                      src={product.image}
+                      src={product.shopifyImage ?? product.image}
                       alt={`Luma ${product.name}`}
                       className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
                     />
@@ -233,10 +279,11 @@ export default function Shop() {
                     <div className="flex gap-2">
                       <button
                         onClick={() => handleAddToCart(product)}
-                        className="btn-amber flex-1 justify-center text-xs py-2.5"
+                        disabled={product.outOfStock}
+                        className="btn-amber flex-1 justify-center text-xs py-2.5 disabled:opacity-50 disabled:cursor-not-allowed"
                       >
                         <ShoppingBag size={13} />
-                        Add to Cart
+                        {product.outOfStock ? "Out of Stock" : "Add to Cart"}
                       </button>
                       <button
                         onClick={() => navigate(`/products/${product.slug}`)}

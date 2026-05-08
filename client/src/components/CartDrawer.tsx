@@ -7,14 +7,39 @@ import { motion, AnimatePresence } from "framer-motion";
 import { X, Minus, Plus, ShoppingBag, ChevronRight, Trash2 } from "lucide-react";
 import { useCart } from "@/contexts/CartContext";
 import { useLocation } from "wouter";
+import { useState } from "react";
+import GiftProgressBar from "@/components/GiftProgressBar";
+import SubscriptionUpsellModal from "@/components/SubscriptionUpsellModal";
 
 export default function CartDrawer() {
-  const { items, isOpen, closeCart, removeItem, updateQuantity, totalItems, subtotal, savings } = useCart();
+  const {
+    items,
+    isOpen,
+    closeCart,
+    removeItem,
+    updateQuantity,
+    totalItems,
+    subtotal,
+    savings,
+    checkout,
+    isLoading,
+  } = useCart();
   const [, navigate] = useLocation();
+  const [showSubscribeModal, setShowSubscribeModal] = useState(false);
 
   const handleCheckout = () => {
-    closeCart();
-    navigate("/checkout");
+    const hasOneTimeItems = items.some((item) => !item.isSubscription);
+    if (hasOneTimeItems) {
+      setShowSubscribeModal(true);
+      return;
+    }
+
+    checkout();
+  };
+
+  const continueToCheckout = () => {
+    setShowSubscribeModal(false);
+    checkout();
   };
 
   return (
@@ -59,6 +84,8 @@ export default function CartDrawer() {
               </button>
             </div>
 
+            <GiftProgressBar subtotal={subtotal} />
+
             {/* Cart Items */}
             <div className="flex-1 overflow-y-auto px-6 py-4">
               {items.length === 0 ? (
@@ -81,7 +108,7 @@ export default function CartDrawer() {
                 <div className="space-y-4">
                   {items.map((item) => (
                     <motion.div
-                      key={`${item.id}-${item.isSubscription}`}
+                      key={item.lineId}
                       layout
                       initial={{ opacity: 0, y: 12 }}
                       animate={{ opacity: 1, y: 0 }}
@@ -117,7 +144,7 @@ export default function CartDrawer() {
                             )}
                           </div>
                           <button
-                            onClick={() => removeItem(item.id)}
+                            onClick={() => removeItem(item.lineId)}
                             className="text-[#1E1B16]/30 hover:text-red-400 transition-colors flex-shrink-0"
                           >
                             <Trash2 size={14} />
@@ -128,7 +155,8 @@ export default function CartDrawer() {
                           {/* Quantity */}
                           <div className="flex items-center gap-2 bg-[#FAF7F2] rounded-full px-2 py-1">
                             <button
-                              onClick={() => updateQuantity(item.id, item.quantity - 1)}
+                              onClick={() => updateQuantity(item.lineId, item.quantity - 1)}
+                              disabled={isLoading}
                               className="w-5 h-5 flex items-center justify-center text-[#1E1B16]/60 hover:text-[#1E1B16] transition-colors"
                             >
                               <Minus size={12} />
@@ -137,7 +165,8 @@ export default function CartDrawer() {
                               {item.quantity}
                             </span>
                             <button
-                              onClick={() => updateQuantity(item.id, item.quantity + 1)}
+                              onClick={() => updateQuantity(item.lineId, item.quantity + 1)}
+                              disabled={isLoading}
                               className="w-5 h-5 flex items-center justify-center text-[#1E1B16]/60 hover:text-[#1E1B16] transition-colors"
                             >
                               <Plus size={12} />
@@ -185,9 +214,10 @@ export default function CartDrawer() {
                 </p>
                 <button
                   onClick={handleCheckout}
+                  disabled={isLoading}
                   className="btn-amber w-full justify-center text-base py-4 flex items-center gap-2"
                 >
-                  Proceed to Checkout
+                  {isLoading ? "Updating..." : "Proceed to Checkout"}
                   <ChevronRight size={18} />
                 </button>
                 <button
@@ -198,6 +228,12 @@ export default function CartDrawer() {
                 </button>
               </div>
             )}
+
+            <SubscriptionUpsellModal
+              open={showSubscribeModal}
+              onClose={() => setShowSubscribeModal(false)}
+              onContinue={continueToCheckout}
+            />
           </motion.div>
         </>
       )}

@@ -14,6 +14,8 @@ import {
 import { useCart } from "@/contexts/CartContext";
 import { products } from "@/lib/products";
 import { toast } from "sonner";
+import { useShopifyProducts } from "@/hooks/useShopifyProducts";
+import { getMonthlySellingPlan } from "@/lib/shopify";
 
 const fadeUp = {
   hidden: { opacity: 0, y: 24 },
@@ -70,6 +72,7 @@ export default function ProductDetail() {
   const params = useParams<{ slug: string }>();
   const [, navigate] = useLocation();
   const { addItem, openCart } = useCart();
+  const { getProduct, getVariantId } = useShopifyProducts();
   const [isSubscription, setIsSubscription] = useState(true);
   const [quantity, setQuantity] = useState(1);
   const [openSection, setOpenSection] = useState<string | null>("ingredients");
@@ -91,20 +94,33 @@ export default function ProductDetail() {
 
   const price = isSubscription ? product.subscribePrice : product.price;
   const savings = isSubscription ? (product.price - product.subscribePrice).toFixed(2) : null;
+  const shopifyHandle = `luma-${product.slug}`;
+  const shopifyProduct = getProduct(shopifyHandle);
+  const sellingPlan = shopifyProduct ? getMonthlySellingPlan(shopifyProduct) : null;
 
-  const handleAddToCart = () => {
-    for (let i = 0; i < quantity; i++) {
-      addItem({
-        id: product.id,
+  const handleAddToCart = async () => {
+    const shopifyVariantId = shopifyProduct?.variants.edges[0]?.node.id ?? (await getVariantId(shopifyHandle));
+
+    if (!shopifyVariantId) {
+      toast.error("This product is not connected to Shopify yet.");
+      return;
+    }
+
+    for (let i = 0; i < quantity; i += 1) {
+      await addItem({
+        variantId: shopifyVariantId,
+        handle: shopifyHandle,
         name: product.name,
         flavor: product.flavor || product.name,
         price: price,
         originalPrice: product.originalPrice,
-        image: product.image,
+        image: shopifyProduct?.images.edges[0]?.node.url ?? product.image,
         color: product.color,
         isSubscription,
+        sellingPlanId: isSubscription ? sellingPlan?.id : undefined,
       });
     }
+
     openCart();
     toast.success(`Luma ${product.name} added to your ritual`);
   };
@@ -526,6 +542,32 @@ export default function ProductDetail() {
                   <div className="font-body font-600 text-sm text-[#C8813A]">${Number(p.price).toFixed(2)}</div>
                 </motion.button>
               ))}
+          </div>
+        </div>
+      </section>
+
+      {/* Okendo Reviews Integration Slot */}
+      <section className="py-16 bg-white">
+        <div className="container">
+          <div className="max-w-4xl mx-auto rounded-3xl border border-[#E8E0D4] bg-[#FAF7F2] p-6 lg:p-8">
+            <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-3 mb-6">
+              <div>
+                <p className="font-body text-xs font-600 tracking-[0.18em] uppercase text-[#C8813A] mb-2">
+                  Verified rituals
+                </p>
+                <h2 className="font-display font-700 text-3xl text-[#1E1B16]">
+                  Customer reviews
+                </h2>
+              </div>
+              <p className="font-body text-sm text-[#1E1B16]/55 max-w-sm">
+                Okendo reviews will render here once the subscriber ID is configured.
+              </p>
+            </div>
+            <div
+              data-oke-widget
+              data-oke-reviews-product-id={shopifyProduct?.id ?? product.id}
+              data-oke-reviews-product-handle={shopifyHandle}
+            />
           </div>
         </div>
       </section>

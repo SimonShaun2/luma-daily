@@ -10,214 +10,8 @@ import { motion, useInView, AnimatePresence } from "framer-motion";
 import { ChevronDown, ChevronLeft, ChevronRight, Star, Check, ArrowRight, Menu, X, ShoppingBag, Leaf, Zap, Moon, Brain, Sparkles } from "lucide-react";
 import { useCart } from "@/contexts/CartContext";
 import { toast } from "sonner";
-
-// ─── Product Data ────────────────────────────────────────────────────────────
-
-const products = [
-  {
-    id: 1,
-    name: "Energy",
-    tagline: "Natural vitality, sustained",
-    image: "/manus-storage/luma_energy_bottle_18c415cd.png",
-    description: "Ginseng, B12 & Green Tea Extract to power your day without the crash.",
-    price: "$38",
-    originalPrice: "$48",
-    color: "#F5C842",
-    bgColor: "#FEF9E7",
-    textColor: "#7A5C00",
-    gummyColor: "#F5C842",
-    icon: <Zap size={18} />,
-    ingredients: ["Ginseng Root", "Vitamin B12", "Green Tea Extract", "CoQ10"],
-    badge: "Best Seller",
-    flavor: "Blood Orange Mango",
-  },
-  {
-    id: 2,
-    name: "Calm",
-    tagline: "Stress less, live more",
-    image: "/manus-storage/luma_calm_bottle_14cc2d8f.png",
-    description: "Ashwagandha & L-Theanine to quiet the noise and find your center.",
-    price: "$38",
-    originalPrice: "$48",
-    color: "#7A9E7E",
-    bgColor: "#EEF5EF",
-    textColor: "#2D5A32",
-    gummyColor: "#7DC47E",
-    icon: <Leaf size={18} />,
-    ingredients: ["Ashwagandha KSM-66", "L-Theanine", "Lemon Balm", "Magnesium"],
-    badge: "Fan Favorite",
-  },
-  {
-    id: 3,
-    name: "Sleep",
-    tagline: "Rest deeply, wake ready",
-    image: "/manus-storage/luma_sleep_bottle_a6f93589.png",
-    description: "Melatonin & Chamomile for restorative sleep that actually refreshes.",
-    price: "$38",
-    originalPrice: "$48",
-    color: "#9B8EC4",
-    bgColor: "#F3F0FA",
-    textColor: "#3D2B7A",
-    gummyColor: "#B8A8E0",
-    icon: <Moon size={18} />,
-    ingredients: ["Melatonin 3mg", "Chamomile Extract", "Passionflower", "GABA"],
-    badge: null,
-  },
-  {
-    id: 4,
-    name: "Focus",
-    tagline: "Clarity on demand",
-    image: "/manus-storage/luma_focus_bottle_4364c9ab.png",
-    description: "Lion's Mane & Bacopa for sharp thinking and sustained concentration.",
-    price: "$38",
-    originalPrice: "$48",
-    color: "#6AACCC",
-    bgColor: "#EBF5FA",
-    textColor: "#1A4E6A",
-    gummyColor: "#6AACCC",
-    icon: <Brain size={18} />,
-    ingredients: ["Lion's Mane", "Bacopa Monnieri", "Ginkgo Biloba", "Vitamin B6"],
-    badge: "New",
-    flavor: "Spearmint Green Tea",
-  },
-  {
-    id: 5,
-    name: "Glow",
-    tagline: "Beauty from within",
-    image: "/manus-storage/luma_glow_bottle_c1ab2dea.png",
-    description: "Collagen & Vitamin C for radiant skin, strong nails, and lustrous hair.",
-    price: "$38",
-    originalPrice: "$48",
-    color: "#E8917A",
-    bgColor: "#FDF0EC",
-    textColor: "#7A2A14",
-    gummyColor: "#E8917A",
-    icon: <Sparkles size={18} />,
-    ingredients: ["Marine Collagen", "Vitamin C", "Biotin", "Hyaluronic Acid"],
-    badge: null,
-    flavor: "Strawberry Peach",
-  },
-  {
-    id: 6,
-    name: "Gut",
-    tagline: "Digestive harmony, daily",
-    image: "https://d2xsxph8kpxj0f.cloudfront.net/310519663633783733/NP8W4PN5hdBACVumhQ3AtE/luma_gut_bottle-XRZKo6DKmqn38DjNUJpCzw.webp",
-    description: "Probiotics, Prebiotics & Digestive Enzymes for a balanced gut microbiome and smooth digestion.",
-    price: "$38",
-    originalPrice: "$48",
-    color: "#7AAE6E",
-    bgColor: "#EFF6EC",
-    textColor: "#2A5C1A",
-    gummyColor: "#A8D49A",
-    icon: <Leaf size={18} />,
-    ingredients: ["Probiotics (10B CFU)", "Inulin Prebiotic", "Digestive Enzymes", "Ginger Root"],
-    badge: "New",
-    flavor: "Citrus Mint",
-  },
-];
-const bundles = [
-  {
-    id: 1,
-    name: "Energy + Calm",
-    subtitle: "Energy + Calm",
-    description: "The perfect pair for a productive, balanced day. Fuel your morning and stay centered through it all.",
-    price: "$69",
-    originalPrice: "$76",
-    image: "/manus-storage/energy_calm_bundle_7ba4902a.png",
-    products: ["Energy", "Calm"],
-  },
-  {
-    id: 2,
-    name: "Sleep + Glow",
-    subtitle: "Sleep + Glow",
-    description: "Rest deeply and wake radiant. Your overnight beauty and recovery ritual in one.",
-    price: "$69",
-    originalPrice: "$76",
-    image: "/manus-storage/sleep_glow_bundle_e2009a50.png",
-    products: ["Sleep", "Glow"],
-  },
-  {
-    id: 3,
-    name: "Glow Up Bundle",
-    subtitle: "Glow + Sleep + Calm",
-    description: "Radiant skin, restful nights, and a calm mind. The ultimate self-care trio.",
-    price: "$99",
-    originalPrice: "$114",
-    image: "/manus-storage/glow_up_bundle_d7d92b3b.png",
-    products: ["Glow", "Sleep", "Calm"],
-  },
-  {
-    id: 4,
-    name: "Performance Bundle",
-    subtitle: "Energy + Focus + Calm",
-    description: "Sharpen your edge. Designed for peak mental and physical performance every day.",
-    price: "$99",
-    originalPrice: "$114",
-    image: "/manus-storage/performance_bundle_3fa231f4.png",
-    products: ["Energy", "Focus", "Calm"],
-  },
-  {
-    id: 5,
-    name: "Focus + Gut Bundle",
-    subtitle: "Focus + Gut Health",
-    description: "The gut-brain connection, optimized. Think clearly and feel great from the inside out.",
-    price: "$99",
-    originalPrice: "$114",
-    image: "/manus-storage/focus_gut_bundle_3ab9febe.png",
-    products: ["Focus", "Gut"],
-  },
-  {
-    id: 6,
-    name: "Focus Wellness Bundle",
-    subtitle: "Focus + Calm + Sleep",
-    description: "Complete cognitive wellness — sharpen focus, reduce stress, and recover overnight.",
-    price: "$99",
-    originalPrice: "$114",
-    image: "/manus-storage/focus_wellness_bundle_2f0d84d6.png",
-    products: ["Focus", "Calm", "Sleep"],
-  },
-  {
-    id: 7,
-    name: "Beauty Wellness Bundle",
-    subtitle: "Glow + Calm + Energy",
-    description: "Look good, feel good. A beauty-forward ritual that nourishes inside and out.",
-    price: "$99",
-    originalPrice: "$114",
-    image: "/manus-storage/beauty_wellness_bundle_8f28c04d.png",
-    products: ["Glow", "Calm", "Energy"],
-  },
-  {
-    id: 8,
-    name: "Mind Body Gut Bundle",
-    subtitle: "Focus + Energy + Gut",
-    description: "Holistic wellness from the inside out. Mind, body, and gut in perfect harmony.",
-    price: "$99",
-    originalPrice: "$114",
-    image: "/manus-storage/mind_body_gut_bundle_6671797c.png",
-    products: ["Focus", "Energy", "Gut"],
-  },
-  {
-    id: 9,
-    name: "Daily Ritual Bundle",
-    subtitle: "Energy + Calm + Sleep + Focus + Glow + Gut",
-    description: "Your complete daily ritual. All six formulas working in harmony, morning to night.",
-    price: "$199",
-    originalPrice: "$228",
-    image: "/manus-storage/daily_ritual_bundle_48b2976a.png",
-    products: ["Energy", "Calm", "Sleep", "Focus", "Glow", "Gut"],
-    featured: true,
-  },
-  {
-    id: 10,
-    name: "Essential Six Bundle",
-    subtitle: "All Six Formulas",
-    description: "The complete Luma system. Every need, every moment, every day — fully covered.",
-    price: "$199",
-    originalPrice: "$228",
-    image: "/manus-storage/essential_five_bundle_f256b0c0.png",
-    products: ["Energy", "Calm", "Sleep", "Focus", "Glow", "Gut"],
-  },
-];
+import { products, bundles, type Bundle, type Product } from "@/lib/products";
+import { useShopifyProducts } from "@/hooks/useShopifyProducts";
 
 const testimonials = [
   {
@@ -328,23 +122,49 @@ function SectionLabel({ children }: { children: React.ReactNode }) {
   );
 }
 
-function ProductCard({ product, index }: { product: typeof products[0]; index: number }) {
+function getProductIcon(slug: string) {
+  if (slug === "energy") return <Zap size={18} />;
+  if (slug === "calm" || slug === "gut") return <Leaf size={18} />;
+  if (slug === "sleep") return <Moon size={18} />;
+  if (slug === "focus") return <Brain size={18} />;
+  return <Sparkles size={18} />;
+}
+
+function getStorefrontHandle(product: Product) {
+  return `luma-${product.slug}`;
+}
+
+function ProductCard({ product, index }: { product: Product; index: number }) {
   const [hovered, setHovered] = useState(false);
   const ref = useRef(null);
   const isInView = useInView(ref, { once: true, margin: "-60px" });
   const { addItem } = useCart();
   const [, navigate] = useLocation();
-  const handleAddToCart = () => {
-    addItem({
-      id: product.id,
+  const { getProduct, getVariantId } = useShopifyProducts();
+
+  const handleAddToCart = async () => {
+    const handle = getStorefrontHandle(product);
+    const shopifyProduct = getProduct(handle);
+    const variantId = shopifyProduct?.variants.edges[0]?.node.id ?? (await getVariantId(handle));
+
+    if (!variantId) {
+      toast.error("This formula is not connected to Shopify yet.");
+      return;
+    }
+
+    await addItem({
+      variantId,
+      handle,
       name: product.name,
-      flavor: (product as any).flavor || product.name,
-      price: typeof product.price === 'string' ? parseFloat((product.price as string).replace("$", "")) : product.price,
-      originalPrice: typeof product.originalPrice === 'string' ? parseFloat((product.originalPrice as string).replace("$", "")) : product.originalPrice,
-      image: product.image,
+      flavor: product.flavor || product.name,
+      price: product.price,
+      originalPrice: product.originalPrice,
+      image: shopifyProduct?.images.edges[0]?.node.url ?? product.image,
       color: product.color,
       isSubscription: false,
     });
+
+    toast.success(`Luma ${product.name} added to your ritual`);
   };
 
   return (
@@ -388,12 +208,12 @@ function ProductCard({ product, index }: { product: typeof products[0]; index: n
           <div>
             <h3 className="font-display font-700 text-xl text-[#1E1B16]">{product.name}</h3>
             <p className="font-body text-xs text-[#1E1B16]/50 italic mt-0.5">{product.tagline}</p>
-            {(product as any).flavor && (
+            {product.flavor && (
               <span
                 className="inline-block mt-1.5 text-[10px] font-body font-600 px-2.5 py-0.5 rounded-full tracking-wide"
                 style={{ backgroundColor: product.bgColor, color: product.textColor }}
               >
-                {(product as any).flavor}
+                {product.flavor}
               </span>
             )}
           </div>
@@ -419,11 +239,11 @@ function ProductCard({ product, index }: { product: typeof products[0]; index: n
               <div className="flex flex-wrap gap-1.5">
                 {product.ingredients.map((ing) => (
                   <span
-                    key={ing}
+                    key={ing.name}
                     className="text-xs font-body px-2.5 py-1 rounded-full"
                     style={{ backgroundColor: product.bgColor, color: product.textColor }}
                   >
-                    {ing}
+                    {ing.name}
                   </span>
                 ))}
               </div>
@@ -435,7 +255,7 @@ function ProductCard({ product, index }: { product: typeof products[0]; index: n
           <button onClick={handleAddToCart} className="btn-amber flex-1 justify-center text-xs py-2.5">
             Add to Ritual
           </button>
-          <button onClick={() => navigate(`/products/${product.name.toLowerCase()}`)} className="btn-outline-dark px-3 py-2.5 text-xs">
+          <button onClick={() => navigate(`/products/${product.slug}`)} className="btn-outline-dark px-3 py-2.5 text-xs">
             Learn More
           </button>
         </div>
@@ -495,22 +315,50 @@ export default function Home() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [, navigate] = useLocation();
   const { openCart, totalItems, addItem } = useCart();
+  const { getProduct, getVariantId } = useShopifyProducts();
 
-  const addBundleToCart = (bundle: typeof bundles[0]) => {
-    const numPrice = typeof bundle.price === "string" ? parseFloat(bundle.price.replace("$", "")) : bundle.price;
-    const numOriginal = typeof bundle.originalPrice === "string" ? parseFloat(bundle.originalPrice.replace("$", "")) : bundle.originalPrice;
-    addItem({
-      id: bundle.id + 100,
-      name: bundle.name,
-      flavor: bundle.subtitle,
-      price: numPrice,
-      originalPrice: numOriginal,
-      image: bundle.image,
-      color: "#C8813A",
+  const addFormulaToCart = async (product: Product) => {
+    const handle = getStorefrontHandle(product);
+    const shopifyProduct = getProduct(handle);
+    const variantId = shopifyProduct?.variants.edges[0]?.node.id ?? (await getVariantId(handle));
+
+    if (!variantId) {
+      throw new Error(`Luma ${product.name} is not connected to Shopify yet.`);
+    }
+
+    await addItem({
+      variantId,
+      handle,
+      name: product.name,
+      flavor: product.flavor || product.name,
+      price: product.price,
+      originalPrice: product.originalPrice,
+      image: shopifyProduct?.images.edges[0]?.node.url ?? product.image,
+      color: product.color,
       isSubscription: false,
     });
+  };
+
+  const addBundleToCart = async (bundle: Bundle) => {
+    const bundleProducts = bundle.products
+      .map((productName) => products.find((product) => product.name === productName))
+      .filter((product): product is Product => Boolean(product));
+
+    if (!bundleProducts.length) {
+      toast.error("This bundle is not connected to Shopify yet.");
+      return;
+    }
+
+    try {
+      for (const product of bundleProducts) {
+        await addFormulaToCart(product);
+      }
+      toast.success(`${bundle.name} added to cart`);
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : "Unable to add bundle to cart.");
+    }
+
     openCart();
-    toast.success(`${bundle.name} added to cart`);
   };
   const [scrolled, setScrolled] = useState(false);
   const [activeCategory, setActiveCategory] = useState<number | null>(null);
@@ -825,7 +673,7 @@ export default function Home() {
                   color: activeCategory === p.id ? "white" : p.textColor,
                 }}
               >
-                {p.icon}
+                {getProductIcon(p.slug)}
                 {p.name}
               </motion.button>
             ))}
