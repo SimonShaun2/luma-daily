@@ -791,3 +791,160 @@ useEffect(() => {
 5. Publish the flow.
 
 **Property mapping:** `$value` maps to Klaviyo's built-in revenue field; `Items` is a line-item array compatible with Klaviyo's product block in email templates.
+
+---
+
+## 17. Klaviyo "Placed Order" Event
+
+**Goal:** Fire a `Placed Order` track event the moment the user passes payment validation and advances to the confirmation step, closing the abandoned-checkout loop and feeding Klaviyo revenue attribution.
+
+### Placement
+
+Inside the `step === "payment"` validation block in the CTA `onClick`, immediately after `setFormErrors({})` succeeds:
+
+```ts
+try {
+  if (typeof window !== "undefined" && (window as any)._learnq) {
+    (window as any)._learnq.push(["track", "Placed Order", {
+      $value: discountedTotal,
+      OrderId: `LUMA-${Date.now()}`,
+      ItemNames: cartItems.map(i => i.name),
+      Items: cartItems.map(i => ({
+        ProductName: i.name,
+        Quantity: i.qty,
+        ItemPrice: i.subscribe ? +(i.price * 0.85).toFixed(2) : i.price,
+        RowTotal: i.subscribe
+          ? +(i.price * 0.85 * i.qty).toFixed(2)
+          : +(i.price * i.qty).toFixed(2),
+        Subscribe: i.subscribe ?? false,
+      })),
+      PromoCode: appliedPromo?.code ?? null,
+      Discount: appliedPromo ? +(discountedTotal - total).toFixed(2) : 0,
+      BillingEmail: form.email,
+    }]);
+  }
+} catch { /* silent fail */ }
+```
+
+**Klaviyo Flow:** Use `Placed Order` as a flow trigger to suppress the `Checkout Started` abandoned-cart flow for profiles that converted. Add a filter: "Skip if person has triggered Placed Order zero times since starting this flow."
+
+---
+
+## 18. Order Summary Mini-Badge on Step Headers
+
+**Goal:** Show a compact badge at the top of the Shipping and Payment steps — product avatar stack, item count, and running total (with discount applied) — so users never lose sight of what they're buying.
+
+### JSX pattern (identical for both steps)
+
+```tsx
+<div className="bg-white rounded-xl border border-[oklch(0.88_0.02_80)] p-3 flex items-center justify-between">
+  <div className="flex items-center gap-2">
+    <div className="flex -space-x-2">
+      {cartItems.slice(0, 3).map((item, i) => (
+        <img key={i} src={item.img} alt={item.name}
+          className="w-8 h-8 rounded-full border-2 border-white object-cover" />
+      ))}
+    </div>
+    <span className="text-xs font-body text-[oklch(0.42_0.04_55)]">
+      {cartItems.length} item{cartItems.length !== 1 ? "s" : ""}
+    </span>
+  </div>
+  <div className="text-right">
+    {appliedPromo && (
+      <span className="text-[10px] font-body text-[oklch(0.42_0.08_150)] font-semibold block">
+        {appliedPromo.pct}% off applied
+      </span>
+    )}
+    <span className="font-display font-bold text-sm text-[oklch(0.22_0.04_55)]">
+      ${discountedTotal.toFixed(2)}
+    </span>
+  </div>
+</div>
+```
+
+Place this as the **first child** inside each step's `<div className="p-5 space-y-4">` container.
+
+---
+
+## 19. Collapsible Promo Code Field
+
+**Goal:** Add a "Have a promo code?" toggle in the Order Summary step that expands an input + Apply button, validates the code against a lookup table, shows a green success badge when applied, and reflects the discount in the subtotal, discount row, and total.
+
+### State
+
+```ts
+const [promoOpen, setPromoOpen] = useState(false);
+const [promoInput, setPromoInput] = useState("");
+const [promoError, setPromoError] = useState("");
+const [appliedPromo, setAppliedPromo] = useState<{ code: string; pct: number } | null>(null);
+
+// Lookup table — replace with a real API call (e.g. POST /api/validate-promo)
+const PROMO_CODES: Record<string, number> = {
+  LUMA10: 10, LUMA15: 15, LUMA20: 20, WELCOME: 10,
+};
+
+const applyPromo = () => {
+  const code = promoInput.trim().toUpperCase();
+  if (!code) { setPromoError("Enter a promo code"); return; }
+  const pct = PROMO_CODES[code];
+  if (!pct) { setPromoError("Invalid or expired code"); return; }
+  setAppliedPromo({ code, pct });
+  setPromoError("");
+};
+
+const discountedTotal = appliedPromo
+  ? +(total * (1 - appliedPromo.pct / 100)).toFixed(2)
+  : total;
+```
+
+### JSX (inside the totals card, between Shipping row and Total row)
+
+```tsx
+{/* Promo toggle */}
+{!appliedPromo ? (
+  <>
+    <button onClick={() => setPromoOpen(o => !o)}
+      className="text-xs text-[oklch(0.52_0.08_45)] font-semibold flex items-center gap-1">
+      <span>{promoOpen ? "−" : "+"}</span> Have a promo code?
+    </button>
+    {promoOpen && (
+      <div className="mt-2 flex gap-2">
+        <input type="text" placeholder="Enter code" value={promoInput}
+          onChange={e => { setPromoInput(e.target.value.toUpperCase()); setPromoError(""); }}
+          onKeyDown={e => e.key === "Enter" && applyPromo()}
+          className="flex-1 border rounded-lg px-3 py-2 text-sm uppercase tracking-widest ..." />
+        <button onClick={applyPromo} className="...">Apply</button>
+      </div>
+    )}
+    {promoError && <span className="text-red-500 text-xs">{promoError}</span>}
+  </>
+) : (
+  <div className="flex items-center justify-between bg-green-50 rounded-lg px-3 py-2">
+    <span className="text-xs font-semibold text-green-700">
+      ✓ {appliedPromo.code} — {appliedPromo.pct}% off
+    </span>
+    <button onClick={() => { setAppliedPromo(null); setPromoInput(""); setPromoOpen(false); }}>
+      Remove
+    </button>
+  </div>
+)}
+
+{/* Discount row — only shown when promo applied */}
+{appliedPromo && (
+  <div className="flex justify-between text-green-700 font-semibold">
+    <span>Discount ({appliedPromo.pct}%)</span>
+    <span>-${(total - discountedTotal).toFixed(2)}</span>
+  </div>
+)}
+
+{/* Total row — shows strikethrough original when discounted */}
+<div className="flex justify-between font-bold text-base pt-2 border-t">
+  <span>Total</span>
+  <div className="text-right">
+    {appliedPromo && <span className="text-xs line-through text-gray-400">${total.toFixed(2)}</span>}
+    <span>${discountedTotal.toFixed(2)}</span>
+  </div>
+</div>
+```
+
+**Shopify port note:** Replace the `PROMO_CODES` lookup with a call to `POST /api/validate_promo` backed by Shopify's Discount Codes API (`GET /admin/api/2024-01/price_rules/{id}/discount_codes.json`). Return `{ valid: true, pct: 15 }` or `{ valid: false, message: "..." }`.
