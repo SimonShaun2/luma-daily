@@ -1109,3 +1109,157 @@ onClick={async () => {
 ```
 
 **Shopify port:** Replace `addToCart` with a POST to Shopify's Draft Orders API to append the upsell line item to the existing order before it is fulfilled. Use `PUT /admin/api/2024-01/draft_orders/{id}.json` with the new `line_items` array, then call `POST /admin/api/2024-01/draft_orders/{id}/complete.json` to finalize.
+
+---
+
+## 23. Upsell Modal Countdown Timer
+
+**Goal:** Show a live MM:SS countdown in the upsell modal header that creates urgency and auto-dismisses the offer when it expires.
+
+### State
+
+```ts
+const [upsellSecondsLeft, setUpsellSecondsLeft] = useState(180); // 3 minutes
+```
+
+### Reset on modal open
+
+```ts
+// In the 800ms trigger useEffect:
+const timer = setTimeout(() => { setShowUpsellModal(true); setUpsellSecondsLeft(180); }, 800);
+```
+
+### Countdown tick useEffect
+
+```ts
+useEffect(() => {
+  if (!showUpsellModal) return;
+  if (upsellSecondsLeft <= 0) { setShowUpsellModal(false); return; }
+  const tick = setInterval(() => setUpsellSecondsLeft(s => {
+    if (s <= 1) { setShowUpsellModal(false); return 0; }
+    return s - 1;
+  }), 1000);
+  return () => clearInterval(tick);
+}, [showUpsellModal, upsellSecondsLeft]);
+```
+
+### Display (in modal header)
+
+```tsx
+<span className={`font-bold tabular-nums ${upsellSecondsLeft <= 30 ? "text-red-400" : "text-white"}`}>
+  {String(Math.floor(upsellSecondsLeft / 60)).padStart(2, "0")}:{String(upsellSecondsLeft % 60).padStart(2, "0")}
+</span>
+```
+
+A thin progress bar below the timer shrinks from full-width to zero over 180 seconds, turning red in the final 30 seconds.
+
+---
+
+## 24. Shopify Draft Orders API — Upsell Accept
+
+**Goal:** When the user accepts the post-purchase upsell, attempt to append the line item to the live Shopify order via a backend proxy before falling back to local cart state.
+
+### Frontend Accept handler
+
+```ts
+onClick={async () => {
+  setUpsellAdding(true);
+  try {
+    const res = await fetch("/api/upsell-add-item", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        productName: upsellProd.name,
+        quantity: 1,
+        price: upsellPrice,
+        originalPrice: upsellProd.price,
+        discountPct: 30,
+      }),
+      signal: AbortSignal.timeout(5000),
+    });
+    if (!res.ok) throw new Error("proxy not available");
+  } catch {
+    // Proxy not yet deployed — fall back to local cart state
+    addToCart({ ...upsellProd, price: upsellPrice });
+  }
+  setUpsellAdding(false);
+  setUpsellAccepted(true);
+  setShowUpsellModal(false);
+}}
+```
+
+### Backend proxy route (`POST /api/upsell-add-item`)
+
+```ts
+// server/routes/upsellAddItem.ts
+import type { Request, Response } from "express";
+
+const SHOPIFY_STORE = process.env.SHOPIFY_STORE_DOMAIN!;
+const SHOPIFY_TOKEN = process.env.SHOPIFY_ADMIN_API_TOKEN!;
+
+export async function upsellAddItem(req: Request, res: Response) {
+  const { draftOrderId, variantId, quantity, price } = req.body;
+
+  // 1. Fetch existing draft order
+  const getRes = await fetch(
+    `https://${SHOPIFY_STORE}/admin/api/2024-01/draft_orders/${draftOrderId}.json`,
+    { headers: { "X-Shopify-Access-Token": SHOPIFY_TOKEN } }
+  );
+  const { draft_order } = await getRes.json();
+
+  // 2. Append upsell line item
+  const updatedLineItems = [
+    ...draft_order.line_items,
+    { variant_id: variantId, quantity, price: String(price), applied_discount: { value: "30", value_type: "percentage" } },
+  ];
+  await fetch(
+    `https://${SHOPIFY_STORE}/admin/api/2024-01/draft_orders/${draftOrderId}.json`,
+    {
+      method: "PUT",
+      headers: { "X-Shopify-Access-Token": SHOPIFY_TOKEN, "Content-Type": "application/json" },
+      body: JSON.stringify({ draft_order: { line_items: updatedLineItems } }),
+    }
+  );
+
+  // 3. Complete the draft order
+  await fetch(
+    `https://${SHOPIFY_STORE}/admin/api/2024-01/draft_orders/${draftOrderId}/complete.json`,
+    { method: "POST", headers: { "X-Shopify-Access-Token": SHOPIFY_TOKEN } }
+  );
+
+  return res.json({ ok: true });
+}
+```
+
+**Required secrets:** `SHOPIFY_STORE_DOMAIN`, `SHOPIFY_ADMIN_API_TOKEN`. Pass `draftOrderId` from the Klaviyo "Placed Order" event payload or from a server-side session store.
+
+---
+
+## 25. Loyalty Points Balance on Confirmation Screen
+
+**Goal:** Show earned points, tier badge, and a progress bar toward the next tier immediately after the order confirmation renders, seeding repeat-purchase intent.
+
+### Points calculation (frontend, demo)
+
+```ts
+const basePoints = Math.round(discountedTotal);           // $1 = 1 point
+const subscribeBonus = cartItems.some(i => i.subscribe)
+  ? Math.round(basePoints * 0.5) : 0;                    // subscribe = 1.5x
+const earnedPoints = basePoints + subscribeBonus;
+
+const TIERS = [
+  { name: "Bronze",   min: 0,    max: 250  },
+  { name: "Silver",   min: 250,  max: 500  },
+  { name: "Gold",     min: 500,  max: 1000 },
+  { name: "Platinum", min: 1000, max: 2000 },
+];
+const priorPoints = 150; // replace with real balance from Loyalty API
+const totalPoints = priorPoints + earnedPoints;
+const tier = TIERS.find(t => totalPoints >= t.min && totalPoints < t.max) ?? TIERS[3];
+const nextTier = TIERS[TIERS.indexOf(tier) + 1];
+const pct = nextTier
+  ? Math.min(100, Math.round(((totalPoints - tier.min) / (nextTier.min - tier.min)) * 100))
+  : 100;
+```
+
+**Shopify port:** Replace `priorPoints = 150` with a call to your loyalty provider's REST API (e.g. Smile.io `GET /v1/customers?email={email}`, LoyaltyLion `GET /customers/{id}`) to fetch the real running balance. Fire a "Points Earned" event via the provider's webhook after order completion to credit the points server-side.
