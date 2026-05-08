@@ -500,3 +500,154 @@ const handleReset = () => {
 ```
 
 **Shopify / Klaviyo integration note:** On `setConfirmEmailSubmitted(true)`, call `klaviyo.identify({ email: confirmEmail })` or POST to a Shopify Flow webhook to trigger the receipt + discount email flow.
+
+---
+
+## 11. sessionStorage Form Persistence
+
+**Goal:** Restore shipping form fields when the user reopens the checkout modal within the same browser session. Card number and CVV are intentionally excluded for PCI compliance.
+
+### Implementation
+
+```ts
+const SS_KEY = "luma_checkout_form";
+
+// Lazy initializer — reads from sessionStorage on first render
+const [form, setForm] = useState(() => {
+  try {
+    const saved = sessionStorage.getItem(SS_KEY);
+    if (saved) return JSON.parse(saved);
+  } catch { /* ignore */ }
+  return { email: "", firstName: "", lastName: "", address: "", city: "", state: "", zip: "", cardNumber: "", expiry: "", cvv: "", nameOnCard: "" };
+});
+
+// Persist on every change, strip sensitive fields
+useEffect(() => {
+  const { cardNumber, cvv, ...safe } = form;
+  try {
+    sessionStorage.setItem(SS_KEY, JSON.stringify({ ...safe, cardNumber: "", cvv: "" }));
+  } catch { /* ignore */ }
+}, [form]);
+```
+
+### Reset on order completion
+
+```ts
+const handleReset = () => {
+  // ...existing resets...
+  try { sessionStorage.removeItem(SS_KEY); } catch { /* ignore */ }
+};
+```
+
+---
+
+## 12. Card Number Formatter + Focus Chaining
+
+**Goal:** Auto-insert spaces every 4 digits (`1234 5678 9012 3456`), restrict to digits only, and automatically move focus to Expiry when 16 digits are entered, then to CVV when Expiry is complete.
+
+### Refs
+
+```ts
+const expiryRef = useRef<HTMLInputElement>(null);
+const cvvRef    = useRef<HTMLInputElement>(null);
+```
+
+### Card number input
+
+```tsx
+<input
+  type="text"
+  inputMode="numeric"
+  placeholder="1234 5678 9012 3456"
+  value={form.cardNumber}
+  maxLength={19}
+  onChange={e => {
+    const digits = e.target.value.replace(/\D/g, "").slice(0, 16);
+    const formatted = digits.replace(/(\d{4})(?=\d)/g, "$1 ");
+    setForm(f => ({ ...f, cardNumber: formatted }));
+    if (digits.length === 16) setTimeout(() => expiryRef.current?.focus(), 0);
+  }}
+  className="... tracking-widest"
+/>
+```
+
+### Expiry input (auto-format MM / YY + advance to CVV)
+
+```tsx
+<input
+  ref={expiryRef}
+  type="text"
+  inputMode="numeric"
+  placeholder="MM / YY"
+  value={form.expiry}
+  maxLength={7}
+  onChange={e => {
+    const raw = e.target.value.replace(/\D/g, "").slice(0, 4);
+    let formatted = raw;
+    if (raw.length >= 3) formatted = raw.slice(0, 2) + " / " + raw.slice(2);
+    else if (raw.length === 2 && form.expiry.length < 2) formatted = raw + " / ";
+    setForm(f => ({ ...f, expiry: formatted }));
+    if (raw.length === 4) setTimeout(() => cvvRef.current?.focus(), 0);
+  }}
+/>
+```
+
+### CVV input (digits only)
+
+```tsx
+<input
+  ref={cvvRef}
+  type="text"
+  inputMode="numeric"
+  placeholder="CVV"
+  value={form.cvv}
+  maxLength={4}
+  onChange={e => {
+    const digits = e.target.value.replace(/\D/g, "").slice(0, 4);
+    setForm(f => ({ ...f, cvv: digits }));
+  }}
+/>
+```
+
+---
+
+## 13. Klaviyo Email Capture Integration
+
+**Goal:** On confirmation email submit, call `klaviyo.identify()` via the Klaviyo browser SDK (already loaded by the Shopify theme) and optionally POST to a Shopify Flow webhook for the receipt + 10% off discount automation.
+
+### Helper function
+
+```ts
+const klaviyoCapture = (email: string) => {
+  try {
+    // Klaviyo browser SDK (_learnq is injected by the Shopify theme snippet)
+    if (typeof window !== "undefined" && (window as any)._learnq) {
+      (window as any)._learnq.push(["identify", { $email: email }]);
+    }
+    // Optional: POST to Shopify Flow webhook
+    // Set window.__LUMA_KLAVIYO_WEBHOOK__ in theme.liquid via Liquid global JS:
+    //   <script>window.__LUMA_KLAVIYO_WEBHOOK__ = "{{ settings.klaviyo_webhook_url }}";</script>
+    const webhookUrl = (window as any).__LUMA_KLAVIYO_WEBHOOK__;
+    if (webhookUrl) {
+      fetch(webhookUrl, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email, source: "checkout_confirmation", discount: "LUMA10" }),
+      }).catch(() => { /* silent fail */ });
+    }
+  } catch { /* silent fail */ }
+};
+```
+
+### Shopify theme setup
+
+1. In **Shopify Admin → Online Store → Themes → Edit code**, open `layout/theme.liquid`.
+2. Add the Klaviyo onsite JS snippet (from Klaviyo dashboard) before `</head>`.
+3. Add a global JS variable to expose the Flow webhook URL:
+   ```liquid
+   <script>
+     window.__LUMA_KLAVIYO_WEBHOOK__ = "{{ settings.klaviyo_webhook_url | escape }}";
+   </script>
+   ```
+4. In **Theme settings**, add a `klaviyo_webhook_url` text field and paste the Shopify Flow webhook URL.
+5. In **Shopify Flow**, create a trigger on the webhook, then add a Klaviyo "Add to list" or "Track event" action to send the receipt + discount email.
