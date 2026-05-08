@@ -335,3 +335,168 @@ useEffect(() => {
 ---
 
 *All CSS classes referenced above are defined in `client/src/index.css` in the "Cart UX Enhancement Animations" section.*
+
+---
+
+## 9. CheckoutModal Form Validation
+
+**Goal:** Block step advancement if required fields are empty or invalid. Show inline red-border + error message per field on blur or on submit attempt.
+
+### State to add to `CheckoutModal`
+
+```ts
+const [touched, setTouched] = useState<Record<string, boolean>>({});
+const [formErrors, setFormErrors] = useState<Record<string, string>>({});
+const [confirmEmail, setConfirmEmail] = useState("");
+const [confirmEmailSubmitted, setConfirmEmailSubmitted] = useState(false);
+const [confirmEmailError, setConfirmEmailError] = useState("");
+```
+
+### Validation functions
+
+```ts
+const validateShipping = (f: typeof form) => {
+  const errs: Record<string, string> = {};
+  if (!f.email.trim()) errs.email = "Email is required";
+  else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(f.email)) errs.email = "Enter a valid email";
+  if (!f.firstName.trim()) errs.firstName = "First name is required";
+  if (!f.lastName.trim()) errs.lastName = "Last name is required";
+  if (!f.address.trim()) errs.address = "Street address is required";
+  if (!f.city.trim()) errs.city = "City is required";
+  if (!f.state.trim()) errs.state = "State is required";
+  if (!f.zip.trim()) errs.zip = "ZIP is required";
+  else if (!/^\d{5}(-\d{4})?$/.test(f.zip.trim())) errs.zip = "Enter a valid ZIP";
+  return errs;
+};
+
+const validatePayment = (f: typeof form) => {
+  const errs: Record<string, string> = {};
+  if (!f.nameOnCard.trim()) errs.nameOnCard = "Name on card is required";
+  if (!f.cardNumber.trim()) errs.cardNumber = "Card number is required";
+  else if (f.cardNumber.replace(/\s/g, "").length < 16) errs.cardNumber = "Enter a valid 16-digit card number";
+  if (!f.expiry.trim()) errs.expiry = "Expiry is required";
+  else if (!/^(0[1-9]|1[0-2])\/\d{2}$/.test(f.expiry.trim())) errs.expiry = "Use MM / YY format";
+  if (!f.cvv.trim()) errs.cvv = "CVV is required";
+  else if (!/^\d{3,4}$/.test(f.cvv.trim())) errs.cvv = "Enter 3 or 4 digits";
+  return errs;
+};
+```
+
+### CTA button onClick guard
+
+```tsx
+onClick={() => {
+  if (step === "shipping") {
+    const errs = validateShipping(form);
+    if (Object.keys(errs).length > 0) {
+      setFormErrors(errs);
+      setTouched({ email: true, firstName: true, lastName: true, address: true, city: true, state: true, zip: true });
+      return;
+    }
+    setFormErrors({});
+  }
+  if (step === "payment") {
+    const errs = validatePayment(form);
+    if (Object.keys(errs).length > 0) {
+      setFormErrors(errs);
+      setTouched(t => ({ ...t, nameOnCard: true, cardNumber: true, expiry: true, cvv: true }));
+      return;
+    }
+    setFormErrors({});
+  }
+  // advance to next step...
+}}
+```
+
+### Input field pattern (apply to each field)
+
+```tsx
+<input
+  type="text"
+  placeholder="Email address"
+  value={form.email}
+  onChange={e => setForm(f => ({ ...f, email: e.target.value }))}
+  onBlur={() => setTouched(t => ({ ...t, email: true }))}
+  className={`w-full border rounded-lg px-4 py-3 text-sm ... ${
+    touched.email && formErrors.email
+      ? 'border-red-400 focus:border-red-400'
+      : 'border-[oklch(0.88_0.02_80)] focus:border-[oklch(0.58_0.13_45)]'
+  }`}
+/>
+{touched.email && formErrors.email && (
+  <span className="text-red-500 text-xs mt-1 block">{formErrors.email}</span>
+)}
+```
+
+### Reset on modal close
+
+```ts
+const handleReset = () => {
+  setStep("summary");
+  setForm({ /* all fields empty */ });
+  setTouched({});
+  setFormErrors({});
+  setConfirmEmail("");
+  setConfirmEmailSubmitted(false);
+  setConfirmEmailError("");
+};
+```
+
+---
+
+## 10. Confirmation Email Capture
+
+**Goal:** After order confirmation, offer "Get your receipt + 10% off your next order" email capture with validation and success state.
+
+### JSX pattern (insert above the upsell row in the confirmation step)
+
+```tsx
+<div className="bg-[oklch(0.975_0.015_80)] rounded-xl border border-[oklch(0.88_0.02_80)] p-4 space-y-3">
+  {confirmEmailSubmitted ? (
+    <div className="flex items-center gap-2 text-[oklch(0.42_0.08_150)]">
+      <div className="w-6 h-6 rounded-full bg-[oklch(0.94_0.04_150)] flex items-center justify-center shrink-0">
+        <Check size={13} strokeWidth={3} />
+      </div>
+      <span className="text-sm font-body font-semibold">Check your inbox!</span>
+    </div>
+  ) : (
+    <>
+      <div>
+        <p className="text-sm font-display font-bold text-[oklch(0.22_0.04_55)]">
+          Get your receipt + 10% off your next order
+        </p>
+        <p className="text-xs font-body text-[oklch(0.52_0.04_55)] mt-0.5">
+          We'll send your order confirmation and an exclusive discount.
+        </p>
+      </div>
+      <div className="flex gap-2">
+        <input
+          type="email"
+          placeholder="your@email.com"
+          value={confirmEmail}
+          onChange={e => { setConfirmEmail(e.target.value); setConfirmEmailError(""); }}
+          className={`flex-1 border rounded-lg px-3 py-2.5 text-sm ... ${
+            confirmEmailError ? 'border-red-400' : 'border-[oklch(0.88_0.02_80)]'
+          }`}
+        />
+        <button
+          onClick={() => {
+            if (!confirmEmail.trim() || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(confirmEmail)) {
+              setConfirmEmailError("Enter a valid email");
+              return;
+            }
+            setConfirmEmailSubmitted(true);
+            // TODO: wire to Klaviyo identify() or POST to /api/email-capture
+          }}
+          className="shrink-0 bg-[oklch(0.58_0.13_45)] text-white text-sm font-semibold rounded-lg px-4 py-2.5"
+        >
+          Send
+        </button>
+      </div>
+      {confirmEmailError && <span className="text-red-500 text-xs block">{confirmEmailError}</span>}
+    </>
+  )}
+</div>
+```
+
+**Shopify / Klaviyo integration note:** On `setConfirmEmailSubmitted(true)`, call `klaviyo.identify({ email: confirmEmail })` or POST to a Shopify Flow webhook to trigger the receipt + discount email flow.
