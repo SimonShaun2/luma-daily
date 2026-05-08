@@ -651,3 +651,143 @@ const klaviyoCapture = (email: string) => {
    ```
 4. In **Theme settings**, add a `klaviyo_webhook_url` text field and paste the Shopify Flow webhook URL.
 5. In **Shopify Flow**, create a trigger on the webhook, then add a Klaviyo "Add to list" or "Track event" action to send the receipt + discount email.
+
+---
+
+## 14. Card Network Icon Detector
+
+**Goal:** Inspect the first 1–2 digits of the card number as the user types and swap the generic `CreditCard` icon for a Visa / Mastercard / Amex / Discover SVG badge in real-time.
+
+### Detection logic
+
+```ts
+const detectCardNetwork = (num: string): "visa" | "mastercard" | "amex" | "discover" | null => {
+  const d = num.replace(/\s/g, "");
+  if (/^4/.test(d)) return "visa";
+  if (/^5[1-5]|^2[2-7]/.test(d)) return "mastercard";
+  if (/^3[47]/.test(d)) return "amex";
+  if (/^6(?:011|5)/.test(d)) return "discover";
+  return null;
+};
+const cardNetwork = detectCardNetwork(form.cardNumber); // re-derived on every render
+```
+
+### JSX — icon slot inside the card number input wrapper
+
+```tsx
+<span className="absolute right-3 top-1/2 -translate-y-1/2 flex items-center">
+  {cardNetwork === "visa"       && <VisaSVG />}
+  {cardNetwork === "mastercard" && <MastercardSVG />}
+  {cardNetwork === "amex"       && <AmexSVG />}
+  {cardNetwork === "discover"   && <DiscoverSVG />}
+  {!cardNetwork && <CreditCard size={18} className="text-[oklch(0.72_0.04_55)]" />}
+</span>
+```
+
+Each `*SVG` is an inline `<svg>` element with the brand's official colours. See `Home.tsx` for the full paths.
+
+---
+
+## 15. Google Maps Places Autocomplete on Street Address
+
+**Goal:** When the user focuses the Street Address field on the Shipping step, attach a Google Maps Places Autocomplete widget that auto-fills city, state, and ZIP on selection.
+
+### Implementation (useEffect inside CheckoutModal)
+
+```ts
+useEffect(() => {
+  if (step !== "shipping") return;
+  let autocomplete: google.maps.places.Autocomplete | null = null;
+  let listener: google.maps.MapsEventListener | null = null;
+
+  const initAutocomplete = () => {
+    if (!addressRef.current || !window.google?.maps?.places) return;
+    autocomplete = new window.google.maps.places.Autocomplete(addressRef.current, {
+      types: ["address"],
+      componentRestrictions: { country: "us" },
+      fields: ["address_components", "formatted_address"],
+    });
+    listener = autocomplete.addListener("place_changed", () => {
+      const place = autocomplete!.getPlace();
+      if (!place.address_components) return;
+      let streetNumber = "", route = "", city = "", state = "", zip = "";
+      for (const comp of place.address_components) {
+        const t = comp.types;
+        if (t.includes("street_number")) streetNumber = comp.long_name;
+        else if (t.includes("route")) route = comp.long_name;
+        else if (t.includes("locality")) city = comp.long_name;
+        else if (t.includes("administrative_area_level_1")) state = comp.short_name;
+        else if (t.includes("postal_code")) zip = comp.long_name;
+      }
+      setForm(f => ({
+        ...f,
+        address: streetNumber ? `${streetNumber} ${route}` : (place.formatted_address ?? f.address),
+        city, state, zip,
+      }));
+      setTouched(t => ({ ...t, address: true, city: true, state: true, zip: true }));
+    });
+  };
+
+  if (window.google?.maps?.places) {
+    initAutocomplete();
+  } else {
+    // Lazy-load the Maps script (uses the Manus proxy — no API key needed from user)
+    if (!document.querySelector(`script[src*="${MAPS_PROXY_URL}"]`)) {
+      const script = document.createElement("script");
+      script.src = `${MAPS_PROXY_URL}/maps/api/js?key=${FORGE_API_KEY}&v=weekly&libraries=places`;
+      script.async = true;
+      script.crossOrigin = "anonymous";
+      script.onload = initAutocomplete;
+      document.head.appendChild(script);
+    }
+  }
+
+  return () => {
+    if (listener) window.google?.maps?.event?.removeListener(listener);
+  };
+}, [step]);
+```
+
+**Shopify port note:** In `checkout.liquid`, replace the street address `<input>` with the same pattern, loading the Maps script from your own Google Maps API key (not the Manus proxy). Restrict the key to your Shopify domain in the Google Cloud Console.
+
+---
+
+## 16. Klaviyo "Checkout Started" Event
+
+**Goal:** Fire a Klaviyo `Checkout Started` track event the moment the checkout modal opens with items in the cart, enabling abandoned-checkout email flows.
+
+### useEffect (inside CheckoutModal)
+
+```ts
+useEffect(() => {
+  if (!open || cartItems.length === 0) return;
+  try {
+    if (typeof window !== "undefined" && (window as any)._learnq) {
+      (window as any)._learnq.push(["track", "Checkout Started", {
+        $value: total,
+        ItemNames: cartItems.map(i => i.name),
+        Items: cartItems.map(i => ({
+          ProductName: i.name,
+          Quantity: i.qty,
+          ItemPrice: i.subscribe ? +(i.price * 0.85).toFixed(2) : i.price,
+          RowTotal: i.subscribe
+            ? +(i.price * 0.85 * i.qty).toFixed(2)
+            : +(i.price * i.qty).toFixed(2),
+          Subscribe: i.subscribe ?? false,
+        })),
+        CheckoutURL: window.location.href,
+      }]);
+    }
+  } catch { /* silent fail */ }
+}, [open, cartItems.length]);
+```
+
+### Klaviyo Flow setup
+
+1. In Klaviyo, go to **Flows → Create Flow → Build your own**.
+2. Set the trigger to **Metric → Checkout Started**.
+3. Add a **Time Delay** of 1–4 hours, then an **Email** action using your abandoned-checkout template.
+4. Add a **Filter** on the flow to skip profiles that have triggered `Placed Order` since the flow started.
+5. Publish the flow.
+
+**Property mapping:** `$value` maps to Klaviyo's built-in revenue field; `Items` is a line-item array compatible with Klaviyo's product block in email templates.
