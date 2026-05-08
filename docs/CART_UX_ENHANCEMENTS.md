@@ -948,3 +948,164 @@ const discountedTotal = appliedPromo
 ```
 
 **Shopify port note:** Replace the `PROMO_CODES` lookup with a call to `POST /api/validate_promo` backed by Shopify's Discount Codes API (`GET /admin/api/2024-01/price_rules/{id}/discount_codes.json`). Return `{ valid: true, pct: 15 }` or `{ valid: false, message: "..." }`.
+
+---
+
+## 20. Shopify Discount Codes API Validation
+
+**Goal:** Replace the client-side promo lookup table with an async call to a backend proxy that validates codes against Shopify's Discount Codes API, keeping codes in sync with Shopify Admin.
+
+### Frontend (`applyPromo`)
+
+```ts
+const applyPromo = async () => {
+  const code = promoInput.trim().toUpperCase();
+  if (!code) { setPromoError("Enter a promo code"); return; }
+  setPromoLoading(true);
+  setPromoError("");
+  try {
+    const res = await fetch("/api/validate-promo", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ code }),
+      signal: AbortSignal.timeout(4000),
+    });
+    if (res.ok) {
+      const data = await res.json();
+      if (data.valid && data.pct) {
+        setAppliedPromo({ code, pct: data.pct, type: data.type ?? "percentage" });
+      } else {
+        setPromoError(data.message ?? "Invalid or expired code");
+      }
+      return;
+    }
+  } catch { /* fall through to local lookup */ }
+  finally { setPromoLoading(false); }
+  // Local fallback for demo / pre-production
+  const FALLBACK = { LUMA10: 10, LUMA15: 15, LUMA20: 20, WELCOME: 10 };
+  const pct = FALLBACK[code as keyof typeof FALLBACK];
+  if (pct) setAppliedPromo({ code, pct, type: "percentage" });
+  else setPromoError("Invalid or expired code");
+};
+```
+
+### Backend proxy route (`POST /api/validate-promo`)
+
+```ts
+// server/routes/validatePromo.ts
+import type { Request, Response } from "express";
+
+const SHOPIFY_STORE = process.env.SHOPIFY_STORE_DOMAIN!;   // e.g. luma-daily.myshopify.com
+const SHOPIFY_TOKEN = process.env.SHOPIFY_ADMIN_API_TOKEN!;
+
+export async function validatePromo(req: Request, res: Response) {
+  const { code } = req.body as { code: string };
+  if (!code) return res.status(400).json({ valid: false, message: "No code provided" });
+
+  // 1. Look up the discount code
+  const lookupRes = await fetch(
+    `https://${SHOPIFY_STORE}/admin/api/2024-01/discount_codes/lookup.json?code=${encodeURIComponent(code)}`,
+    { headers: { "X-Shopify-Access-Token": SHOPIFY_TOKEN } }
+  );
+  if (!lookupRes.ok) return res.json({ valid: false, message: "Invalid or expired code" });
+  const { discount_code } = await lookupRes.json();
+
+  // 2. Resolve the parent price rule for value_type + value
+  const ruleRes = await fetch(
+    `https://${SHOPIFY_STORE}/admin/api/2024-01/price_rules/${discount_code.price_rule_id}.json`,
+    { headers: { "X-Shopify-Access-Token": SHOPIFY_TOKEN } }
+  );
+  const { price_rule } = await ruleRes.json();
+
+  const isPercentage = price_rule.value_type === "percentage";
+  const pct = isPercentage ? Math.abs(parseFloat(price_rule.value)) : null;
+  const fixed = !isPercentage ? Math.abs(parseFloat(price_rule.value)) : null;
+
+  return res.json({ valid: true, pct, fixed, type: price_rule.value_type });
+}
+```
+
+**Required secrets:** `SHOPIFY_STORE_DOMAIN`, `SHOPIFY_ADMIN_API_TOKEN` (add via Settings → Secrets after upgrading to web-db-user).
+
+---
+
+## 21. Referral Share Row on Confirmation Screen
+
+**Goal:** After order confirmed, show a pre-filled referral link (`lumadaily.com/?ref=FIRSTNAME`) with copy-to-clipboard and native Web Share API buttons, turning every buyer into a referral channel.
+
+### State needed
+
+None — uses `form.firstName` already in scope.
+
+### JSX (insert after email capture card, before "Complete your ritual")
+
+```tsx
+<div className="bg-white rounded-xl border p-4">
+  <p className="text-sm font-bold mb-0.5">Share Luma Daily with a friend</p>
+  <p className="text-xs text-gray-500 mb-3">They get 10% off their first order. You get 10% off your next.</p>
+  {(() => {
+    const refName = (form.firstName || "friend").trim();
+    const refUrl = `https://lumadaily.com/?ref=${encodeURIComponent(refName)}`;
+    return (
+      <div className="flex gap-2">
+        <div className="flex-1 bg-gray-50 border rounded-lg px-3 py-2 text-xs truncate select-all">{refUrl}</div>
+        <button onClick={() => {
+          navigator.clipboard.writeText(refUrl).catch(() => {});
+          const el = document.getElementById("ref-copy-label");
+          if (el) { el.textContent = "Copied!"; setTimeout(() => { if (el) el.textContent = "Copy"; }, 2000); }
+        }} className="...">
+          <span id="ref-copy-label">Copy</span>
+        </button>
+        {typeof navigator !== "undefined" && "share" in navigator && (
+          <button onClick={() => navigator.share({
+            title: "Try Luma Daily",
+            text: `${refName} thinks you'll love Luma Daily — get 10% off!`,
+            url: refUrl,
+          }).catch(() => {})} className="...">Share</button>
+        )}
+      </div>
+    );
+  })()}
+</div>
+```
+
+**Shopify port:** Wire the `ref` query param to a Shopify Referral app (e.g. Referral Candy or Smile.io) or a custom Shopify Flow that creates a unique discount code for the referrer on first referred purchase.
+
+---
+
+## 22. Post-Purchase Upsell Modal
+
+**Goal:** 800ms after the confirmation step renders, show a full-screen overlay with a one-time 30%-off offer on the first product not already in the cart. Accept adds it to the cart at the discounted price; decline closes the modal. The modal never shows again once accepted.
+
+### State
+
+```ts
+const [showUpsellModal, setShowUpsellModal] = useState(false);
+const [upsellAccepted, setUpsellAccepted] = useState(false);
+const [upsellAdding, setUpsellAdding] = useState(false);
+```
+
+### Trigger
+
+```ts
+useEffect(() => {
+  if (step !== "confirmation" || upsellAccepted) return;
+  const timer = setTimeout(() => setShowUpsellModal(true), 800);
+  return () => clearTimeout(timer);
+}, [step]);
+```
+
+### Accept handler
+
+```ts
+onClick={async () => {
+  setUpsellAdding(true);
+  await new Promise(r => setTimeout(r, 600)); // simulate add-to-order API
+  addToCart({ ...upsellProd, price: upsellPrice }); // upsellPrice = price * 0.70
+  setUpsellAdding(false);
+  setUpsellAccepted(true);
+  setShowUpsellModal(false);
+}}
+```
+
+**Shopify port:** Replace `addToCart` with a POST to Shopify's Draft Orders API to append the upsell line item to the existing order before it is fulfilled. Use `PUT /admin/api/2024-01/draft_orders/{id}.json` with the new `line_items` array, then call `POST /admin/api/2024-01/draft_orders/{id}/complete.json` to finalize.
