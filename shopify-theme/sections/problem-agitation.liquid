@@ -1,0 +1,45 @@
+{% comment %}
+  Section: problem-agitation
+  Ported from: Home.tsx §6 PROBLEM AGITATION
+{% endcomment %}
+<section class="problem-agitation" aria-label="Problem agitation">
+  <div class="container problem-agitation__inner">
+    <h2 class="problem-agitation__headline">{{ section.settings.headline | escape }}</h2>
+    <p class="problem-agitation__body">{{ section.settings.body | escape }}</p>
+    <div class="problem-agitation__points">
+      {%- for block in section.blocks -%}
+        {%- if block.type == 'point' -%}
+          <div class="problem-agitation__point" {{ block.shopify_attributes }}>
+            <span class="problem-agitation__point-icon" aria-hidden="true">{{ block.settings.emoji }}</span>
+            <div>
+              <strong>{{ block.settings.label | escape }}</strong>
+              <p>{{ block.settings.description | escape }}</p>
+            </div>
+          </div>
+        {%- endif -%}
+      {%- endfor -%}
+    </div>
+  </div>
+</section>
+{% schema %}
+{
+  "name": "Problem Agitation",
+  "tag": "section",
+  "settings": [
+    { "type": "text", "id": "headline", "label": "Headline", "default": "You've tried the pills. Nothing stuck." },
+    { "type": "textarea", "id": "body", "label": "Body copy" }
+  ],
+  "blocks": [
+    {
+      "type": "point",
+      "name": "Pain Point",
+      "settings": [
+        { "type": "text", "id": "emoji", "label": "Emoji" },
+        { "type": "text", "id": "label", "label": "Label" },
+        { "type": "text", "id": "description", "label": "Description" }
+      ]
+    }
+  ],
+  "presets": [{ "name": "Problem Agitation" }]
+}
+{% endschema %}

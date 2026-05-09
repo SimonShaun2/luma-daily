@@ -1,0 +1,73 @@
+{% comment %}
+  Section: social-proof-stats
+  Ported from: Home.tsx §9 SOCIAL PROOF STATS
+  JS: IntersectionObserver-triggered counter animation
+{% endcomment %}
+<section class="social-proof-stats" aria-label="Social proof statistics">
+  <div class="container social-proof-stats__grid">
+    {%- for block in section.blocks -%}
+      {%- if block.type == 'stat' -%}
+        <div class="stat-item" {{ block.shopify_attributes }}>
+          <span class="stat-item__number" data-target="{{ block.settings.number | escape }}" data-suffix="{{ block.settings.suffix | escape }}">0</span>
+          <span class="stat-item__label">{{ block.settings.label | escape }}</span>
+        </div>
+      {%- endif -%}
+    {%- endfor -%}
+  </div>
+</section>
+
+<script>
+(function() {
+  var stats = document.querySelectorAll('.stat-item__number');
+  var observer = new IntersectionObserver(function(entries) {
+    entries.forEach(function(entry) {
+      if (!entry.isIntersecting) return;
+      var el = entry.target;
+      var target = parseFloat(el.dataset.target);
+      var suffix = el.dataset.suffix || '';
+      var start = 0;
+      var duration = 1800;
+      var startTime = null;
+      function step(ts) {
+        if (!startTime) startTime = ts;
+        var progress = Math.min((ts - startTime) / duration, 1);
+        var val = Math.floor(progress * target);
+        el.textContent = val.toLocaleString() + suffix;
+        if (progress < 1) requestAnimationFrame(step);
+      }
+      requestAnimationFrame(step);
+      observer.unobserve(el);
+    });
+  }, { threshold: 0.3 });
+  stats.forEach(function(el) { observer.observe(el); });
+})();
+</script>
+
+{% schema %}
+{
+  "name": "Social Proof Stats",
+  "tag": "section",
+  "settings": [],
+  "blocks": [
+    {
+      "type": "stat",
+      "name": "Stat",
+      "settings": [
+        { "type": "text", "id": "number", "label": "Number (digits only)", "default": "12400" },
+        { "type": "text", "id": "suffix", "label": "Suffix (e.g. +, %)", "default": "+" },
+        { "type": "text", "id": "label", "label": "Label" }
+      ]
+    }
+  ],
+  "presets": [
+    {
+      "name": "Social Proof Stats",
+      "blocks": [
+        { "type": "stat", "settings": { "number": "12400", "suffix": "+", "label": "Happy Customers" } },
+        { "type": "stat", "settings": { "number": "4.9", "suffix": "★", "label": "Average Rating" } },
+        { "type": "stat", "settings": { "number": "97", "suffix": "%", "label": "Would Recommend" } }
+      ]
+    }
+  ]
+}
+{% endschema %}

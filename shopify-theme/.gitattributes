@@ -1,0 +1,6 @@
+# Protected Shopify theme files — never auto-merge, always require manual review
+# These files contain live store configuration and merchant-entered data.
+# See: https://git-scm.com/docs/gitattributes#_defining_a_custom_merge_driver
+
+config/settings_data.json  merge=ours
+templates/*.json           merge=ours

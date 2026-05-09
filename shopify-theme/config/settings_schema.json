@@ -1,0 +1,132 @@
+[
+  {
+    "name": "theme_info",
+    "theme_name": "Luma Daily",
+    "theme_version": "1.0.0",
+    "theme_author": "Luma Daily",
+    "theme_documentation_url": "https://github.com/SimonShaun2/luma-daily",
+    "theme_support_url": "https://github.com/SimonShaun2/luma-daily/issues"
+  },
+  {
+    "name": "Cart & Checkout",
+    "settings": [
+      {
+        "type": "number",
+        "id": "free_shipping_threshold",
+        "label": "Free shipping threshold ($)",
+        "default": 50,
+        "info": "Cart subtotal at which free shipping unlocks. Must match your Shopify shipping profile."
+      },
+      {
+        "type": "number",
+        "id": "gwp_threshold",
+        "label": "Gift-with-purchase threshold ($)",
+        "default": 75,
+        "info": "Cart subtotal at which the free gift is added."
+      },
+      {
+        "type": "product",
+        "id": "gwp_product",
+        "label": "Gift-with-purchase product",
+        "info": "The product that is automatically added as a free gift when the GWP threshold is reached. Set the product price to $0 in Shopify Admin."
+      },
+      {
+        "type": "text",
+        "id": "gwp_product_handle",
+        "label": "GWP product handle",
+        "default": "luma-glow-sample",
+        "info": "Shopify product handle for the GWP item. Must match the product handle in Shopify Admin."
+      }
+    ]
+  },
+  {
+    "name": "Klaviyo",
+    "settings": [
+      {
+        "type": "text",
+        "id": "klaviyo_public_key",
+        "label": "Klaviyo public API key",
+        "info": "Found in Klaviyo → Account → Settings → API Keys. Used for onsite identify and track calls."
+      },
+      {
+        "type": "url",
+        "id": "klaviyo_webhook_url",
+        "label": "Klaviyo Flow webhook URL",
+        "info": "Shopify Flow webhook URL that triggers the receipt + 10% off email. Create a Flow with a webhook trigger in Shopify Admin → Flow."
+      }
+    ]
+  },
+  {
+    "name": "Google Maps",
+    "settings": [
+      {
+        "type": "text",
+        "id": "google_maps_api_key",
+        "label": "Google Maps JavaScript API key",
+        "info": "Restrict this key to your Shopify domain in Google Cloud Console. Used for address autocomplete on the checkout shipping step."
+      }
+    ]
+  },
+  {
+    "name": "Smile.io Loyalty",
+    "settings": [
+      {
+        "type": "text",
+        "id": "smile_api_key",
+        "label": "Smile.io API key",
+        "info": "Found in Smile.io Admin → Apps → API. Used to fetch customer points balance and deduct redeemed points."
+      }
+    ]
+  },
+  {
+    "name": "Promotions",
+    "settings": [
+      {
+        "type": "text",
+        "id": "urgency_bar_text",
+        "label": "Urgency bar text",
+        "default": "LIMITED OFFER — BUY 2 GET 1 FREE ENDS IN:",
+        "info": "Text shown in the announcement bar before the countdown timer."
+      },
+      {
+        "type": "text",
+        "id": "urgency_bar_end_date",
+        "label": "Urgency bar end date (ISO 8601)",
+        "default": "2026-05-15T23:59:59",
+        "info": "ISO 8601 datetime string for the countdown timer target. Example: 2026-05-15T23:59:59"
+      },
+      {
+        "type": "text",
+        "id": "exit_intent_promo_code",
+        "label": "Exit-intent promo code",
+        "default": "LUMA10",
+        "info": "Promo code shown in the exit-intent overlay when the user tries to leave with items in the cart."
+      }
+    ]
+  },
+  {
+    "name": "Social",
+    "settings": [
+      {
+        "type": "url",
+        "id": "social_instagram",
+        "label": "Instagram URL"
+      },
+      {
+        "type": "url",
+        "id": "social_tiktok",
+        "label": "TikTok URL"
+      },
+      {
+        "type": "url",
+        "id": "social_facebook",
+        "label": "Facebook URL"
+      },
+      {
+        "type": "url",
+        "id": "social_pinterest",
+        "label": "Pinterest URL"
+      }
+    ]
+  }
+]

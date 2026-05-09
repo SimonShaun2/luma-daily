@@ -1,0 +1,30 @@
+{% comment %}
+  Section: final-cta
+  Ported from: Home.tsx §16 FINAL CTA
+{% endcomment %}
+<section class="final-cta" aria-label="Final call to action">
+  <div class="container final-cta__inner">
+    {%- if section.settings.background_image != blank -%}
+      <img src="{{ section.settings.background_image | image_url: width: 1400 }}" alt="" class="final-cta__bg" aria-hidden="true" width="1400" loading="lazy">
+    {%- endif -%}
+    <div class="final-cta__content">
+      <h2>{{ section.settings.heading | escape }}</h2>
+      <p>{{ section.settings.subhead | escape }}</p>
+      <a href="{{ section.settings.cta_url }}" class="btn btn--primary btn--lg">{{ section.settings.cta_label | escape }}</a>
+    </div>
+  </div>
+</section>
+{% schema %}
+{
+  "name": "Final CTA",
+  "tag": "section",
+  "settings": [
+    { "type": "text", "id": "heading", "label": "Heading", "default": "Start Your Ritual Today" },
+    { "type": "text", "id": "subhead", "label": "Subheadline" },
+    { "type": "text", "id": "cta_label", "label": "CTA label", "default": "Shop All Formulas" },
+    { "type": "url", "id": "cta_url", "label": "CTA URL" },
+    { "type": "image_picker", "id": "background_image", "label": "Background image" }
+  ],
+  "presets": [{ "name": "Final CTA" }]
+}
+{% endschema %}

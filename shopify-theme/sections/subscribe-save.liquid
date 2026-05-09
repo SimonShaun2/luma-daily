@@ -1,0 +1,47 @@
+{% comment %}
+  Section: subscribe-save
+  Ported from: Home.tsx §13 SUBSCRIBE & SAVE
+{% endcomment %}
+<section class="subscribe-save" aria-label="Subscribe and save">
+  <div class="container subscribe-save__inner">
+    <div class="subscribe-save__one-time">
+      <h3>{{ section.settings.one_time_heading | default: 'One-Time Purchase' | escape }}</h3>
+      {%- for block in section.blocks -%}
+        {%- if block.type == 'one_time_point' -%}
+          <p class="subscribe-save__point">{{ block.settings.text | escape }}</p>
+        {%- endif -%}
+      {%- endfor -%}
+    </div>
+    <div class="subscribe-save__divider" aria-hidden="true">vs</div>
+    <div class="subscribe-save__subscribe">
+      <div class="subscribe-save__badge">{{ section.settings.savings_badge | default: 'Save 15%' | escape }}</div>
+      <h3>{{ section.settings.subscribe_heading | default: 'Subscribe & Save' | escape }}</h3>
+      {%- for block in section.blocks -%}
+        {%- if block.type == 'subscribe_point' -%}
+          <p class="subscribe-save__point subscribe-save__point--highlight">✓ {{ block.settings.text | escape }}</p>
+        {%- endif -%}
+      {%- endfor -%}
+      <a href="{{ section.settings.subscribe_cta_url | default: '/collections/all' }}" class="btn btn--primary">
+        {{ section.settings.subscribe_cta_label | default: 'Subscribe & Save 15%' | escape }}
+      </a>
+    </div>
+  </div>
+</section>
+{% schema %}
+{
+  "name": "Subscribe & Save",
+  "tag": "section",
+  "settings": [
+    { "type": "text", "id": "one_time_heading", "label": "One-time heading", "default": "One-Time Purchase" },
+    { "type": "text", "id": "subscribe_heading", "label": "Subscribe heading", "default": "Subscribe & Save" },
+    { "type": "text", "id": "savings_badge", "label": "Savings badge", "default": "Save 15%" },
+    { "type": "text", "id": "subscribe_cta_label", "label": "Subscribe CTA label", "default": "Subscribe & Save 15%" },
+    { "type": "url", "id": "subscribe_cta_url", "label": "Subscribe CTA URL" }
+  ],
+  "blocks": [
+    { "type": "one_time_point", "name": "One-time Point", "settings": [{ "type": "text", "id": "text", "label": "Point text" }] },
+    { "type": "subscribe_point", "name": "Subscribe Point", "settings": [{ "type": "text", "id": "text", "label": "Point text" }] }
+  ],
+  "presets": [{ "name": "Subscribe & Save" }]
+}
+{% endschema %}

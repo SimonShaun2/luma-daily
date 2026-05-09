@@ -1,0 +1,85 @@
+{% comment %}
+  Section: faq
+  Ported from: Home.tsx §15 FAQ
+  Design: Warm Editorial — collapsible accordion, smooth height transition
+  SEO: Each block renders FAQ schema JSON-LD for Google rich results
+{% endcomment %}
+
+<section class="faq" aria-label="Frequently asked questions">
+  <div class="container faq__inner">
+    <h2 class="section-title">{{ section.settings.heading | default: 'Frequently Asked Questions' | escape }}</h2>
+
+    <div class="faq__list" itemscope itemtype="https://schema.org/FAQPage">
+      {%- for block in section.blocks -%}
+        {%- if block.type == 'faq_item' -%}
+          <div class="faq__item" itemscope itemprop="mainEntity" itemtype="https://schema.org/Question" {{ block.shopify_attributes }}>
+            <button
+              class="faq__question"
+              aria-expanded="false"
+              aria-controls="faq-answer-{{ forloop.index }}"
+              itemprop="name"
+            >
+              {{ block.settings.question | escape }}
+              <span class="faq__icon" aria-hidden="true">+</span>
+            </button>
+            <div
+              class="faq__answer"
+              id="faq-answer-{{ forloop.index }}"
+              hidden
+              itemscope
+              itemprop="acceptedAnswer"
+              itemtype="https://schema.org/Answer"
+            >
+              <div itemprop="text">{{ block.settings.answer }}</div>
+            </div>
+          </div>
+        {%- endif -%}
+      {%- endfor -%}
+    </div>
+  </div>
+</section>
+
+<script>
+(function() {
+  document.querySelectorAll('.faq__question').forEach(function(btn) {
+    btn.addEventListener('click', function() {
+      var expanded = this.getAttribute('aria-expanded') === 'true';
+      var answer = document.getElementById(this.getAttribute('aria-controls'));
+      this.setAttribute('aria-expanded', String(!expanded));
+      this.querySelector('.faq__icon').textContent = expanded ? '+' : '−';
+      if (expanded) { answer.hidden = true; } else { answer.hidden = false; }
+    });
+  });
+})();
+</script>
+
+{% schema %}
+{
+  "name": "FAQ",
+  "tag": "section",
+  "settings": [
+    { "type": "text", "id": "heading", "label": "Section heading", "default": "Frequently Asked Questions" }
+  ],
+  "blocks": [
+    {
+      "type": "faq_item",
+      "name": "FAQ Item",
+      "settings": [
+        { "type": "text", "id": "question", "label": "Question" },
+        { "type": "richtext", "id": "answer", "label": "Answer" }
+      ]
+    }
+  ],
+  "presets": [
+    {
+      "name": "FAQ",
+      "blocks": [
+        { "type": "faq_item", "settings": { "question": "What makes Luma Daily different?", "answer": "<p>Luma Daily uses premium, clinically-studied ingredients at effective doses — no fillers, no proprietary blends.</p>" } },
+        { "type": "faq_item", "settings": { "question": "How long until I see results?", "answer": "<p>Most customers notice a difference within 2–4 weeks of consistent daily use.</p>" } },
+        { "type": "faq_item", "settings": { "question": "Are there any allergens?", "answer": "<p>All formulas are vegan, gluten-free, and free from the top 9 allergens.</p>" } },
+        { "type": "faq_item", "settings": { "question": "Can I take multiple formulas?", "answer": "<p>Yes — our formulas are designed to stack safely. Many customers take 2–3 daily.</p>" } }
+      ]
+    }
+  ]
+}
+{% endschema %}

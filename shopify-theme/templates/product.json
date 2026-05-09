@@ -1,0 +1,26 @@
+{
+  "sections": {
+    "product-detail": {
+      "type": "product-detail",
+      "settings": {}
+    },
+    "ingredients-accordion": {
+      "type": "ingredients-accordion",
+      "settings": {}
+    },
+    "reviews-widget": {
+      "type": "reviews-widget",
+      "settings": {}
+    },
+    "related-products": {
+      "type": "related-products",
+      "settings": {}
+    }
+  },
+  "order": [
+    "product-detail",
+    "ingredients-accordion",
+    "reviews-widget",
+    "related-products"
+  ]
+}
