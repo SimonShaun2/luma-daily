@@ -1412,3 +1412,32 @@ After completing all steps, verify:
 4. The store domain is `luma-daily.myshopify.com`. The public-facing domain is `takelumadaily.com`. The Shopify checkout will show `luma-daily.myshopify.com` in the URL until a custom checkout domain is configured in Shopify Settings → Domains.
 
 5. Do not install any new npm packages. All required dependencies are already in `package.json`: `framer-motion`, `lucide-react`, `sonner`, `wouter`, `react-hook-form`, `zod`, `@radix-ui/*`, `tailwind-merge`.
+
+
+---
+
+## CART UX ENHANCEMENTS (Manus Design Prototype — Ready to Port)
+
+The following micro-interactions have been designed, prototyped, and validated in the Manus design sandbox. CSS animations are already committed to `client/src/index.css`. Full implementation spec with code snippets is in `docs/CART_UX_ENHANCEMENTS.md`.
+
+**Priority order for implementation:**
+
+| # | Enhancement | CSS Class | Target Component |
+|---|-------------|-----------|-----------------|
+| 1 | ATC button loading spinner + success checkmark | `.spinner-icon`, `.success-pop` | Product card ATC button |
+| 2 | Cart drawer success banner on add | `.banner-slide-in` | Cart drawer header |
+| 3 | New item slide-in animation | `.cart-item-enter` | Cart drawer item list |
+| 4 | Remove item shake + slide-out | `.item-shake`, `.item-slide-out` | Cart drawer item row |
+| 5 | Quantity change price flash | `.price-flash` | Cart drawer price display |
+| 6 | Cart badge pop on count increase | `.badge-pop` | Nav cart icon badge |
+| 7 | Free-shipping progress to unlocked banner | `.banner-slide-in` | Cart drawer footer |
+| 8 | GWP tier at $75 with progress bar | `.banner-slide-in` | Cart drawer footer |
+| 9 | Checkout button glow pulse at $50 | `.checkout-glow-pulse` | Cart drawer checkout button |
+| 10 | Sticky checkout footer on mobile | `sticky bottom-0` | Cart drawer layout |
+
+**State additions required in CartContext:**
+- `addingId: string | null` — handle of product currently being added
+- `successId: string | null` — handle of product that just succeeded (auto-cleared after 1.4s)
+- `lastAddedName: string | null` — display name for the success banner (auto-cleared after 2.5s)
+
+See `docs/CART_UX_ENHANCEMENTS.md` for complete code snippets for each enhancement.

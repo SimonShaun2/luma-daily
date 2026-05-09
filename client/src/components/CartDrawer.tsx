@@ -1,15 +1,28 @@
 /**
- * CartDrawer — Slide-out cart panel
+ * CartDrawer — Slide-out cart panel for Luma Daily
  * Design: Warm Editorial — cream/charcoal/amber palette
  * Playfair Display headings + DM Sans body
+ *
+ * UX Enhancements wired (see docs/CART_UX_ENHANCEMENTS.md):
+ *   #2  Success banner on add (lastAddedName from CartContext)
+ *   #3  New item slide-in animation (.cart-item-enter)
+ *   #4  Remove item shake + slide-out (.item-shake, .item-slide-out)
+ *   #5  Quantity change price flash (.price-flash)
+ *   #7  Free-shipping progress → unlocked banner
+ *   #8  GWP tier at $75 with secondary progress bar
+ *   #9  Checkout button glow pulse at $50 (.checkout-glow-pulse)
+ *   #10 Sticky checkout footer on mobile
  */
 import { motion, AnimatePresence } from "framer-motion";
-import { X, Minus, Plus, ShoppingBag, ChevronRight, Trash2 } from "lucide-react";
+import { X, Minus, Plus, ShoppingBag, ChevronRight, Trash2, Check, Gift } from "lucide-react";
 import { useCart } from "@/contexts/CartContext";
 import { useLocation } from "wouter";
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import GiftProgressBar from "@/components/GiftProgressBar";
 import SubscriptionUpsellModal from "@/components/SubscriptionUpsellModal";
+
+const FREE_SHIPPING_THRESHOLD = 50;
+const GWP_THRESHOLD = 75;
 
 export default function CartDrawer() {
   const {
@@ -23,9 +36,81 @@ export default function CartDrawer() {
     savings,
     checkout,
     isLoading,
+    lastAddedName,
   } = useCart();
   const [, navigate] = useLocation();
   const [showSubscribeModal, setShowSubscribeModal] = useState(false);
+
+  // ── Enhancement #4: Remove item shake + slide-out ─────────────────────────
+  const [shakingId, setShakingId] = useState<string | null>(null);
+  const [removingId, setRemovingId] = useState<string | null>(null);
+
+  // ── Enhancement #5: Quantity change price flash ───────────────────────────
+  const [flashId, setFlashId] = useState<string | null>(null);
+
+  // ── Enhancement #3: New item entrance animation ───────────────────────────
+  const [newItemIds, setNewItemIds] = useState<Set<string>>(new Set());
+  const prevItemIdsRef = useRef<Set<string>>(new Set());
+
+  useEffect(() => {
+    const currentIds = new Set(items.map((i) => i.lineId));
+    const incoming = new Set<string>();
+    currentIds.forEach((id) => {
+      if (!prevItemIdsRef.current.has(id)) incoming.add(id);
+    });
+    if (incoming.size > 0) {
+      setNewItemIds(incoming);
+      // Clear entrance class after animation completes (350ms)
+      const t = setTimeout(() => setNewItemIds(new Set()), 400);
+      return () => clearTimeout(t);
+    }
+    prevItemIdsRef.current = currentIds;
+  }, [items]);
+
+  // ── Enhancement #9: Checkout button glow pulse at $50 ────────────────────
+  const [glowPulse, setGlowPulse] = useState(false);
+  const prevShippingRef = useRef(subtotal >= FREE_SHIPPING_THRESHOLD ? 0 : 5.99);
+  const shipping = subtotal >= FREE_SHIPPING_THRESHOLD ? 0 : 5.99;
+
+  useEffect(() => {
+    if (prevShippingRef.current > 0 && shipping === 0) {
+      setGlowPulse(true);
+      const t = setTimeout(() => setGlowPulse(false), 1700);
+      return () => clearTimeout(t);
+    }
+    prevShippingRef.current = shipping;
+  }, [shipping]);
+
+  // ── Enhancement #8: GWP tier banner at $75 ───────────────────────────────
+  const gwpUnlocked = subtotal >= GWP_THRESHOLD;
+  const [gwpBannerVisible, setGwpBannerVisible] = useState(false);
+  const prevGwpRef = useRef(gwpUnlocked);
+
+  useEffect(() => {
+    if (!prevGwpRef.current && gwpUnlocked) setGwpBannerVisible(true);
+    if (prevGwpRef.current && !gwpUnlocked) setGwpBannerVisible(false);
+    prevGwpRef.current = gwpUnlocked;
+  }, [gwpUnlocked]);
+
+  // ── Handlers ──────────────────────────────────────────────────────────────
+
+  const handleRemove = (lineId: string) => {
+    setShakingId(lineId);
+    setTimeout(() => {
+      setShakingId(null);
+      setRemovingId(lineId);
+      setTimeout(() => {
+        removeItem(lineId);
+        setRemovingId(null);
+      }, 380);
+    }, 450);
+  };
+
+  const handleQtyChange = (lineId: string, qty: number) => {
+    updateQuantity(lineId, qty);
+    setFlashId(lineId);
+    setTimeout(() => setFlashId(null), 600);
+  };
 
   const handleCheckout = () => {
     const hasOneTimeItems = items.some((item) => !item.isSubscription);
@@ -33,7 +118,6 @@ export default function CartDrawer() {
       setShowSubscribeModal(true);
       return;
     }
-
     checkout();
   };
 
@@ -84,12 +168,37 @@ export default function CartDrawer() {
               </button>
             </div>
 
+            {/* Enhancement #2: Success banner — slides in when lastAddedName is set */}
+            <AnimatePresence>
+              {lastAddedName && (
+                <motion.div
+                  key="success-banner"
+                  initial={{ opacity: 0, y: -8 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -8 }}
+                  transition={{ duration: 0.25 }}
+                  className="mx-4 mt-3 flex items-center gap-2.5 bg-green-50 border border-green-200 text-green-800 rounded-xl px-4 py-2.5 text-sm font-body font-600"
+                >
+                  <span className="success-pop inline-flex w-5 h-5 rounded-full bg-green-500 text-white items-center justify-center flex-shrink-0">
+                    <Check size={11} strokeWidth={3} />
+                  </span>
+                  <span>{lastAddedName} added to your ritual!</span>
+                </motion.div>
+              )}
+            </AnimatePresence>
+
+            {/* Free-shipping / GWP progress bar */}
             <GiftProgressBar subtotal={subtotal} />
 
-            {/* Cart Items */}
+            {/* Cart Items — scrollable */}
             <div className="flex-1 overflow-y-auto px-6 py-4">
               {items.length === 0 ? (
-                <div className="flex flex-col items-center justify-center h-full text-center py-16">
+                <motion.div
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  transition={{ duration: 0.3 }}
+                  className="flex flex-col items-center justify-center h-full text-center py-16"
+                >
                   <ShoppingBag size={48} className="text-[#C8813A]/30 mb-4" />
                   <h3 className="font-display font-700 text-xl text-[#1E1B16] mb-2">
                     Your ritual awaits
@@ -103,17 +212,18 @@ export default function CartDrawer() {
                   >
                     Shop Formulas
                   </button>
-                </div>
+                </motion.div>
               ) : (
                 <div className="space-y-4">
                   {items.map((item) => (
-                    <motion.div
+                    <div
                       key={item.lineId}
-                      layout
-                      initial={{ opacity: 0, y: 12 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      exit={{ opacity: 0, x: 40 }}
-                      className="flex gap-4 bg-white rounded-2xl p-4 shadow-sm"
+                      className={[
+                        "flex gap-4 bg-white rounded-2xl p-4 shadow-sm transition-colors",
+                        newItemIds.has(item.lineId) ? "cart-item-enter" : "",
+                        shakingId === item.lineId ? "item-shake" : "",
+                        removingId === item.lineId ? "item-slide-out" : "",
+                      ].filter(Boolean).join(" ")}
                     >
                       {/* Product image */}
                       <div
@@ -143,21 +253,25 @@ export default function CartDrawer() {
                               </span>
                             )}
                           </div>
+                          {/* Enhancement #4: Trash button turns red on hover, triggers shake */}
                           <button
-                            onClick={() => removeItem(item.lineId)}
-                            className="text-[#1E1B16]/30 hover:text-red-400 transition-colors flex-shrink-0"
+                            onClick={() => handleRemove(item.lineId)}
+                            disabled={shakingId === item.lineId || removingId === item.lineId}
+                            className="text-[#1E1B16]/30 hover:text-red-400 transition-colors flex-shrink-0 disabled:opacity-40"
+                            aria-label={`Remove ${item.name}`}
                           >
                             <Trash2 size={14} />
                           </button>
                         </div>
 
                         <div className="flex items-center justify-between mt-3">
-                          {/* Quantity */}
+                          {/* Enhancement #5: Quantity buttons trigger price flash */}
                           <div className="flex items-center gap-2 bg-[#FAF7F2] rounded-full px-2 py-1">
                             <button
-                              onClick={() => updateQuantity(item.lineId, item.quantity - 1)}
+                              onClick={() => handleQtyChange(item.lineId, item.quantity - 1)}
                               disabled={isLoading}
                               className="w-5 h-5 flex items-center justify-center text-[#1E1B16]/60 hover:text-[#1E1B16] transition-colors"
+                              aria-label="Decrease quantity"
                             >
                               <Minus size={12} />
                             </button>
@@ -165,17 +279,23 @@ export default function CartDrawer() {
                               {item.quantity}
                             </span>
                             <button
-                              onClick={() => updateQuantity(item.lineId, item.quantity + 1)}
+                              onClick={() => handleQtyChange(item.lineId, item.quantity + 1)}
                               disabled={isLoading}
                               className="w-5 h-5 flex items-center justify-center text-[#1E1B16]/60 hover:text-[#1E1B16] transition-colors"
+                              aria-label="Increase quantity"
                             >
                               <Plus size={12} />
                             </button>
                           </div>
 
-                          {/* Price */}
+                          {/* Enhancement #5: Price flashes green on qty change */}
                           <div className="text-right">
-                            <span className="font-body font-700 text-sm text-[#1E1B16]">
+                            <span
+                              className={[
+                                "font-body font-700 text-sm text-[#1E1B16] inline-block",
+                                flashId === item.lineId ? "price-flash" : "",
+                              ].filter(Boolean).join(" ")}
+                            >
                               ${(item.price * item.quantity).toFixed(2)}
                             </span>
                             {item.originalPrice > item.price && (
@@ -186,46 +306,128 @@ export default function CartDrawer() {
                           </div>
                         </div>
                       </div>
-                    </motion.div>
+                    </div>
                   ))}
                 </div>
               )}
             </div>
 
-            {/* Footer */}
+            {/* Enhancement #10: Sticky footer — always visible at bottom */}
             {items.length > 0 && (
-              <div className="px-6 py-5 border-t border-[#E8E0D4] bg-white">
-                {savings > 0 && (
-                  <div className="flex items-center justify-between mb-3 text-sm">
-                    <span className="font-body text-green-600">You save</span>
-                    <span className="font-body font-700 text-green-600">
-                      −${savings.toFixed(2)}
+              <div className="border-t border-[#E8E0D4] bg-white flex-shrink-0">
+                {/* Scrollable totals area */}
+                <div className="px-6 pt-4 pb-2 space-y-3 max-h-[40vh] overflow-y-auto">
+                  {/* Enhancement #7: Free-shipping progress → unlocked banner */}
+                  {subtotal < FREE_SHIPPING_THRESHOLD ? (
+                    <div>
+                      <div className="flex items-center justify-between mb-1.5">
+                        <p className="font-body text-xs font-600 text-[#1E1B16]">
+                          Add <span className="text-[#C8813A]">${(FREE_SHIPPING_THRESHOLD - subtotal).toFixed(2)}</span> more for free shipping
+                        </p>
+                        <span className="font-body text-[10px] text-[#1E1B16]/40">${FREE_SHIPPING_THRESHOLD} goal</span>
+                      </div>
+                      <div className="h-1.5 rounded-full bg-[#E8E0D4] overflow-hidden">
+                        <div
+                          className="h-full rounded-full bg-[#C8813A] transition-all duration-500"
+                          style={{ width: `${Math.min((subtotal / FREE_SHIPPING_THRESHOLD) * 100, 100)}%` }}
+                        />
+                      </div>
+                    </div>
+                  ) : (
+                    <motion.div
+                      initial={{ opacity: 0, y: -6 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      className="flex items-center gap-2 bg-green-50 border border-green-200 rounded-xl px-3 py-2 text-xs font-body font-600 text-green-700"
+                    >
+                      <Check size={13} className="text-green-500 flex-shrink-0" />
+                      🎉 Free shipping unlocked!
+                    </motion.div>
+                  )}
+
+                  {/* Enhancement #8: GWP secondary progress bar ($50–$75) */}
+                  {subtotal >= FREE_SHIPPING_THRESHOLD && !gwpUnlocked && (
+                    <div>
+                      <div className="flex items-center justify-between mb-1.5">
+                        <p className="font-body text-xs font-600 text-[#1E1B16]">
+                          Add <span className="text-[#C8813A]">${(GWP_THRESHOLD - subtotal).toFixed(2)}</span> for a free sample
+                        </p>
+                        <Gift size={12} className="text-[#C8813A]" />
+                      </div>
+                      <div className="h-1.5 rounded-full bg-[#E8E0D4] overflow-hidden">
+                        <div
+                          className="h-full rounded-full bg-amber-400 transition-all duration-500"
+                          style={{ width: `${Math.min(((subtotal - FREE_SHIPPING_THRESHOLD) / (GWP_THRESHOLD - FREE_SHIPPING_THRESHOLD)) * 100, 100)}%` }}
+                        />
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Enhancement #8: GWP unlocked banner */}
+                  <AnimatePresence>
+                    {gwpBannerVisible && (
+                      <motion.div
+                        initial={{ opacity: 0, y: -6 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        exit={{ opacity: 0, y: -6 }}
+                        className="flex items-center justify-between bg-amber-50 border border-amber-200 rounded-xl px-3 py-2 text-xs font-body font-600 text-amber-800"
+                      >
+                        <span>🎁 Free Luma Glow Sample added!</span>
+                        <button
+                          onClick={() => setGwpBannerVisible(false)}
+                          className="text-amber-500 hover:text-amber-700 transition-colors ml-2 flex-shrink-0"
+                          aria-label="Dismiss"
+                        >
+                          <X size={12} />
+                        </button>
+                      </motion.div>
+                    )}
+                  </AnimatePresence>
+
+                  {/* Savings row */}
+                  {savings > 0 && (
+                    <div className="flex items-center justify-between text-sm">
+                      <span className="font-body text-green-600">You save</span>
+                      <span className="font-body font-700 text-green-600">
+                        −${savings.toFixed(2)}
+                      </span>
+                    </div>
+                  )}
+
+                  {/* Subtotal */}
+                  <div className="flex items-center justify-between">
+                    <span className="font-body text-[#1E1B16]/60 text-sm">Subtotal</span>
+                    <span className="font-display font-700 text-xl text-[#1E1B16]">
+                      ${subtotal.toFixed(2)}
                     </span>
                   </div>
-                )}
-                <div className="flex items-center justify-between mb-4">
-                  <span className="font-body text-[#1E1B16]/60 text-sm">Subtotal</span>
-                  <span className="font-display font-700 text-xl text-[#1E1B16]">
-                    ${subtotal.toFixed(2)}
-                  </span>
+
+                  <p className="font-body text-xs text-[#1E1B16]/40 text-center">
+                    {shipping === 0 ? "Free shipping applied" : `+$${shipping.toFixed(2)} shipping · calculated at checkout`}
+                  </p>
                 </div>
-                <p className="font-body text-xs text-[#1E1B16]/40 mb-4 text-center">
-                  Shipping & taxes calculated at checkout
-                </p>
-                <button
-                  onClick={handleCheckout}
-                  disabled={isLoading}
-                  className="btn-amber w-full justify-center text-base py-4 flex items-center gap-2"
-                >
-                  {isLoading ? "Updating..." : "Proceed to Checkout"}
-                  <ChevronRight size={18} />
-                </button>
-                <button
-                  onClick={closeCart}
-                  className="w-full text-center font-body text-sm text-[#1E1B16]/50 hover:text-[#1E1B16] mt-3 transition-colors"
-                >
-                  Continue Shopping
-                </button>
+
+                {/* Sticky CTA — always pinned at bottom */}
+                <div className="px-6 pb-5 pt-3">
+                  {/* Enhancement #9: Checkout button glow pulse when free shipping unlocks */}
+                  <button
+                    key={glowPulse ? "glow" : "idle"}
+                    onClick={handleCheckout}
+                    disabled={isLoading}
+                    className={[
+                      "btn-amber w-full justify-center text-base py-4 flex items-center gap-2",
+                      glowPulse ? "checkout-glow-pulse" : "",
+                    ].filter(Boolean).join(" ")}
+                  >
+                    {isLoading ? "Updating..." : "Proceed to Checkout"}
+                    <ChevronRight size={18} />
+                  </button>
+                  <button
+                    onClick={closeCart}
+                    className="w-full text-center font-body text-sm text-[#1E1B16]/50 hover:text-[#1E1B16] mt-3 transition-colors"
+                  >
+                    Continue Shopping
+                  </button>
+                </div>
               </div>
             )}
 

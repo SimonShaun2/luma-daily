@@ -1,8 +1,13 @@
 /**
  * CartContext — Shopify Storefront cart state for Luma Daily
  * Design: Warm Editorial — cream/charcoal/amber palette
+ *
+ * UX Enhancements (see docs/CART_UX_ENHANCEMENTS.md):
+ *   addingId     — handle of product currently being added (drives ATC spinner)
+ *   successId    — handle of product that just succeeded (drives ATC checkmark, auto-clears 1.4s)
+ *   lastAddedName — display name for the cart drawer success banner (auto-clears 2.5s)
  */
-import React, { createContext, useCallback, useContext, useEffect, useState } from "react";
+import React, { createContext, useCallback, useContext, useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
 import {
   addCartLines,
@@ -50,6 +55,12 @@ interface CartContextType {
   totalItems: number;
   subtotal: number;
   savings: number;
+  /** Handle of the product currently being added — drives ATC loading spinner */
+  addingId: string | null;
+  /** Handle of the product that just succeeded — drives ATC checkmark (auto-clears after 1.4s) */
+  successId: string | null;
+  /** Display name of the last added product — drives cart drawer success banner (auto-clears after 2.5s) */
+  lastAddedName: string | null;
 }
 
 const CartContext = createContext<CartContextType | null>(null);
@@ -106,6 +117,23 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
   const [isOpen, setIsOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
 
+  // ── UX Enhancement state ──────────────────────────────────────────────────
+  const [addingId, setAddingId] = useState<string | null>(null);
+  const [successId, setSuccessId] = useState<string | null>(null);
+  const [lastAddedName, setLastAddedName] = useState<string | null>(null);
+
+  // Refs to hold timeout IDs so we can clear them on unmount
+  const successTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const bannerTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  // Clean up timers on unmount
+  useEffect(() => {
+    return () => {
+      if (successTimerRef.current) clearTimeout(successTimerRef.current);
+      if (bannerTimerRef.current) clearTimeout(bannerTimerRef.current);
+    };
+  }, []);
+
   const openCart = useCallback(() => setIsOpen(true), []);
   const closeCart = useCallback(() => setIsOpen(false), []);
 
@@ -157,18 +185,42 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
         ...(input.sellingPlanId ? { sellingPlanId: input.sellingPlanId } : {}),
       };
 
+      // ── UX: start loading state for this product ──
+      setAddingId(input.handle);
       setIsLoading(true);
 
       try {
         const cart = cartId ? await addCartLines(cartId, [line]) : await createCart([line]);
         applyCart(cart);
         setIsOpen(true);
+
+        // ── UX: transition to success state ──
+        setAddingId(null);
+        setSuccessId(input.handle);
+        setLastAddedName(`Luma ${input.name}`);
+
+        // Clear success button state after 1.4s
+        if (successTimerRef.current) clearTimeout(successTimerRef.current);
+        successTimerRef.current = setTimeout(() => setSuccessId(null), 1400);
+
+        // Clear drawer banner after 2.5s
+        if (bannerTimerRef.current) clearTimeout(bannerTimerRef.current);
+        bannerTimerRef.current = setTimeout(() => setLastAddedName(null), 2500);
+
       } catch {
+        setAddingId(null);
         try {
           localStorage.removeItem(CART_ID_KEY);
           const freshCart = await createCart([line]);
           applyCart(freshCart);
           setIsOpen(true);
+
+          setSuccessId(input.handle);
+          setLastAddedName(`Luma ${input.name}`);
+          if (successTimerRef.current) clearTimeout(successTimerRef.current);
+          successTimerRef.current = setTimeout(() => setSuccessId(null), 1400);
+          if (bannerTimerRef.current) clearTimeout(bannerTimerRef.current);
+          bannerTimerRef.current = setTimeout(() => setLastAddedName(null), 2500);
         } catch {
           toast.error("Unable to connect to store. Please try again.");
         }
@@ -254,6 +306,9 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
         totalItems,
         subtotal,
         savings,
+        addingId,
+        successId,
+        lastAddedName,
       }}
     >
       {children}

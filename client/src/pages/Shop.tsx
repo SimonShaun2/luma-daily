@@ -7,7 +7,7 @@
 import { useState } from "react";
 import { useLocation } from "wouter";
 import { motion } from "framer-motion";
-import { ArrowRight, ShoppingBag, Star, Check, Filter } from "lucide-react";
+import { ArrowRight, ShoppingBag, Star, Check, Filter, Loader2 } from "lucide-react";
 import { useCart } from "@/contexts/CartContext";
 import { products, bundles, type Bundle, type Product } from "@/lib/products";
 import { toast } from "sonner";
@@ -22,7 +22,8 @@ const FILTERS = ["All", "Energy", "Sleep", "Stress", "Focus", "Beauty", "Gut"];
 
 export default function Shop() {
   const [, navigate] = useLocation();
-  const { addItem, openCart } = useCart();
+  // addingId/successId drive per-product ATC button states (Enhancement #1)
+  const { addItem, openCart, addingId, successId } = useCart();
   const { getProduct, getVariantId } = useShopifyProducts();
   const [activeFilter, setActiveFilter] = useState("All");
   const [activeTab, setActiveTab] = useState<"formulas" | "bundles">("formulas");
@@ -277,13 +278,24 @@ export default function Shop() {
                     </div>
 
                     <div className="flex gap-2">
+                      {/* Enhancement #1: ATC button — idle → loading → success → idle */}
                       <button
                         onClick={() => handleAddToCart(product)}
-                        disabled={product.outOfStock}
-                        className="btn-amber flex-1 justify-center text-xs py-2.5 disabled:opacity-50 disabled:cursor-not-allowed"
+                        disabled={product.outOfStock || addingId === `luma-${product.slug}` || successId === `luma-${product.slug}`}
+                        className={[
+                          "btn-amber flex-1 justify-center text-xs py-2.5 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200",
+                          successId === `luma-${product.slug}` ? "!bg-green-600 !border-green-600" : "",
+                        ].filter(Boolean).join(" ")}
                       >
-                        <ShoppingBag size={13} />
-                        {product.outOfStock ? "Out of Stock" : "Add to Cart"}
+                        {addingId === `luma-${product.slug}` ? (
+                          <><Loader2 size={13} className="spinner-icon" /> Adding...</>
+                        ) : successId === `luma-${product.slug}` ? (
+                          <><Check size={13} className="success-pop" /> Added!</>
+                        ) : product.outOfStock ? (
+                          "Out of Stock"
+                        ) : (
+                          <><ShoppingBag size={13} /> Add to Cart</>
+                        )}
                       </button>
                       <button
                         onClick={() => navigate(`/products/${product.slug}`)}
