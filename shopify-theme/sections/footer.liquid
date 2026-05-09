@@ -1,0 +1,135 @@
+{% comment %}
+  Section: footer
+  Design: Warm Editorial — espresso background, four-column grid, newsletter input,
+          Playfair brand name, social icons, legal links
+  Renders: {% section 'footer' %} in layout/theme.liquid
+{% endcomment %}
+
+<footer class="site-footer" role="contentinfo">
+  <div class="container">
+    <div class="site-footer__grid">
+
+      {%- comment -%} Column 1 — Brand + newsletter {%- endcomment -%}
+      <div class="site-footer__brand-col">
+        <p class="site-footer__brand-name">{{ section.settings.brand_name | default: shop.name | escape }}</p>
+        <p class="site-footer__tagline">{{ section.settings.tagline | escape }}</p>
+        <form
+          class="site-footer__newsletter"
+          action="/contact#newsletter"
+          method="post"
+          id="footer-newsletter-form"
+        >
+          <input type="hidden" name="form_type" value="customer">
+          <input type="hidden" name="utf8" value="✓">
+          <input type="hidden" name="contact[tags]" value="newsletter">
+          <input
+            type="email"
+            name="contact[email]"
+            placeholder="{{ section.settings.newsletter_placeholder | default: 'Your email' | escape }}"
+            required
+            aria-label="Email address"
+            class="site-footer__newsletter-input"
+          >
+          <button type="submit" class="btn btn--primary btn--sm">
+            {{ section.settings.newsletter_cta | default: 'Subscribe' | escape }}
+          </button>
+        </form>
+      </div>
+
+      {%- comment -%} Columns 2–4 — Link lists {%- endcomment -%}
+      {%- for i in (1..3) -%}
+        {%- assign col_title_key = 'col_' | append: i | append: '_title' -%}
+        {%- assign col_menu_key  = 'col_' | append: i | append: '_menu' -%}
+        {%- assign col_title = section.settings[col_title_key] -%}
+        {%- assign col_menu  = section.settings[col_menu_key] -%}
+        {%- if col_menu != blank -%}
+          <div class="site-footer__col">
+            {%- if col_title != blank -%}
+              <p class="site-footer__col-title">{{ col_title | escape }}</p>
+            {%- endif -%}
+            <ul class="site-footer__links">
+              {%- for link in linklists[col_menu].links -%}
+                <li><a href="{{ link.url }}">{{ link.title | escape }}</a></li>
+              {%- endfor -%}
+            </ul>
+          </div>
+        {%- endif -%}
+      {%- endfor -%}
+
+    </div>
+
+    {%- comment -%} Bottom bar — copyright + social + legal {%- endcomment -%}
+    <div class="site-footer__bottom">
+      <span>© {{ 'now' | date: '%Y' }} {{ shop.name }}. All rights reserved.</span>
+
+      {%- comment -%} Social icons {%- endcomment -%}
+      <div class="site-footer__social">
+        {%- if section.settings.instagram_url != blank -%}
+          <a href="{{ section.settings.instagram_url }}" target="_blank" rel="noopener" aria-label="Instagram">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true">
+              <rect x="2" y="2" width="20" height="20" rx="5" ry="5"/>
+              <circle cx="12" cy="12" r="4"/>
+              <circle cx="17.5" cy="6.5" r="1" fill="currentColor" stroke="none"/>
+            </svg>
+          </a>
+        {%- endif -%}
+        {%- if section.settings.tiktok_url != blank -%}
+          <a href="{{ section.settings.tiktok_url }}" target="_blank" rel="noopener" aria-label="TikTok">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+              <path d="M19.59 6.69a4.83 4.83 0 0 1-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 0 1-2.88 2.5 2.89 2.89 0 0 1-2.89-2.89 2.89 2.89 0 0 1 2.89-2.89c.28 0 .54.04.79.1V9.01a6.34 6.34 0 0 0-.79-.05 6.34 6.34 0 0 0-6.34 6.34 6.34 6.34 0 0 0 6.34 6.34 6.34 6.34 0 0 0 6.33-6.34V8.69a8.18 8.18 0 0 0 4.78 1.52V6.76a4.85 4.85 0 0 1-1.01-.07z"/>
+            </svg>
+          </a>
+        {%- endif -%}
+      </div>
+
+      {%- comment -%} Legal links {%- endcomment -%}
+      {%- if section.settings.legal_menu != blank -%}
+        <div class="site-footer__legal">
+          {%- for link in linklists[section.settings.legal_menu].links -%}
+            <a href="{{ link.url }}">{{ link.title | escape }}</a>
+          {%- endfor -%}
+        </div>
+      {%- endif -%}
+    </div>
+  </div>
+</footer>
+
+<style>
+  .site-footer__social { display: flex; gap: var(--space-4); }
+  .site-footer__social a { color: rgba(250,247,242,.45); transition: color var(--transition); }
+  .site-footer__social a:hover { color: var(--color-amber-light); }
+  .site-footer__legal { display: flex; gap: var(--space-4); flex-wrap: wrap; }
+  .site-footer__legal a { color: rgba(250,247,242,.45); font-size: 12px; transition: color var(--transition); }
+  .site-footer__legal a:hover { color: var(--color-amber-light); }
+  .site-footer__newsletter-input {
+    flex: 1;
+    padding: 10px 16px;
+    border-radius: var(--radius-full);
+    border: 1px solid rgba(255,255,255,.15);
+    background: rgba(255,255,255,.08);
+    color: var(--color-cream);
+    font-size: 14px;
+  }
+  .site-footer__newsletter-input::placeholder { color: rgba(250,247,242,.4); }
+</style>
+
+{% schema %}
+{
+  "name": "Footer",
+  "settings": [
+    { "type": "text", "id": "brand_name", "label": "Brand name" },
+    { "type": "text", "id": "tagline", "label": "Brand tagline", "default": "Premium wellness gummies for real results." },
+    { "type": "text", "id": "newsletter_placeholder", "label": "Newsletter placeholder", "default": "Your email" },
+    { "type": "text", "id": "newsletter_cta", "label": "Newsletter CTA", "default": "Subscribe" },
+    { "type": "text", "id": "col_1_title", "label": "Column 1 title", "default": "Shop" },
+    { "type": "link_list", "id": "col_1_menu", "label": "Column 1 menu" },
+    { "type": "text", "id": "col_2_title", "label": "Column 2 title", "default": "Company" },
+    { "type": "link_list", "id": "col_2_menu", "label": "Column 2 menu" },
+    { "type": "text", "id": "col_3_title", "label": "Column 3 title", "default": "Support" },
+    { "type": "link_list", "id": "col_3_menu", "label": "Column 3 menu" },
+    { "type": "link_list", "id": "legal_menu", "label": "Legal links menu" },
+    { "type": "url", "id": "instagram_url", "label": "Instagram URL" },
+    { "type": "url", "id": "tiktok_url", "label": "TikTok URL" }
+  ]
+}
+{% endschema %}

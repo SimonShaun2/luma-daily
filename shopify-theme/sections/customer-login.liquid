@@ -1,0 +1,89 @@
+{% comment %}
+  Section: customer-login
+  Ported from: Home.tsx SignIn page
+  Design: Warm Editorial — centered card, amber CTA, form validation
+{% endcomment %}
+
+<div class="customer-page">
+  <div class="container customer-page__inner">
+    <h1 class="customer-page__title">Sign In</h1>
+
+    {%- form 'customer_login', id: 'customer-login-form' -%}
+      {%- if form.errors -%}
+        <div class="form-errors" role="alert">
+          {{ form.errors | default_errors }}
+        </div>
+      {%- endif -%}
+
+      <div class="form-group">
+        <label class="form-label" for="customer-email">Email</label>
+        <input
+          type="email"
+          id="customer-email"
+          name="customer[email]"
+          autocomplete="email"
+          autocapitalize="off"
+          required
+          class="form-input"
+          placeholder="you@example.com"
+          value="{{ form.email }}"
+        >
+      </div>
+
+      <div class="form-group">
+        <label class="form-label" for="customer-password">Password</label>
+        <input
+          type="password"
+          id="customer-password"
+          name="customer[password]"
+          autocomplete="current-password"
+          required
+          class="form-input"
+          placeholder="••••••••"
+        >
+      </div>
+
+      <button type="submit" class="btn btn--primary btn--full" style="margin-bottom: var(--space-4);">
+        Sign In
+      </button>
+
+      <div style="display:flex; justify-content:space-between; font-size:14px;">
+        <a href="/account/register" class="form-link">Create account</a>
+        <a href="/account/login#recover" class="form-link">Forgot password?</a>
+      </div>
+    {%- endform -%}
+
+    {%- comment -%} Password recovery form {%- endcomment -%}
+    <div id="recover-section" style="display:none; margin-top: var(--space-8);">
+      <h2 style="font-size:20px; margin-bottom: var(--space-5);">Reset your password</h2>
+      {%- form 'recover_customer_password' -%}
+        {%- if form.posted_successfully? -%}
+          <p style="color: var(--color-sage); font-weight:600;">Check your email for a reset link.</p>
+        {%- else -%}
+          <div class="form-group">
+            <label class="form-label" for="recover-email">Email</label>
+            <input type="email" id="recover-email" name="email" required class="form-input" placeholder="you@example.com">
+          </div>
+          <button type="submit" class="btn btn--primary btn--full">Send Reset Link</button>
+        {%- endif -%}
+      {%- endform -%}
+    </div>
+  </div>
+</div>
+
+<script>
+(function() {
+  if (window.location.hash === '#recover') {
+    document.getElementById('recover-section').style.display = 'block';
+  }
+})();
+</script>
+
+{% schema %}
+{
+  "name": "Customer Login",
+  "tag": "section",
+  "settings": [],
+  "presets": [{ "name": "Customer Login" }]
+}
+{% endschema %}

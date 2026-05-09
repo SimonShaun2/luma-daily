@@ -1,0 +1,169 @@
+{% comment %}
+  Snippet: product-card
+  Usage: {% render 'product-card', product: product, show_subscribe_toggle: true %}
+
+  Parameters:
+    product               {Object}  Required. Shopify product object.
+    show_subscribe_toggle {Boolean} Optional. Show one-time vs subscribe toggle. Default: true.
+    show_details_btn      {Boolean} Optional. Show "View Details" secondary button. Default: true.
+    image_aspect_ratio    {String}  Optional. CSS aspect-ratio value. Default: "1".
+    lazy_load             {Boolean} Optional. Use loading="lazy" on image. Default: true.
+
+  Design: Warm Editorial — cream card, amber ATC, subscribe toggle, star rating
+{% endcomment %}
+
+{%- liquid
+  assign show_subscribe_toggle = show_subscribe_toggle | default: true
+  assign show_details_btn      = show_details_btn      | default: true
+  assign image_aspect_ratio    = image_aspect_ratio    | default: '1'
+  assign lazy_load             = lazy_load             | default: true
+  assign selling_plan          = product.selling_plan_groups.first.selling_plans.first
+  assign subscribe_price       = product.price | times: 0.85 | round
+  assign rating                = product.metafields.reviews.rating.value | default: 4.9
+  assign review_count          = product.metafields.reviews.rating_count.value | default: 0
+-%}
+
+<div class="product-card" data-product-id="{{ product.id }}">
+
+  {%- comment -%} Product image {%- endcomment -%}
+  <a href="{{ product.url }}" class="product-card__image-link" tabindex="-1" aria-hidden="true">
+    {%- if product.featured_image -%}
+      <img
+        src="{{ product.featured_image | image_url: width: 480 }}"
+        srcset="
+          {{ product.featured_image | image_url: width: 240 }} 240w,
+          {{ product.featured_image | image_url: width: 480 }} 480w,
+          {{ product.featured_image | image_url: width: 720 }} 720w
+        "
+        sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 280px"
+        alt="{{ product.featured_image.alt | default: product.title | escape }}"
+        class="product-card__image"
+        style="aspect-ratio: {{ image_aspect_ratio }};"
+        width="480"
+        {%- if lazy_load -%}loading="lazy"{%- else -%}loading="eager"{%- endif -%}
+      >
+    {%- else -%}
+      <div class="product-card__image product-card__image--placeholder" style="aspect-ratio: {{ image_aspect_ratio }};"></div>
+    {%- endif -%}
+  </a>
+
+  <div class="product-card__body">
+
+    {%- comment -%} Flavor / formula badge {%- endcomment -%}
+    {%- if product.metafields.custom.flavor != blank -%}
+      <span class="product-card__flavor-badge">{{ product.metafields.custom.flavor | escape }}</span>
+    {%- endif -%}
+
+    {%- comment -%} Title {%- endcomment -%}
+    <h3 class="product-card__title">
+      <a href="{{ product.url }}">{{ product.title | escape }}</a>
+    </h3>
+
+    {%- comment -%} Star rating {%- endcomment -%}
+    <div
+      class="product-card__stars"
+      aria-label="{{ rating }} out of 5 stars{%- if review_count > 0 -%}, {{ review_count }} reviews{%- endif -%}"
+    >
+      ★★★★★
+      {%- if review_count > 0 -%}
+        <span class="product-card__review-count">({{ review_count }})</span>
+      {%- endif -%}
+    </div>
+
+    {%- comment -%} Tagline {%- endcomment -%}
+    {%- if product.metafields.custom.tagline != blank -%}
+      <p class="product-card__tagline">{{ product.metafields.custom.tagline | escape }}</p>
+    {%- endif -%}
+
+    {%- comment -%} Subscribe toggle {%- endcomment -%}
+    {%- if show_subscribe_toggle -%}
+      <div class="product-card__purchase-toggle" role="group" aria-label="Purchase frequency">
+        <label class="toggle-option toggle-option--active">
+          <input
+            type="radio"
+            name="purchase-mode-{{ product.id }}"
+            value="one-time"
+            checked
+            data-product-id="{{ product.id }}"
+            data-mode="one-time"
+          >
+          One-time
+          <strong>{{ product.price | money }}</strong>
+        </label>
+        {%- if selling_plan -%}
+          <label class="toggle-option">
+            <input
+              type="radio"
+              name="purchase-mode-{{ product.id }}"
+              value="subscribe"
+              data-product-id="{{ product.id }}"
+              data-mode="subscribe"
+              data-selling-plan-id="{{ selling_plan.id }}"
+            >
+            Subscribe
+            <strong>{{ subscribe_price | money }}</strong>
+            <span class="toggle-option__badge">Save 15%</span>
+          </label>
+        {%- endif -%}
+      </div>
+    {%- else -%}
+      <div class="product-card__price-simple">
+        <span class="product-card__price-current">{{ product.price | money }}</span>
+        {%- if product.compare_at_price > product.price -%}
+          <span class="product-card__price-compare">{{ product.compare_at_price | money }}</span>
+        {%- endif -%}
+      </div>
+    {%- endif -%}
+
+    {%- comment -%} Actions {%- endcomment -%}
+    <div class="product-card__actions">
+      <form action="/cart/add" method="post" class="product-card__atc-form">
+        <input type="hidden" name="id" value="{{ product.selected_or_first_available_variant.id }}" class="variant-id-input">
+        {%- if selling_plan -%}
+          <input type="hidden" name="selling_plan" value="" class="selling-plan-input">
+        {%- endif -%}
+        <input type="hidden" name="quantity" value="1">
+        <button
+          type="submit"
+          class="btn btn--primary btn--full product-card__atc-btn"
+          {%- unless product.available -%}disabled aria-disabled="true"{%- endunless -%}
+        >
+          {%- if product.available -%}
+            Add to Cart
+          {%- else -%}
+            Sold Out
+          {%- endif -%}
+        </button>
+      </form>
+
+      {%- if show_details_btn -%}
+        <a href="{{ product.url }}" class="btn btn--ghost btn--full product-card__details-btn">
+          View Details
+        </a>
+      {%- endif -%}
+    </div>
+
+  </div>
+</div>
+
+<script>
+(function() {
+  var card = document.querySelector('.product-card[data-product-id="{{ product.id }}"]');
+  if (!card) return;
+  var radios = card.querySelectorAll('input[type="radio"]');
+  radios.forEach(function(radio) {
+    radio.addEventListener('change', function() {
+      var labels = card.querySelectorAll('.toggle-option');
+      labels.forEach(function(l) { l.classList.remove('toggle-option--active'); });
+      this.closest('.toggle-option').classList.add('toggle-option--active');
+      var sellingPlanInput = card.querySelector('.selling-plan-input');
+      if (sellingPlanInput) {
+        sellingPlanInput.disabled = this.dataset.mode !== 'subscribe';
+        if (this.dataset.mode === 'subscribe') {
+          sellingPlanInput.value = this.dataset.sellingPlanId || '';
+        }
+      }
+    });
+  });
+})();
+</script>

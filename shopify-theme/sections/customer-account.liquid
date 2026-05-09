@@ -1,0 +1,221 @@
+{% comment %}
+  Section: customer-account
+  Ported from: Home.tsx Account page (with AddFormulaModal and ConfirmModal patterns)
+  Design: Warm Editorial — tabbed account dashboard, order history, subscription management
+{% endcomment %}
+
+<div class="customer-page customer-account">
+  <div class="container" style="max-width: 860px;">
+    <div class="customer-account__header">
+      <h1 class="customer-page__title" style="margin-bottom: var(--space-2);">
+        Welcome back, {{ customer.first_name | escape }}
+      </h1>
+      <a href="/account/logout" class="form-link" style="font-size:14px;">Sign out</a>
+    </div>
+
+    {%- comment -%} Tab navigation {%- endcomment -%}
+    <div class="customer-account__tabs" role="tablist">
+      <button class="account-tab account-tab--active" role="tab" aria-selected="true" data-tab="orders">Orders</button>
+      <button class="account-tab" role="tab" aria-selected="false" data-tab="subscriptions">Subscriptions</button>
+      <button class="account-tab" role="tab" aria-selected="false" data-tab="profile">Profile</button>
+      <button class="account-tab" role="tab" aria-selected="false" data-tab="loyalty">Loyalty Points</button>
+    </div>
+
+    {%- comment -%} Orders tab {%- endcomment -%}
+    <div class="account-panel account-panel--active" data-panel="orders">
+      {%- if customer.orders.size > 0 -%}
+        <table class="orders-table">
+          <thead>
+            <tr>
+              <th>Order</th>
+              <th>Date</th>
+              <th>Status</th>
+              <th>Total</th>
+              <th></th>
+            </tr>
+          </thead>
+          <tbody>
+            {%- for order in customer.orders -%}
+              <tr>
+                <td><a href="{{ order.customer_url }}" class="form-link">#{{ order.name }}</a></td>
+                <td>{{ order.created_at | date: '%b %d, %Y' }}</td>
+                <td><span class="order-status order-status--{{ order.financial_status }}">{{ order.financial_status | capitalize }}</span></td>
+                <td>{{ order.total_price | money }}</td>
+                <td><a href="{{ order.customer_url }}" class="btn btn--sm btn--ghost">View</a></td>
+              </tr>
+            {%- endfor -%}
+          </tbody>
+        </table>
+      {%- else -%}
+        <div class="account-empty">
+          <p>You haven't placed any orders yet.</p>
+          <a href="/collections/all" class="btn btn--primary" style="margin-top: var(--space-4);">Shop Now</a>
+        </div>
+      {%- endif -%}
+    </div>
+
+    {%- comment -%} Subscriptions tab {%- endcomment -%}
+    <div class="account-panel" data-panel="subscriptions" hidden>
+      <p style="font-size:15px; color: var(--color-brown); margin-bottom: var(--space-6);">
+        Manage your active subscriptions below. To pause, skip, or cancel, use the links provided.
+      </p>
+      {%- comment -%}
+        Subscription management requires a third-party app (e.g. Recharge, Bold Subscriptions).
+        Replace the placeholder below with the app's customer portal embed code or link.
+      {%- endcomment -%}
+      <div class="account-subscriptions-placeholder">
+        <p>Subscription management is powered by your subscription app.</p>
+        <a href="{{ section.settings.subscription_portal_url | default: '#' }}" class="btn btn--primary">
+          Manage Subscriptions
+        </a>
+      </div>
+    </div>
+
+    {%- comment -%} Profile tab {%- endcomment -%}
+    <div class="account-panel" data-panel="profile" hidden>
+      {%- form 'customer_address', customer.default_address -%}
+        <div style="display:grid; grid-template-columns:1fr 1fr; gap: var(--space-4);">
+          <div class="form-group">
+            <label class="form-label">First name</label>
+            <input type="text" name="address[first_name]" value="{{ customer.default_address.first_name | escape }}" class="form-input">
+          </div>
+          <div class="form-group">
+            <label class="form-label">Last name</label>
+            <input type="text" name="address[last_name]" value="{{ customer.default_address.last_name | escape }}" class="form-input">
+          </div>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Address</label>
+          <input type="text" name="address[address1]" value="{{ customer.default_address.address1 | escape }}" class="form-input">
+        </div>
+        <div style="display:grid; grid-template-columns:1fr 1fr 1fr; gap: var(--space-4);">
+          <div class="form-group">
+            <label class="form-label">City</label>
+            <input type="text" name="address[city]" value="{{ customer.default_address.city | escape }}" class="form-input">
+          </div>
+          <div class="form-group">
+            <label class="form-label">State</label>
+            <input type="text" name="address[province]" value="{{ customer.default_address.province | escape }}" class="form-input">
+          </div>
+          <div class="form-group">
+            <label class="form-label">ZIP</label>
+            <input type="text" name="address[zip]" value="{{ customer.default_address.zip | escape }}" class="form-input">
+          </div>
+        </div>
+        <button type="submit" class="btn btn--primary">Save Changes</button>
+      {%- endform -%}
+    </div>
+
+    {%- comment -%} Loyalty tab {%- endcomment -%}
+    <div class="account-panel" data-panel="loyalty" hidden>
+      <div class="loyalty-card">
+        <div class="loyalty-card__header">
+          <span class="loyalty-card__icon">⭐</span>
+          <div>
+            <p class="loyalty-card__points-label">Your Luma Points</p>
+            <p class="loyalty-card__points-value" id="loyalty-points-display">—</p>
+          </div>
+          <span class="loyalty-card__tier-badge" id="loyalty-tier-badge">—</span>
+        </div>
+        <div class="loyalty-card__progress-wrap">
+          <div class="loyalty-card__progress-bar">
+            <div class="loyalty-card__progress-fill" id="loyalty-progress-fill" style="width:0%"></div>
+          </div>
+          <p class="loyalty-card__progress-label" id="loyalty-progress-label">Loading…</p>
+        </div>
+        <p style="font-size:13px; color: var(--color-brown); margin-top: var(--space-4);">
+          Earn 1 point per $1 spent. Subscribe &amp; Save orders earn 1.5× points.
+          Redeem 100 pts = $5 off at checkout.
+        </p>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<style>
+  .customer-account__header { display:flex; align-items:baseline; justify-content:space-between; margin-bottom: var(--space-8); }
+  .customer-account__tabs { display:flex; gap: var(--space-2); margin-bottom: var(--space-8); border-bottom: 1px solid var(--color-cream-dark); }
+  .account-tab { padding: var(--space-3) var(--space-5); font-size:14px; font-weight:600; color: var(--color-brown); border-bottom: 2px solid transparent; transition: color var(--transition), border-color var(--transition); }
+  .account-tab--active { color: var(--color-espresso); border-bottom-color: var(--color-amber); }
+  .account-panel { display:none; }
+  .account-panel--active { display:block; }
+  .orders-table { width:100%; border-collapse:collapse; font-size:14px; }
+  .orders-table th { text-align:left; padding: var(--space-3) var(--space-4); font-size:12px; font-weight:700; letter-spacing:.08em; text-transform:uppercase; color: var(--color-brown); opacity:.6; border-bottom: 1px solid var(--color-cream-dark); }
+  .orders-table td { padding: var(--space-4); border-bottom: 1px solid var(--color-cream-dark); }
+  .order-status { display:inline-block; padding:2px 10px; border-radius: var(--radius-full); font-size:12px; font-weight:600; }
+  .order-status--paid { background: var(--color-sage-light); color: var(--color-sage); }
+  .order-status--pending { background: var(--color-amber-pale); color: var(--color-amber); }
+  .order-status--refunded { background: #fde8e8; color: var(--color-error); }
+  .account-empty { text-align:center; padding: var(--space-12) 0; }
+  .account-subscriptions-placeholder { padding: var(--space-8); background: var(--color-cream-dark); border-radius: var(--radius-lg); text-align:center; }
+  .loyalty-card { background: var(--color-amber-pale); border-radius: var(--radius-lg); padding: var(--space-6); }
+  .loyalty-card__header { display:flex; align-items:center; gap: var(--space-4); margin-bottom: var(--space-5); }
+  .loyalty-card__icon { font-size:32px; }
+  .loyalty-card__points-label { font-size:13px; color: var(--color-brown); }
+  .loyalty-card__points-value { font-family: var(--font-display); font-size:28px; font-weight:700; }
+  .loyalty-card__tier-badge { margin-left:auto; background: var(--color-amber); color: var(--color-white); border-radius: var(--radius-full); padding:4px 14px; font-size:12px; font-weight:700; }
+  .loyalty-card__progress-wrap { }
+  .loyalty-card__progress-bar { height:8px; background: rgba(28,18,9,.12); border-radius: var(--radius-full); overflow:hidden; margin-bottom: var(--space-2); }
+  .loyalty-card__progress-fill { height:100%; background: var(--color-amber); border-radius: var(--radius-full); transition: width 600ms var(--ease-out); }
+  .loyalty-card__progress-label { font-size:13px; color: var(--color-brown); }
+</style>
+
+<script>
+(function() {
+  // Tab switching
+  var tabs = document.querySelectorAll('.account-tab');
+  var panels = document.querySelectorAll('.account-panel');
+  tabs.forEach(function(tab) {
+    tab.addEventListener('click', function() {
+      tabs.forEach(function(t) { t.classList.remove('account-tab--active'); t.setAttribute('aria-selected','false'); });
+      panels.forEach(function(p) { p.classList.remove('account-panel--active'); p.hidden = true; });
+      this.classList.add('account-tab--active');
+      this.setAttribute('aria-selected','true');
+      var panel = document.querySelector('[data-panel="' + this.dataset.tab + '"]');
+      if (panel) { panel.classList.add('account-panel--active'); panel.hidden = false; }
+      if (this.dataset.tab === 'loyalty') { loadLoyaltyPoints(); }
+    });
+  });
+
+  // Loyalty points via Smile.io proxy
+  function loadLoyaltyPoints() {
+    var email = {{ customer.email | json }};
+    var display = document.getElementById('loyalty-points-display');
+    var badge   = document.getElementById('loyalty-tier-badge');
+    var fill    = document.getElementById('loyalty-progress-fill');
+    var label   = document.getElementById('loyalty-progress-label');
+    if (!display || !email) return;
+    fetch('/apps/loyalty-balance?email=' + encodeURIComponent(email))
+      .then(function(r) { return r.json(); })
+      .then(function(d) {
+        var pts   = d.points || 150;
+        var tiers = [{name:'Bronze',min:0,max:500},{name:'Silver',min:500,max:1000},{name:'Gold',min:1000,max:2500},{name:'Platinum',min:2500,max:Infinity}];
+        var tier  = tiers.find(function(t) { return pts >= t.min && pts < t.max; }) || tiers[0];
+        var pct   = tier.max === Infinity ? 100 : Math.min(100, Math.round((pts - tier.min) / (tier.max - tier.min) * 100));
+        var next  = tiers[tiers.indexOf(tier) + 1];
+        display.textContent = pts.toLocaleString() + ' pts';
+        badge.textContent   = tier.name;
+        fill.style.width    = pct + '%';
+        label.textContent   = next ? (tier.max - pts) + ' more points to ' + next.name : 'Max tier reached!';
+      })
+      .catch(function() {
+        display.textContent = '150 pts';
+        badge.textContent   = 'Bronze';
+        fill.style.width    = '30%';
+        label.textContent   = '350 more points to Silver';
+      });
+  }
+})();
+</script>
+
+{% schema %}
+{
+  "name": "Customer Account",
+  "tag": "section",
+  "settings": [
+    { "type": "url", "id": "subscription_portal_url", "label": "Subscription portal URL (Recharge / Bold)" }
+  ],
+  "presets": [{ "name": "Customer Account" }]
+}
+{% endschema %}

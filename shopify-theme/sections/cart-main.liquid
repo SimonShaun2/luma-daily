@@ -1,0 +1,229 @@
+{% comment %}
+  Section: cart-main
+  Ported from: cart drawer + checkout modal Order Summary step in Home.tsx
+  Design: Warm Editorial — two-column layout (items left, summary right)
+{% endcomment %}
+
+{%- if cart.item_count == 0 -%}
+  <div class="customer-page">
+    <div class="container customer-page__inner" style="text-align:center;">
+      <h1 class="customer-page__title">Your Cart is Empty</h1>
+      <p style="color: var(--color-brown); margin-bottom: var(--space-8);">Add some products to get started.</p>
+      <a href="/collections/all" class="btn btn--primary btn--lg">Shop Now</a>
+    </div>
+  </div>
+{%- else -%}
+  <section class="cart-page section-cream">
+    <div class="container">
+      <h1 class="section-title" style="margin-bottom: var(--space-8);">Your Cart</h1>
+
+      <div class="cart-page__inner">
+
+        {%- comment -%} Left: line items {%- endcomment -%}
+        <div class="cart-page__items">
+          {%- for item in cart.items -%}
+            <div class="cart-item cart-page__item" data-key="{{ item.key }}">
+              <img
+                src="{{ item.image | image_url: width: 120 }}"
+                alt="{{ item.image.alt | default: item.title | escape }}"
+                class="cart-item__image"
+                width="80"
+                height="80"
+                loading="lazy"
+              >
+              <div class="cart-item__details">
+                <p class="cart-item__title">{{ item.product.title | escape }}</p>
+                {%- if item.variant.title != 'Default Title' -%}
+                  <p class="cart-item__variant">{{ item.variant.title | escape }}</p>
+                {%- endif -%}
+                {%- if item.selling_plan_allocation -%}
+                  <span class="cart-item__subscribe-badge">Subscribe &amp; Save</span>
+                {%- endif -%}
+                <div class="cart-item__qty-controls">
+                  <button class="qty-btn" data-action="decrement" data-key="{{ item.key }}" aria-label="Decrease quantity">−</button>
+                  <span class="qty-display">{{ item.quantity }}</span>
+                  <button class="qty-btn" data-action="increment" data-key="{{ item.key }}" aria-label="Increase quantity">+</button>
+                </div>
+              </div>
+              <div class="cart-item__price-col">
+                <span class="cart-item__price">{{ item.final_line_price | money }}</span>
+                <button class="cart-item__remove" data-key="{{ item.key }}" aria-label="Remove {{ item.title | escape }}">Remove</button>
+              </div>
+            </div>
+          {%- endfor -%}
+        </div>
+
+        {%- comment -%} Right: order summary {%- endcomment -%}
+        <div class="cart-page__summary">
+
+          {%- comment -%} Shipping progress {%- endcomment -%}
+          {%- assign free_threshold = section.settings.free_shipping_threshold | default: 75 -%}
+          {%- assign cart_dollars = cart.total_price | divided_by: 100.0 -%}
+          {%- assign shipping_pct = cart_dollars | divided_by: free_threshold | times: 100 | round -%}
+          {%- if shipping_pct > 100 -%}{%- assign shipping_pct = 100 -%}{%- endif -%}
+          <div class="cart-drawer__shipping-bar" style="border-radius: var(--radius-md); margin-bottom: var(--space-5);">
+            <div class="shipping-bar__track">
+              <div
+                class="shipping-bar__fill{% if shipping_pct >= 100 %} shipping-bar__fill--unlocked{% endif %}"
+                style="width: {{ shipping_pct }}%"
+              ></div>
+            </div>
+            {%- if shipping_pct >= 100 -%}
+              <p class="shipping-bar__label">🎉 You've unlocked free shipping!</p>
+            {%- else -%}
+              {%- assign remaining = free_threshold | minus: cart_dollars -%}
+              <p class="shipping-bar__label">Add ${{ remaining | round: 2 }} more for free shipping</p>
+            {%- endif -%}
+          </div>
+
+          {%- comment -%} Promo code {%- endcomment -%}
+          <div class="cart-page__promo" style="margin-bottom: var(--space-5);">
+            <button class="cart-page__promo-toggle" id="promo-toggle" aria-expanded="false">
+              Have a promo code? <span id="promo-toggle-icon">+</span>
+            </button>
+            <div id="promo-panel" hidden style="margin-top: var(--space-3); display:flex; gap: var(--space-2);">
+              <input
+                type="text"
+                id="promo-input"
+                class="form-input"
+                placeholder="Enter code"
+                style="flex:1; text-transform:uppercase;"
+              >
+              <button class="btn btn--outline-amber btn--sm" id="promo-apply-btn">Apply</button>
+            </div>
+            <p id="promo-message" style="font-size:13px; margin-top: var(--space-2);"></p>
+          </div>
+
+          {%- comment -%} Totals {%- endcomment -%}
+          <div class="cart-page__totals">
+            <div class="cart-drawer__subtotal">
+              <span>Subtotal</span>
+              <span>{{ cart.total_price | money }}</span>
+            </div>
+            <p style="font-size:12px; color: var(--color-brown); opacity:.6; margin-top: var(--space-2);">
+              Shipping calculated at checkout
+            </p>
+          </div>
+
+          <a href="/checkout" class="btn btn--primary btn--full btn--lg" style="margin-top: var(--space-5);">
+            Proceed to Checkout — {{ cart.total_price | money }}
+          </a>
+
+          <div class="cart-drawer__trust" style="margin-top: var(--space-4);">
+            <span>🔒 Secure checkout</span>
+            <span>🚚 Free shipping ${{ free_threshold }}+</span>
+            <span>↩ 30-day returns</span>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </section>
+{%- endif -%}
+
+<style>
+  .cart-page__inner {
+    display: grid;
+    grid-template-columns: 1fr 360px;
+    gap: var(--space-10);
+    align-items: start;
+  }
+  @media (max-width: 768px) {
+    .cart-page__inner { grid-template-columns: 1fr; }
+  }
+  .cart-page__item { border-bottom: 1px solid var(--color-cream-dark); padding-bottom: var(--space-5); margin-bottom: var(--space-5); }
+  .cart-page__summary { background: var(--color-white); border-radius: var(--radius-lg); padding: var(--space-6); box-shadow: var(--shadow-sm); position: sticky; top: 80px; }
+  .cart-page__promo-toggle { font-size:14px; font-weight:600; color: var(--color-amber); background:none; border:none; cursor:pointer; padding:0; }
+  .cart-page__totals { border-top: 1px solid var(--color-cream-dark); padding-top: var(--space-4); margin-top: var(--space-4); }
+</style>
+
+<script>
+(function() {
+  // Promo toggle
+  var toggle = document.getElementById('promo-toggle');
+  var panel  = document.getElementById('promo-panel');
+  var icon   = document.getElementById('promo-toggle-icon');
+  if (toggle && panel) {
+    toggle.addEventListener('click', function() {
+      var open = this.getAttribute('aria-expanded') === 'true';
+      this.setAttribute('aria-expanded', String(!open));
+      panel.hidden = open;
+      icon.textContent = open ? '+' : '−';
+    });
+  }
+
+  // Qty controls (AJAX cart)
+  document.querySelectorAll('.qty-btn').forEach(function(btn) {
+    btn.addEventListener('click', function() {
+      var key     = this.dataset.key;
+      var display = this.closest('.cart-item__qty-controls').querySelector('.qty-display');
+      var qty     = parseInt(display.textContent, 10);
+      var newQty  = this.dataset.action === 'increment' ? qty + 1 : Math.max(0, qty - 1);
+      fetch('/cart/change.js', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ id: key, quantity: newQty })
+      }).then(function() { window.location.reload(); });
+    });
+  });
+
+  // Remove buttons
+  document.querySelectorAll('.cart-item__remove').forEach(function(btn) {
+    btn.addEventListener('click', function() {
+      fetch('/cart/change.js', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ id: this.dataset.key, quantity: 0 })
+      }).then(function() { window.location.reload(); });
+    });
+  });
+
+  // Promo apply (client-side demo; replace with /apps/validate-promo proxy)
+  var applyBtn = document.getElementById('promo-apply-btn');
+  var promoMsg = document.getElementById('promo-message');
+  var FALLBACK = { LUMA10: 10, LUMA15: 15, LUMA20: 20, WELCOME: 15 };
+  if (applyBtn) {
+    applyBtn.addEventListener('click', function() {
+      var code = document.getElementById('promo-input').value.trim().toUpperCase();
+      if (!code) return;
+      applyBtn.textContent = 'Checking…';
+      applyBtn.disabled = true;
+      fetch('/apps/validate-promo', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ code: code })
+      })
+      .then(function(r) { return r.json(); })
+      .then(function(d) {
+        promoMsg.style.color = 'var(--color-sage)';
+        promoMsg.textContent = '✓ ' + d.discount + '% off applied!';
+      })
+      .catch(function() {
+        var pct = FALLBACK[code];
+        if (pct) {
+          promoMsg.style.color = 'var(--color-sage)';
+          promoMsg.textContent = '✓ ' + pct + '% off applied (demo)';
+        } else {
+          promoMsg.style.color = 'var(--color-error)';
+          promoMsg.textContent = 'Code not found.';
+        }
+      })
+      .finally(function() {
+        applyBtn.textContent = 'Apply';
+        applyBtn.disabled = false;
+      });
+    });
+  }
+})();
+</script>
+
+{% schema %}
+{
+  "name": "Cart",
+  "tag": "section",
+  "settings": [
+    { "type": "number", "id": "free_shipping_threshold", "label": "Free shipping threshold ($)", "default": 75 }
+  ],
+  "presets": [{ "name": "Cart" }]
+}
+{% endschema %}

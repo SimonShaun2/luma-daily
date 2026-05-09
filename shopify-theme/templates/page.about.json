@@ -1,0 +1,9 @@
+{
+  "sections": {
+    "page-about": {
+      "type": "page-about",
+      "settings": {}
+    }
+  },
+  "order": ["page-about"]
+}
