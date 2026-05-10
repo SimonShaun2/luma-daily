@@ -40,7 +40,8 @@
         class="product-card__image"
         style="aspect-ratio: {{ image_aspect_ratio }};"
         width="480"
-        {%- if lazy_load -%}loading="lazy"{%- else -%}loading="eager"{%- endif -%}
+        height="480"
+        {% if lazy_load %}loading="lazy"{% else %}loading="eager"{% endif %}
       >
     {%- else -%}
       <div class="product-card__image product-card__image--placeholder" style="aspect-ratio: {{ image_aspect_ratio }};"></div>

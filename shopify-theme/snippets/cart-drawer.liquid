@@ -37,7 +37,7 @@
         {%- for item in cart.items -%}
           <div class="cart-item" data-key="{{ item.key }}" data-variant-id="{{ item.variant_id }}">
             <a href="{{ item.url }}" class="cart-item__image-link">
-              <img src="{{ item.image | image_url: width: 100 }}" alt="{{ item.title | escape }}" width="100" class="cart-item__image">
+              <img src="{{ item.image | image_url: width: 100 }}" alt="{{ item.title | escape }}" width="100" height="100" class="cart-item__image">
             </a>
             <div class="cart-item__details">
               <p class="cart-item__title">{{ item.product.title | escape }}</p>
@@ -71,7 +71,7 @@
       {%- assign upsell_collection = collections['best-sellers'] -%}
       {%- for product in upsell_collection.products limit: 3 -%}
         <div class="upsell-item">
-          <img src="{{ product.featured_image | image_url: width: 60 }}" alt="{{ product.title | escape }}" width="60">
+          <img src="{{ product.featured_image | image_url: width: 60 }}" alt="{{ product.title | escape }}" width="60" height="60">
           <div class="upsell-item__info">
             <span>{{ product.title | escape }}</span>
             <span>{{ product.price | money }}</span>

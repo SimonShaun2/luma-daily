@@ -5,7 +5,7 @@
 <section class="final-cta" aria-label="Final call to action">
   <div class="container final-cta__inner">
     {%- if section.settings.background_image != blank -%}
-      <img src="{{ section.settings.background_image | image_url: width: 1400 }}" alt="" class="final-cta__bg" aria-hidden="true" width="1400" loading="lazy">
+      <img src="{{ section.settings.background_image | image_url: width: 1400 }}" alt="" class="final-cta__bg" aria-hidden="true" width="1400" height="700" loading="lazy">
     {%- endif -%}
     <div class="final-cta__content">
       <h2>{{ section.settings.heading | escape }}</h2>

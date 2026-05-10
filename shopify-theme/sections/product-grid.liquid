@@ -13,7 +13,8 @@
     {%- comment -%} Filter tabs — driven by product tags {%- endcomment -%}
     <div class="product-filter-tabs" role="tablist" aria-label="Filter by formula">
       <button class="filter-tab filter-tab--active" data-filter="all" role="tab" aria-selected="true">All</button>
-      {%- for tag in section.settings.filter_tags | split: ',' -%}
+      {%- assign filter_tags = section.settings.filter_tags | split: ',' -%}
+      {%- for tag in filter_tags -%}
         <button class="filter-tab" data-filter="{{ tag | strip | handle }}" role="tab" aria-selected="false">
           {{ tag | strip | escape }}
         </button>
@@ -33,6 +34,7 @@
               alt="{{ product.featured_image.alt | default: product.title | escape }}"
               class="product-card__image"
               width="400"
+              height="400"
               loading="lazy"
             >
           </a>

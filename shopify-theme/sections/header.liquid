@@ -12,8 +12,9 @@
     <a href="/" class="site-header__logo" aria-label="{{ shop.name }} home">
       {%- if section.settings.logo != blank -%}
         <img
-          src="{{ section.settings.logo | image_url: height: 40 }}"
+          src="{{ section.settings.logo | image_url: width: 160, height: 40 }}"
           alt="{{ shop.name }}"
+          width="160"
           height="40"
           loading="eager"
         >

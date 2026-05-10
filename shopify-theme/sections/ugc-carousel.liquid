@@ -11,7 +11,7 @@
         {%- if block.type == 'video' -%}
           <div class="ugc-carousel__item" role="listitem" {{ block.shopify_attributes }}>
             {%- if block.settings.thumbnail != blank -%}
-              <img src="{{ block.settings.thumbnail | image_url: width: 300 }}" alt="{{ block.settings.alt | escape }}" width="300" loading="lazy" class="ugc-carousel__thumbnail">
+            <img src="{{ block.settings.thumbnail | image_url: width: 300 }}" alt="{{ block.settings.alt | escape }}" width="300" height="533" loading="lazy" class="ugc-carousel__thumbnail">
             {%- endif -%}
             <button class="ugc-carousel__play" aria-label="Play video" data-video="{{ block.settings.video_url | escape }}">
               <svg viewBox="0 0 24 24" fill="currentColor" width="40" height="40"><path d="M8 5v14l11-7z"/></svg>

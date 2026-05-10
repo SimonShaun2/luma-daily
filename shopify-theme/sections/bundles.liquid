@@ -16,10 +16,11 @@
             <img
               src="{{ product.featured_image | image_url: width: 400 }}"
               alt="{{ product.featured_image.alt | default: product.title | escape }}"
-              class="bundle-card__image"
-              width="400"
-              loading="lazy"
-            >
+                class="bundle-card__image"
+                width="400"
+                height="400"
+                loading="lazy"
+              >
           </a>
           <div class="bundle-card__body">
             <h3 class="bundle-card__title"><a href="{{ product.url }}">{{ product.title | escape }}</a></h3>

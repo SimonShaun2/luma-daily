@@ -13,7 +13,7 @@
     </div>
     {%- if section.settings.image != blank -%}
       <div class="quiz-cta__image">
-        <img src="{{ section.settings.image | image_url: width: 500 }}" alt="{{ section.settings.image.alt | escape }}" width="500" loading="lazy">
+        <img src="{{ section.settings.image | image_url: width: 500 }}" alt="{{ section.settings.image.alt | escape }}" width="500" height="500" loading="lazy">
       </div>
     {%- endif -%}
   </div>
