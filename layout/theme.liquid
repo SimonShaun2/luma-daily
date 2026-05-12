@@ -34,14 +34,22 @@
        Replace REPLACE_WITH_KLAVIYO_PUBLIC_KEY with your Klaviyo public API key.
        Found in Klaviyo → Account → Settings → API Keys.
   ──────────────────────────────────────────────────────────────────────────── -->
-  {%- if settings.klaviyo_public_key != blank -%}
+  {%- assign klaviyo_public_key_is_placeholder = false -%}
+  {%- if settings.klaviyo_public_key contains 'REPLACE_WITH' -%}
+    {%- assign klaviyo_public_key_is_placeholder = true -%}
+  {%- endif -%}
+  {%- if settings.klaviyo_public_key != blank and klaviyo_public_key_is_placeholder == false -%}
     <script async type="text/javascript"
       src="https://static.klaviyo.com/onsite/js/klaviyo.js?company_id={{ settings.klaviyo_public_key }}">
     </script>
   {%- endif -%}
 
   <!-- ─── Klaviyo Flow webhook URL (exposed to JS for confirmation email capture) ── -->
-  {%- if settings.klaviyo_webhook_url != blank -%}
+  {%- assign klaviyo_webhook_is_placeholder = false -%}
+  {%- if settings.klaviyo_webhook_url contains 'REPLACE_WITH' -%}
+    {%- assign klaviyo_webhook_is_placeholder = true -%}
+  {%- endif -%}
+  {%- if settings.klaviyo_webhook_url != blank and klaviyo_webhook_is_placeholder == false -%}
     <script>
       window.__LUMA_KLAVIYO_WEBHOOK__ = {{ settings.klaviyo_webhook_url | json }};
     </script>
@@ -51,7 +59,11 @@
        Replace REPLACE_WITH_GOOGLE_MAPS_API_KEY with a key restricted to this domain.
        Google Cloud Console → APIs & Services → Credentials → Restrict to HTTP referrers.
   ──────────────────────────────────────────────────────────────────────────── -->
-  {%- if settings.google_maps_api_key != blank -%}
+  {%- assign google_maps_key_is_placeholder = false -%}
+  {%- if settings.google_maps_api_key contains 'REPLACE_WITH' -%}
+    {%- assign google_maps_key_is_placeholder = true -%}
+  {%- endif -%}
+  {%- if settings.google_maps_api_key != blank and google_maps_key_is_placeholder == false -%}
     <script async defer
       src="https://maps.googleapis.com/maps/api/js?key={{ settings.google_maps_api_key }}&libraries=places">
     </script>

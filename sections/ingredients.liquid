@@ -1,36 +1,51 @@
-{% comment %}
-  Section: ingredients
-  Ported from: Home.tsx §11 INGREDIENTS
-{% endcomment %}
-<section class="ingredients" aria-label="Key ingredients">
+{% comment %}Ingredient cards with defaults so previews are never empty.{% endcomment %}
+
+<section class="ingredients" id="ingredients" aria-label="Key ingredients">
   <div class="container">
-    <h2 class="section-title">{{ section.settings.heading | default: 'What Goes In — And Why' | escape }}</h2>
+    <div class="luma-section-kicker">Clean support, clearly labeled</div>
+    <h2 class="section-title">{{ section.settings.heading | default: 'What goes in - and why' | escape }}</h2>
+    <p class="section-subhead">{{ section.settings.subhead | default: 'Familiar daily wellness ingredients, paired by benefit and designed for consistency.' | escape }}</p>
+
     <div class="ingredients__grid">
-      {%- for block in section.blocks -%}
-        {%- if block.type == 'ingredient' -%}
-          <div class="ingredient-card" {{ block.shopify_attributes }}>
-            <span class="ingredient-card__icon" aria-hidden="true">{{ block.settings.emoji }}</span>
-            <h3 class="ingredient-card__name">{{ block.settings.name | escape }}</h3>
-            <p class="ingredient-card__benefit">{{ block.settings.benefit | escape }}</p>
+      {%- if section.blocks.size > 0 -%}
+        {%- for block in section.blocks -%}
+          {%- if block.type == 'ingredient' -%}
+            <div class="ingredient-card" {{ block.shopify_attributes }}>
+              <span class="ingredient-card__icon" aria-hidden="true">{{ block.settings.emoji | default: '+' }}</span>
+              <h3 class="ingredient-card__name">{{ block.settings.name | escape }}</h3>
+              <p class="ingredient-card__benefit">{{ block.settings.benefit | escape }}</p>
+            </div>
+          {%- endif -%}
+        {%- endfor -%}
+      {%- else -%}
+        {%- assign ingredients = 'B12|Energy + focus support;L-Theanine|Calm focus support;Magnesium|Restful sleep support;Biotin|Skin, hair + nails support;Prebiotic Fiber|Digestive wellness support;Vitamin C|Daily glow support;Ginger|Digestive comfort support;Peppermint|Citrus mint ritual flavor' | split: ';' -%}
+        {%- for ingredient in ingredients -%}
+          {%- assign data = ingredient | split: '|' -%}
+          <div class="ingredient-card">
+            <span class="ingredient-card__icon" aria-hidden="true">+</span>
+            <h3 class="ingredient-card__name">{{ data[0] | escape }}</h3>
+            <p class="ingredient-card__benefit">{{ data[1] | escape }}</p>
           </div>
-        {%- endif -%}
-      {%- endfor -%}
+        {%- endfor -%}
+      {%- endif -%}
     </div>
   </div>
 </section>
+
 {% schema %}
 {
   "name": "Ingredients",
   "tag": "section",
   "settings": [
-    { "type": "text", "id": "heading", "label": "Heading", "default": "What Goes In — And Why" }
+    { "type": "text", "id": "heading", "label": "Heading", "default": "What goes in - and why" },
+    { "type": "text", "id": "subhead", "label": "Subheadline", "default": "Familiar daily wellness ingredients, paired by benefit and designed for consistency." }
   ],
   "blocks": [
     {
       "type": "ingredient",
       "name": "Ingredient",
       "settings": [
-        { "type": "text", "id": "emoji", "label": "Emoji icon" },
+        { "type": "text", "id": "emoji", "label": "Icon" },
         { "type": "text", "id": "name", "label": "Ingredient name" },
         { "type": "text", "id": "benefit", "label": "Benefit copy" }
       ]

@@ -1,22 +1,35 @@
-{% comment %}
-  Section: trust-bar
-  Ported from: Home.tsx §5 TRUST BAR
-{% endcomment %}
+{% comment %}Conversion trust bar with editable blocks and Luma fallbacks.{% endcomment %}
+
 <section class="trust-bar" aria-label="Trust signals">
   <div class="container trust-bar__grid">
-    {%- for block in section.blocks -%}
-      {%- if block.type == 'item' -%}
-        <div class="trust-bar__item" {{ block.shopify_attributes }}>
-          <span class="trust-bar__icon" aria-hidden="true">{{ block.settings.emoji }}</span>
+    {%- if section.blocks.size > 0 -%}
+      {%- for block in section.blocks -%}
+        {%- if block.type == 'item' -%}
+          <div class="trust-bar__item" {{ block.shopify_attributes }}>
+            <span class="trust-bar__icon" aria-hidden="true">{{ block.settings.emoji | default: '&#10003;' }}</span>
+            <div>
+              <strong class="trust-bar__label">{{ block.settings.label | escape }}</strong>
+              <p class="trust-bar__sub">{{ block.settings.sublabel | escape }}</p>
+            </div>
+          </div>
+        {%- endif -%}
+      {%- endfor -%}
+    {%- else -%}
+      {%- assign items = '10,000+ subscribers|Daily rituals started;Third-party tested|Every batch tested;No artificial colors|Clean, fruit-forward formulas;Vegan, gluten-free, non-GMO|Made for daily consistency;30-day satisfaction guarantee|Try Luma with confidence;Free shipping $50+|Simple subscription delivery' | split: ';' -%}
+      {%- for item in items -%}
+        {%- assign data = item | split: '|' -%}
+        <div class="trust-bar__item">
+          <span class="trust-bar__icon" aria-hidden="true">&#10003;</span>
           <div>
-            <strong class="trust-bar__label">{{ block.settings.label | escape }}</strong>
-            <p class="trust-bar__sub">{{ block.settings.sublabel | escape }}</p>
+            <strong class="trust-bar__label">{{ data[0] | escape }}</strong>
+            <p class="trust-bar__sub">{{ data[1] | escape }}</p>
           </div>
         </div>
-      {%- endif -%}
-    {%- endfor -%}
+      {%- endfor -%}
+    {%- endif -%}
   </div>
 </section>
+
 {% schema %}
 {
   "name": "Trust Bar",
@@ -27,7 +40,7 @@
       "type": "item",
       "name": "Trust Item",
       "settings": [
-        { "type": "text", "id": "emoji", "label": "Emoji icon", "default": "✓" },
+        { "type": "text", "id": "emoji", "label": "Icon", "default": "+" },
         { "type": "text", "id": "label", "label": "Label" },
         { "type": "text", "id": "sublabel", "label": "Sub-label" }
       ]
@@ -37,10 +50,10 @@
     {
       "name": "Trust Bar",
       "blocks": [
-        { "type": "item", "settings": { "emoji": "✓", "label": "Results in 30 Days", "sublabel": "Or your money back" } },
-        { "type": "item", "settings": { "emoji": "★", "label": "Tastes Amazing", "sublabel": "Real fruit flavors" } },
-        { "type": "item", "settings": { "emoji": "🌿", "label": "Clean Ingredients", "sublabel": "No artificial anything" } },
-        { "type": "item", "settings": { "emoji": "🧪", "label": "Third-Party Tested", "sublabel": "Every batch, every time" } }
+        { "type": "item", "settings": { "emoji": "+", "label": "Vegan", "sublabel": "Gummy rituals, cleanly made" } },
+        { "type": "item", "settings": { "emoji": "+", "label": "Third-party tested", "sublabel": "Every batch" } },
+        { "type": "item", "settings": { "emoji": "+", "label": "Gluten-free", "sublabel": "No artificial colors" } },
+        { "type": "item", "settings": { "emoji": "+", "label": "Free shipping $50+", "sublabel": "Simple reorder rhythm" } }
       ]
     }
   ]

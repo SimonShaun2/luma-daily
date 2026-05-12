@@ -25,12 +25,11 @@
 
     {%- comment -%} Desktop navigation {%- endcomment -%}
     <nav class="site-header__nav hide-mobile" aria-label="Main navigation">
-      {%- for link in linklists[section.settings.menu].links -%}
-        <a
-          href="{{ link.url }}"
-          {% if link.active %}aria-current="page"{% endif %}
-        >{{ link.title | escape }}</a>
-      {%- endfor -%}
+      <a href="/#products">Shop All</a>
+      <a href="/#bundles">Bundles</a>
+      <a href="/#quiz">Find My Ritual</a>
+      <a href="/#faq">FAQ</a>
+      <a href="/pages/about">About</a>
     </nav>
 
     {%- comment -%} Actions: account + cart {%- endcomment -%}
@@ -88,13 +87,11 @@
     hidden
   >
     <div class="container site-header__mobile-nav-inner">
-      {%- for link in linklists[section.settings.menu].links -%}
-        <a
-          href="{{ link.url }}"
-          class="site-header__mobile-link"
-          {% if link.active %}aria-current="page"{% endif %}
-        >{{ link.title | escape }}</a>
-      {%- endfor -%}
+      <a href="/#products" class="site-header__mobile-link">Shop All</a>
+      <a href="/#bundles" class="site-header__mobile-link">Bundles</a>
+      <a href="/#quiz" class="site-header__mobile-link">Find My Ritual</a>
+      <a href="/#faq" class="site-header__mobile-link">FAQ</a>
+      <a href="/pages/about" class="site-header__mobile-link">About</a>
     </div>
   </nav>
 </header>

@@ -1,46 +1,44 @@
-{% comment %}
-  Section: subscribe-save
-  Ported from: Home.tsx §13 SUBSCRIBE & SAVE
-{% endcomment %}
+{% comment %}Subscribe & Save comparison. Subscription app can attach selling plans later.{% endcomment %}
+
 <section class="subscribe-save" aria-label="Subscribe and save">
-  <div class="container subscribe-save__inner">
-    <div class="subscribe-save__one-time">
-      <h3>{{ section.settings.one_time_heading | default: 'One-Time Purchase' | escape }}</h3>
-      {%- for block in section.blocks -%}
-        {%- if block.type == 'one_time_point' -%}
-          <p class="subscribe-save__point">{{ block.settings.text | escape }}</p>
-        {%- endif -%}
-      {%- endfor -%}
+  <div class="container">
+    <div class="subscribe-save__heading">
+      <div class="luma-section-kicker">Subscribe &amp; save</div>
+      <h2 class="section-title">Make consistency automatic.</h2>
+      <p class="section-subhead">Keep your ritual stocked, save every month, and pause or cancel whenever your routine changes.</p>
     </div>
-    <div class="subscribe-save__divider" aria-hidden="true">vs</div>
-    <div class="subscribe-save__subscribe">
-      <div class="subscribe-save__badge">{{ section.settings.savings_badge | default: 'Save 15%' | escape }}</div>
-      <h3>{{ section.settings.subscribe_heading | default: 'Subscribe & Save' | escape }}</h3>
-      {%- for block in section.blocks -%}
-        {%- if block.type == 'subscribe_point' -%}
-          <p class="subscribe-save__point subscribe-save__point--highlight">✓ {{ block.settings.text | escape }}</p>
-        {%- endif -%}
-      {%- endfor -%}
-      <a href="{{ section.settings.subscribe_cta_url | default: '/collections/all' }}" class="btn btn--primary">
-        {{ section.settings.subscribe_cta_label | default: 'Subscribe & Save 15%' | escape }}
-      </a>
+    <div class="subscribe-save__inner">
+      <div class="subscribe-save__one-time">
+        <h3>{{ section.settings.one_time_heading | default: 'One-time purchase' | escape }}</h3>
+        <p class="subscribe-save__point">Try any single formula.</p>
+        <p class="subscribe-save__point">No recurring delivery.</p>
+        <p class="subscribe-save__point">Best for first-time discovery.</p>
+      </div>
+      <div class="subscribe-save__divider" aria-hidden="true">vs</div>
+      <div class="subscribe-save__subscribe">
+        <div class="subscribe-save__badge">{{ section.settings.savings_badge | default: 'Save 20%' | escape }}</div>
+        <h3>{{ section.settings.subscribe_heading | default: 'Subscribe & Save' | escape }}</h3>
+        <p class="subscribe-save__point subscribe-save__point--highlight">Delivered every 30 days.</p>
+        <p class="subscribe-save__point subscribe-save__point--highlight">Bundle savings up to 30%.</p>
+        <p class="subscribe-save__point subscribe-save__point--highlight">Pause, skip, or cancel anytime.</p>
+        <a href="{{ section.settings.subscribe_cta_url | default: '/#quiz' }}" class="btn btn--primary">
+          {{ section.settings.subscribe_cta_label | default: 'Build My Ritual' | escape }}
+        </a>
+      </div>
     </div>
   </div>
 </section>
+
 {% schema %}
 {
   "name": "Subscribe & Save",
   "tag": "section",
   "settings": [
-    { "type": "text", "id": "one_time_heading", "label": "One-time heading", "default": "One-Time Purchase" },
+    { "type": "text", "id": "one_time_heading", "label": "One-time heading", "default": "One-time purchase" },
     { "type": "text", "id": "subscribe_heading", "label": "Subscribe heading", "default": "Subscribe & Save" },
-    { "type": "text", "id": "savings_badge", "label": "Savings badge", "default": "Save 15%" },
-    { "type": "text", "id": "subscribe_cta_label", "label": "Subscribe CTA label", "default": "Subscribe & Save 15%" },
+    { "type": "text", "id": "savings_badge", "label": "Savings badge", "default": "Save 20%" },
+    { "type": "text", "id": "subscribe_cta_label", "label": "Subscribe CTA label", "default": "Build My Ritual" },
     { "type": "url", "id": "subscribe_cta_url", "label": "Subscribe CTA URL" }
-  ],
-  "blocks": [
-    { "type": "one_time_point", "name": "One-time Point", "settings": [{ "type": "text", "id": "text", "label": "Point text" }] },
-    { "type": "subscribe_point", "name": "Subscribe Point", "settings": [{ "type": "text", "id": "text", "label": "Point text" }] }
   ],
   "presets": [{ "name": "Subscribe & Save" }]
 }

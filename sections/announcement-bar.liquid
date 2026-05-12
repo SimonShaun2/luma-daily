@@ -5,7 +5,7 @@
 {% endcomment %}
 
 <div id="announcement-bar" class="announcement-bar" data-end-date="{{ settings.urgency_bar_end_date | escape }}">
-  <span class="announcement-bar__text">{{ settings.urgency_bar_text | escape }}</span>
+  <span class="announcement-bar__text">{{ settings.urgency_bar_text | default: 'Free shipping on all orders $50+ | Subscribe & save 20% every order | Start your ritual' | escape }}</span>
   <span class="announcement-bar__timer" id="countdown-timer">
     <span class="countdown-unit"><span id="cd-hours">00</span><small>h</small></span>
     <span class="countdown-sep">:</span>
@@ -18,7 +18,17 @@
 <script>
 (function() {
   var bar = document.getElementById('announcement-bar');
+  if (!bar || !bar.dataset.endDate) {
+    var timer = document.getElementById('countdown-timer');
+    if (timer) timer.hidden = true;
+    return;
+  }
   var endDate = new Date(bar.dataset.endDate);
+  if (Number.isNaN(endDate.getTime())) {
+    var invalidTimer = document.getElementById('countdown-timer');
+    if (invalidTimer) invalidTimer.hidden = true;
+    return;
+  }
   function tick() {
     var now = new Date();
     var diff = Math.max(0, Math.floor((endDate - now) / 1000));

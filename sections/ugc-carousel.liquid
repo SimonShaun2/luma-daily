@@ -1,38 +1,44 @@
-{% comment %}
-  Section: ugc-carousel
-  Ported from: Home.tsx §14 UGC CAROUSEL
-  Note: Replace block video URLs with real UGC video handles from Shopify Files
-{% endcomment %}
-<section class="ugc-carousel" aria-label="Customer videos">
+{% comment %}Visual image strip. Blocks can later be replaced by UGC video thumbnails.{% endcomment %}
+
+<section class="ugc-carousel" aria-label="Luma Daily product imagery">
   <div class="container">
-    <h2 class="section-title">{{ section.settings.heading | default: 'See It In Action' | escape }}</h2>
+    <div class="luma-section-kicker">See it in action</div>
+    <h2 class="section-title">{{ section.settings.heading | default: 'A ritual that looks as good as it tastes.' | escape }}</h2>
     <div class="ugc-carousel__track" role="list">
-      {%- for block in section.blocks -%}
-        {%- if block.type == 'video' -%}
-          <div class="ugc-carousel__item" role="listitem" {{ block.shopify_attributes }}>
-            {%- if block.settings.thumbnail != blank -%}
-            <img src="{{ block.settings.thumbnail | image_url: width: 300 }}" alt="{{ block.settings.alt | escape }}" width="300" height="533" loading="lazy" class="ugc-carousel__thumbnail">
-            {%- endif -%}
-            <button class="ugc-carousel__play" aria-label="Play video" data-video="{{ block.settings.video_url | escape }}">
-              <svg viewBox="0 0 24 24" fill="currentColor" width="40" height="40"><path d="M8 5v14l11-7z"/></svg>
-            </button>
+      {%- if section.blocks.size > 0 -%}
+        {%- for block in section.blocks -%}
+          {%- if block.type == 'video' -%}
+            <div class="ugc-carousel__item" role="listitem" {{ block.shopify_attributes }}>
+              {%- if block.settings.thumbnail != blank -%}
+                <img src="{{ block.settings.thumbnail | image_url: width: 360 }}" alt="{{ block.settings.alt | escape }}" width="360" height="360" loading="lazy" class="ugc-carousel__thumbnail">
+              {%- endif -%}
+            </div>
+          {%- endif -%}
+        {%- endfor -%}
+      {%- else -%}
+        {%- assign images = 'luma-energy-blood-orange-mango-gummies.png|Luma Energy;luma-calm-raspberry-hibiscus-gummies.png|Luma Calm;luma-sleep-blueberry-lavender-gummies.png|Luma Sleep;luma-glow-strawberry-peach-gummies.png|Luma Glow;luma-gut-citrus-mint-gummies.png|Luma Gut' | split: ';' -%}
+        {%- for item in images -%}
+          {%- assign data = item | split: '|' -%}
+          <div class="ugc-carousel__item" role="listitem">
+            <img src="{{ data[0] | asset_url }}" alt="{{ data[1] | escape }} gummies" width="360" height="360" loading="lazy" class="ugc-carousel__thumbnail">
           </div>
-        {%- endif -%}
-      {%- endfor -%}
+        {%- endfor -%}
+      {%- endif -%}
     </div>
   </div>
 </section>
+
 {% schema %}
 {
   "name": "UGC Carousel",
   "tag": "section",
   "settings": [
-    { "type": "text", "id": "heading", "label": "Heading", "default": "See It In Action" }
+    { "type": "text", "id": "heading", "label": "Heading", "default": "A ritual that looks as good as it tastes." }
   ],
   "blocks": [
     {
       "type": "video",
-      "name": "Video",
+      "name": "Video or image",
       "settings": [
         { "type": "image_picker", "id": "thumbnail", "label": "Thumbnail image" },
         { "type": "text", "id": "alt", "label": "Alt text" },

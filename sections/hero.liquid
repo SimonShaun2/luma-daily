@@ -1,76 +1,62 @@
 {% comment %}
-  Section: hero
-  Ported from: Home.tsx §3 HERO
-  Design: Warm Editorial — asymmetric split, Playfair Display headline, amber CTA
-  Left: headline + social proof pills + CTAs
-  Right: UGC video player with thumbnail overlay
+  Editorial homepage hero. Shopify image picker wins; Luma bundle image is the default.
 {% endcomment %}
 
 <section class="hero section-cream" aria-label="Hero">
   <div class="hero__inner container">
-
-    {%- comment -%} LEFT COLUMN {%- endcomment -%}
     <div class="hero__copy">
-      <div class="hero__badge">
-        {%- if section.settings.badge_text != blank -%}
-          <span class="hero__badge-pill">{{ section.settings.badge_text | escape }}</span>
-        {%- endif -%}
+      <div class="hero__social-proof">
+        <div class="hero__stars" aria-label="4.9 out of 5 stars">&#9733;&#9733;&#9733;&#9733;&#9733;</div>
+        <span class="hero__review-count">10,000+ daily rituals started - 4.9 average</span>
       </div>
 
-      <h1 class="hero__headline">{{ section.settings.headline | newline_to_br }}</h1>
-      <p class="hero__subhead">{{ section.settings.subhead | escape }}</p>
+      <h1 class="hero__headline">{{ section.settings.headline | default: 'The gummies that make wellness feel like a ritual.' | newline_to_br }}</h1>
+      <p class="hero__subhead">{{ section.settings.subhead | default: 'Five clean, great-tasting supplement gummies for energy, calm, sleep, glow, and gut support. Built for people who want daily wellness to feel simple.' | escape }}</p>
 
-      <div class="hero__social-proof">
-        <div class="hero__stars" aria-label="4.9 out of 5 stars">★★★★★</div>
-        <span class="hero__review-count">{{ section.settings.review_count | escape }} verified reviews</span>
+      <div class="hero__price-card">
+        <strong>{{ section.settings.price_anchor | default: 'Starting at $22.40/mo' | escape }}</strong>
+        <span>Subscribe &amp; save 20% - cancel anytime</span>
+        <em>Save 20%</em>
       </div>
 
       <div class="hero__ctas">
-        <a href="{{ section.settings.primary_cta_url }}" class="btn btn--primary btn--lg">
-          {{ section.settings.primary_cta_label | default: 'Shop Now' | escape }}
+        <a href="{{ section.settings.primary_cta_url | default: '/#quiz' }}" class="btn btn--primary btn--lg">
+          {{ section.settings.primary_cta_label | default: 'Build My Ritual' | escape }}
         </a>
-        <a href="{{ section.settings.secondary_cta_url }}" class="btn btn--ghost btn--lg">
-          {{ section.settings.secondary_cta_label | default: 'Find My Ritual' | escape }}
+        <a href="{{ section.settings.secondary_cta_url | default: routes.all_products_collection_url }}" class="btn btn--ghost btn--lg">
+          {{ section.settings.secondary_cta_label | default: 'Shop Best Sellers' | escape }}
         </a>
       </div>
 
       <div class="hero__trust-pills">
-        <span class="trust-pill">🌿 Vegan &amp; Gluten-Free</span>
-        <span class="trust-pill">🧪 Third-Party Tested</span>
-        <span class="trust-pill">🇺🇸 Made in the USA</span>
+        <span class="trust-pill">Vegan &amp; gluten-free</span>
+        <span class="trust-pill">Third-party tested</span>
+        <span class="trust-pill">No artificial colors</span>
+        <span class="trust-pill">30-day guarantee</span>
       </div>
     </div>
 
-    {%- comment -%} RIGHT COLUMN — video player {%- endcomment -%}
     <div class="hero__media">
-      {%- if section.settings.hero_video_url != blank -%}
-        <div class="hero__video-wrapper" data-video-url="{{ section.settings.hero_video_url | escape }}">
-          {%- if section.settings.hero_video_thumbnail != blank -%}
-            <img
-              src="{{ section.settings.hero_video_thumbnail | image_url: width: 600 }}"
-              alt="Play video"
-              class="hero__video-thumbnail"
-              width="600"
-              height="600"
-              loading="eager"
-            >
-          {%- endif -%}
-          <button class="hero__play-btn" aria-label="Play video">
-            <svg viewBox="0 0 24 24" fill="currentColor" width="48" height="48"><path d="M8 5v14l11-7z"/></svg>
-          </button>
-        </div>
-      {%- elsif section.settings.hero_image != blank -%}
+      {%- if section.settings.hero_image != blank -%}
         <img
-          src="{{ section.settings.hero_image | image_url: width: 600 }}"
-          alt="{{ section.settings.hero_image.alt | escape }}"
+          src="{{ section.settings.hero_image | image_url: width: 760 }}"
+          alt="{{ section.settings.hero_image.alt | default: 'Luma Daily gummies' | escape }}"
           class="hero__image"
-          width="600"
-          height="600"
+          width="760"
+          height="760"
+          loading="eager"
+        >
+      {%- else -%}
+        <img
+          src="{{ 'luma-full-ritual-bundle.png' | asset_url }}"
+          alt="Five Luma Daily gummy supplement bottles"
+          class="hero__image"
+          width="760"
+          height="760"
           loading="eager"
         >
       {%- endif -%}
     </div>
-
   </div>
 </section>
 
@@ -79,17 +65,14 @@
   "name": "Hero",
   "tag": "section",
   "settings": [
-    { "type": "text", "id": "badge_text", "label": "Badge text", "default": "Six Formulas. One Daily Ritual." },
-    { "type": "textarea", "id": "headline", "label": "Headline", "default": "Feel Like\nYourself Again" },
-    { "type": "text", "id": "subhead", "label": "Subheadline", "default": "Premium wellness gummies formulated for real results — energy, calm, sleep, focus, glow, and gut health." },
-    { "type": "text", "id": "review_count", "label": "Review count", "default": "12,400+" },
-    { "type": "text", "id": "primary_cta_label", "label": "Primary CTA label", "default": "Shop Now" },
+    { "type": "textarea", "id": "headline", "label": "Headline", "default": "The gummies that make wellness feel like a ritual." },
+    { "type": "text", "id": "subhead", "label": "Subheadline", "default": "Five clean, great-tasting supplement gummies for energy, calm, sleep, glow, and gut support. Built for people who want daily wellness to feel simple." },
+    { "type": "text", "id": "price_anchor", "label": "Price anchor", "default": "Starting at $22.40/mo" },
+    { "type": "text", "id": "primary_cta_label", "label": "Primary CTA label", "default": "Build My Ritual" },
     { "type": "url", "id": "primary_cta_url", "label": "Primary CTA URL" },
-    { "type": "text", "id": "secondary_cta_label", "label": "Secondary CTA label", "default": "Find My Ritual" },
+    { "type": "text", "id": "secondary_cta_label", "label": "Secondary CTA label", "default": "Shop Best Sellers" },
     { "type": "url", "id": "secondary_cta_url", "label": "Secondary CTA URL" },
-    { "type": "video_url", "id": "hero_video_url", "label": "Hero video URL", "accept": ["youtube", "vimeo"] },
-    { "type": "image_picker", "id": "hero_video_thumbnail", "label": "Video thumbnail image" },
-    { "type": "image_picker", "id": "hero_image", "label": "Hero image (fallback if no video)" }
+    { "type": "image_picker", "id": "hero_image", "label": "Hero image" }
   ],
   "presets": [{ "name": "Hero" }]
 }

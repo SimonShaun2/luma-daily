@@ -34,8 +34,8 @@
         "type": "text",
         "id": "gwp_product_handle",
         "label": "GWP product handle",
-        "default": "luma-glow-sample",
-        "info": "Shopify product handle for the GWP item. Must match the product handle in Shopify Admin."
+        "default": "",
+        "info": "Optional Shopify product handle for the GWP item."
       }
     ]
   },
@@ -46,13 +46,13 @@
         "type": "text",
         "id": "klaviyo_public_key",
         "label": "Klaviyo public API key",
-        "info": "Found in Klaviyo → Account → Settings → API Keys. Used for onsite identify and track calls."
+        "info": "Found in Klaviyo Account Settings API Keys. Used for onsite identify and track calls."
       },
       {
         "type": "url",
         "id": "klaviyo_webhook_url",
         "label": "Klaviyo Flow webhook URL",
-        "info": "Shopify Flow webhook URL that triggers the receipt + 10% off email. Create a Flow with a webhook trigger in Shopify Admin → Flow."
+        "info": "Shopify Flow webhook URL that triggers the receipt + offer email. Create a Flow with a webhook trigger in Shopify Admin."
       }
     ]
   },
@@ -63,7 +63,7 @@
         "type": "text",
         "id": "google_maps_api_key",
         "label": "Google Maps JavaScript API key",
-        "info": "Restrict this key to your Shopify domain in Google Cloud Console. Used for address autocomplete on the checkout shipping step."
+        "info": "Restrict this key to your Shopify domain in Google Cloud Console. Used for address autocomplete when enabled."
       }
     ]
   },
@@ -74,7 +74,7 @@
         "type": "text",
         "id": "smile_api_key",
         "label": "Smile.io API key",
-        "info": "Found in Smile.io Admin → Apps → API. Used to fetch customer points balance and deduct redeemed points."
+        "info": "Optional Smile.io API key."
       }
     ]
   },
@@ -84,23 +84,23 @@
       {
         "type": "text",
         "id": "urgency_bar_text",
-        "label": "Urgency bar text",
-        "default": "LIMITED OFFER — BUY 2 GET 1 FREE ENDS IN:",
-        "info": "Text shown in the announcement bar before the countdown timer."
+        "label": "Announcement bar text",
+        "default": "Free shipping on all orders $50+ | Subscribe & save 20% every order | Start your ritual",
+        "info": "Text shown in the announcement bar."
       },
       {
         "type": "text",
         "id": "urgency_bar_end_date",
-        "label": "Urgency bar end date (ISO 8601)",
-        "default": "2026-05-15T23:59:59",
-        "info": "ISO 8601 datetime string for the countdown timer target. Example: 2026-05-15T23:59:59"
+        "label": "Countdown end date (ISO 8601)",
+        "default": "",
+        "info": "Optional ISO 8601 datetime string. Leave blank to hide the countdown timer."
       },
       {
         "type": "text",
         "id": "exit_intent_promo_code",
         "label": "Exit-intent promo code",
         "default": "LUMA10",
-        "info": "Promo code shown in the exit-intent overlay when the user tries to leave with items in the cart."
+        "info": "Promo code shown in the exit-intent overlay when enabled."
       }
     ]
   },

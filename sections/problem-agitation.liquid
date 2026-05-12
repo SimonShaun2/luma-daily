@@ -1,40 +1,55 @@
-{% comment %}
-  Section: problem-agitation
-  Ported from: Home.tsx §6 PROBLEM AGITATION
-{% endcomment %}
-<section class="problem-agitation" aria-label="Problem agitation">
+{% comment %}Transformation section: why a ritual is easier to keep than a pill stack.{% endcomment %}
+
+<section class="problem-agitation" aria-label="Daily ritual transformation">
   <div class="container problem-agitation__inner">
-    <h2 class="problem-agitation__headline">{{ section.settings.headline | escape }}</h2>
-    <p class="problem-agitation__body">{{ section.settings.body | escape }}</p>
+    <div class="luma-section-kicker">The daily shift</div>
+    <h2 class="problem-agitation__headline">{{ section.settings.headline | default: "You've tried the pills. Nothing stuck." | escape }}</h2>
+    <p class="problem-agitation__body">{{ section.settings.body | default: 'Luma Daily turns scattered wellness intentions into one simple, enjoyable ritual you can repeat every day.' | escape }}</p>
+
     <div class="problem-agitation__points">
-      {%- for block in section.blocks -%}
-        {%- if block.type == 'point' -%}
-          <div class="problem-agitation__point" {{ block.shopify_attributes }}>
-            <span class="problem-agitation__point-icon" aria-hidden="true">{{ block.settings.emoji }}</span>
+      {%- if section.blocks.size > 0 -%}
+        {%- for block in section.blocks -%}
+          {%- if block.type == 'point' -%}
+            <div class="problem-agitation__point" {{ block.shopify_attributes }}>
+              <span class="problem-agitation__point-icon" aria-hidden="true">{{ block.settings.emoji | default: '01' }}</span>
+              <div>
+                <strong>{{ block.settings.label | escape }}</strong>
+                <p>{{ block.settings.description | escape }}</p>
+              </div>
+            </div>
+          {%- endif -%}
+        {%- endfor -%}
+      {%- else -%}
+        {%- assign points = '01|Choose your support|Energy, calm, sleep, glow, or gut support based on your day.;02|Build your ritual|Start with one formula or bundle a complete morning-to-night routine.;03|Keep it consistent|Subscribe, save, and keep your daily gummies stocked without overthinking it.' | split: ';' -%}
+        {%- for point in points -%}
+          {%- assign data = point | split: '|' -%}
+          <div class="problem-agitation__point">
+            <span class="problem-agitation__point-icon" aria-hidden="true">{{ data[0] }}</span>
             <div>
-              <strong>{{ block.settings.label | escape }}</strong>
-              <p>{{ block.settings.description | escape }}</p>
+              <strong>{{ data[1] | escape }}</strong>
+              <p>{{ data[2] | escape }}</p>
             </div>
           </div>
-        {%- endif -%}
-      {%- endfor -%}
+        {%- endfor -%}
+      {%- endif -%}
     </div>
   </div>
 </section>
+
 {% schema %}
 {
   "name": "Problem Agitation",
   "tag": "section",
   "settings": [
     { "type": "text", "id": "headline", "label": "Headline", "default": "You've tried the pills. Nothing stuck." },
-    { "type": "textarea", "id": "body", "label": "Body copy" }
+    { "type": "textarea", "id": "body", "label": "Body copy", "default": "Luma Daily turns scattered wellness intentions into one simple, enjoyable ritual you can repeat every day." }
   ],
   "blocks": [
     {
       "type": "point",
-      "name": "Pain Point",
+      "name": "Point",
       "settings": [
-        { "type": "text", "id": "emoji", "label": "Emoji" },
+        { "type": "text", "id": "emoji", "label": "Icon" },
         { "type": "text", "id": "label", "label": "Label" },
         { "type": "text", "id": "description", "label": "Description" }
       ]
