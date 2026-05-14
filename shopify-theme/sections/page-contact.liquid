@@ -1,0 +1,130 @@
+{% comment %}
+  Section: page-contact
+  Ported from: Home.tsx Contact page
+  Design: Warm Editorial — two-column layout, Shopify native contact form, support hours
+{% endcomment %}
+
+<section class="page-contact section-cream">
+  <div class="container">
+    <div class="page-contact__inner">
+
+      {%- comment -%} Left: form {%- endcomment -%}
+      <div class="page-contact__form-col">
+        <span class="hero__badge-pill">Get in Touch</span>
+        <h1 class="section-title">{{ section.settings.headline | default: "We'd Love to Hear From You" }}</h1>
+        <p class="section-subhead">{{ section.settings.subhead | default: 'Our team typically responds within one business day.' }}</p>
+
+        {%- form 'contact', id: 'contact-form' -%}
+          {%- if form.posted_successfully? -%}
+            <div class="contact-success" role="alert">
+              <span style="font-size:24px;">✓</span>
+              <p>Message sent! We'll be in touch within 1 business day.</p>
+            </div>
+          {%- else -%}
+            {%- if form.errors -%}
+              <div class="form-errors" role="alert">{{ form.errors | default_errors }}</div>
+            {%- endif -%}
+
+            <div style="display:grid; grid-template-columns:1fr 1fr; gap: var(--space-4);">
+              <div class="form-group">
+                <label class="form-label" for="contact-name">Name</label>
+                <input type="text" id="contact-name" name="contact[name]" required class="form-input" placeholder="Jane Smith" value="{{ form.name }}">
+              </div>
+              <div class="form-group">
+                <label class="form-label" for="contact-email">Email</label>
+                <input type="email" id="contact-email" name="contact[email]" required class="form-input" placeholder="you@example.com" value="{{ form.email }}">
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label class="form-label" for="contact-subject">Subject</label>
+              <select id="contact-subject" name="contact[subject]" class="form-input">
+                <option value="">Select a topic…</option>
+                <option value="Order question">Order question</option>
+                <option value="Subscription">Subscription</option>
+                <option value="Returns & refunds">Returns &amp; refunds</option>
+                <option value="Product question">Product question</option>
+                <option value="Wholesale">Wholesale inquiry</option>
+                <option value="Other">Other</option>
+              </select>
+            </div>
+
+            <div class="form-group">
+              <label class="form-label" for="contact-message">Message</label>
+              <textarea
+                id="contact-message"
+                name="contact[body]"
+                required
+                rows="5"
+                class="form-input"
+                placeholder="Tell us how we can help…"
+              >{{ form.body }}</textarea>
+            </div>
+
+            <button type="submit" class="btn btn--primary btn--full">Send Message</button>
+          {%- endif -%}
+        {%- endform -%}
+      </div>
+
+      {%- comment -%} Right: contact info {%- endcomment -%}
+      <div class="page-contact__info-col">
+        <div class="contact-info-card">
+          <h3>{{ section.settings.info_title | default: 'Contact Information' }}</h3>
+          {%- if section.settings.email != blank -%}
+            <div class="contact-info-item">
+              <span class="contact-info-icon">✉️</span>
+              <div>
+                <p class="contact-info-label">Email</p>
+                <a href="mailto:{{ section.settings.email }}" class="form-link">{{ section.settings.email }}</a>
+              </div>
+            </div>
+          {%- endif -%}
+          {%- if section.settings.hours != blank -%}
+            <div class="contact-info-item">
+              <span class="contact-info-icon">🕐</span>
+              <div>
+                <p class="contact-info-label">Support Hours</p>
+                <p>{{ section.settings.hours }}</p>
+              </div>
+            </div>
+          {%- endif -%}
+          <div class="contact-info-item">
+            <span class="contact-info-icon">❓</span>
+            <div>
+              <p class="contact-info-label">Quick Answers</p>
+              <a href="/pages/faq" class="form-link">Browse our FAQ →</a>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<style>
+  .page-contact__inner { display:grid; grid-template-columns:1fr 360px; gap: var(--space-12); align-items:start; }
+  @media (max-width:768px) { .page-contact__inner { grid-template-columns:1fr; } }
+  .contact-success { display:flex; align-items:center; gap: var(--space-4); background: var(--color-sage-light); border-radius: var(--radius-lg); padding: var(--space-6); color: var(--color-sage); font-weight:600; }
+  .contact-info-card { background: var(--color-cream-dark); border-radius: var(--radius-lg); padding: var(--space-6); display:flex; flex-direction:column; gap: var(--space-5); position:sticky; top:80px; }
+  .contact-info-card h3 { font-size:18px; margin-bottom: var(--space-2); }
+  .contact-info-item { display:flex; align-items:flex-start; gap: var(--space-3); }
+  .contact-info-icon { font-size:20px; flex-shrink:0; }
+  .contact-info-label { font-size:12px; font-weight:700; letter-spacing:.08em; text-transform:uppercase; color: var(--color-brown); opacity:.6; margin-bottom:2px; }
+  .form-errors { background:#fde8e8; border-radius: var(--radius-md); padding: var(--space-4); color: var(--color-error); font-size:14px; margin-bottom: var(--space-5); }
+</style>
+
+{% schema %}
+{
+  "name": "Contact Page",
+  "tag": "section",
+  "settings": [
+    { "type": "text", "id": "headline", "label": "Headline" },
+    { "type": "text", "id": "subhead",  "label": "Subheadline" },
+    { "type": "text", "id": "info_title", "label": "Info card title", "default": "Contact Information" },
+    { "type": "text", "id": "email",   "label": "Support email" },
+    { "type": "text", "id": "hours",   "label": "Support hours", "default": "Mon–Fri, 9am–5pm EST" }
+  ],
+  "presets": [{ "name": "Contact Page" }]
+}
+{% endschema %}

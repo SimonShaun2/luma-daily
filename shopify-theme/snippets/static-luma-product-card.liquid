@@ -1,0 +1,36 @@
+{%- assign target_url = '/products/' | append: handle -%}
+{%- if product != blank -%}
+  {%- assign target_url = product.url -%}
+{%- endif -%}
+
+<div class="product-card luma-static-product" data-tags="{{ tags }}" role="listitem">
+  <a href="{{ target_url }}" class="product-card__image-link" tabindex="-1" aria-hidden="true">
+    <img src="{{ image }}" alt="{{ title | escape }}" class="product-card__image" width="520" height="520" loading="lazy">
+  </a>
+
+  <div class="product-card__body">
+    <div class="product-card__flavor-badge">{{ badge | escape }}</div>
+    <div class="product-card__stars" aria-label="5 out of 5 stars">&#9733;&#9733;&#9733;&#9733;&#9733; <span>10,000+</span></div>
+    <h3 class="product-card__title"><a href="{{ target_url }}">{{ title | escape }}</a></h3>
+    <p class="product-card__tagline">{{ tagline | escape }}</p>
+    <p class="product-card__flavor">{{ flavor | escape }}</p>
+    <div class="product-card__price-simple">
+      <span class="product-card__price-current">
+        {%- if product != blank -%}{{ product.price | money }}{%- else -%}$34.99{%- endif -%}
+      </span>
+    </div>
+
+    <div class="product-card__actions">
+      {%- if product != blank and product.selected_or_first_available_variant != blank -%}
+        <form action="/cart/add" method="post" class="product-card__atc-form">
+          <input type="hidden" name="id" value="{{ product.selected_or_first_available_variant.id }}">
+          <input type="hidden" name="quantity" value="1">
+          <button type="submit" class="btn btn--primary btn--full product-card__atc-btn">Add to Cart</button>
+        </form>
+      {%- else -%}
+        <a href="{{ target_url }}" class="btn btn--primary btn--full product-card__atc-btn">Shop Formula</a>
+      {%- endif -%}
+      <a href="{{ target_url }}" class="btn btn--ghost btn--full product-card__details-btn">View Details</a>
+    </div>
+  </div>
+</div>

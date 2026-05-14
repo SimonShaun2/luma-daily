@@ -1,0 +1,57 @@
+{% comment %}
+  Section: press-logos
+  Ported from: Home.tsx §4 PRESS LOGOS
+  Design: Warm Editorial — scrolling marquee of press mentions
+{% endcomment %}
+
+<section class="press-logos" aria-label="As seen in">
+  <div class="container">
+    <p class="press-logos__label">{{ section.settings.label | default: 'As Seen In' | escape }}</p>
+    <div class="press-logos__marquee" aria-hidden="true">
+      <div class="press-logos__track">
+        {%- for block in section.blocks -%}
+          {%- if block.type == 'logo' -%}
+            <span class="press-logos__name" {{ block.shopify_attributes }}>{{ block.settings.name | escape }}</span>
+          {%- endif -%}
+        {%- endfor -%}
+        {%- comment -%} Duplicate for seamless loop {%- endcomment -%}
+        {%- for block in section.blocks -%}
+          {%- if block.type == 'logo' -%}
+            <span class="press-logos__name" aria-hidden="true">{{ block.settings.name | escape }}</span>
+          {%- endif -%}
+        {%- endfor -%}
+      </div>
+    </div>
+  </div>
+</section>
+
+{% schema %}
+{
+  "name": "Press Logos",
+  "tag": "section",
+  "settings": [
+    { "type": "text", "id": "label", "label": "Label text", "default": "As Seen In" }
+  ],
+  "blocks": [
+    {
+      "type": "logo",
+      "name": "Press Mention",
+      "settings": [
+        { "type": "text", "id": "name", "label": "Publication name" }
+      ]
+    }
+  ],
+  "presets": [
+    {
+      "name": "Press Logos",
+      "blocks": [
+        { "type": "logo", "settings": { "name": "Forbes" } },
+        { "type": "logo", "settings": { "name": "Vogue" } },
+        { "type": "logo", "settings": { "name": "Well+Good" } },
+        { "type": "logo", "settings": { "name": "Byrdie" } },
+        { "type": "logo", "settings": { "name": "Shape" } }
+      ]
+    }
+  ]
+}
+{% endschema %}

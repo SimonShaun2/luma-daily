@@ -1,0 +1,9 @@
+{
+  "sections": {
+    "page-ingredients": {
+      "type": "page-ingredients",
+      "settings": {}
+    }
+  },
+  "order": ["page-ingredients"]
+}

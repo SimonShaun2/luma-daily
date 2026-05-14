@@ -1,0 +1,46 @@
+{% comment %}
+  Section: announcement-bar
+  Ported from: Home.tsx §1 URGENCY BAR
+  Design: Warm Editorial — amber on dark background, countdown timer
+{% endcomment %}
+
+<div id="announcement-bar" class="announcement-bar" data-end-date="{{ settings.urgency_bar_end_date | escape }}">
+  <span class="announcement-bar__text">{{ settings.urgency_bar_text | escape }}</span>
+  <span class="announcement-bar__timer" id="countdown-timer">
+    <span class="countdown-unit"><span id="cd-hours">00</span><small>h</small></span>
+    <span class="countdown-sep">:</span>
+    <span class="countdown-unit"><span id="cd-minutes">00</span><small>m</small></span>
+    <span class="countdown-sep">:</span>
+    <span class="countdown-unit"><span id="cd-seconds">00</span><small>s</small></span>
+  </span>
+</div>
+
+<script>
+(function() {
+  var bar = document.getElementById('announcement-bar');
+  var endDate = new Date(bar.dataset.endDate);
+  function tick() {
+    var now = new Date();
+    var diff = Math.max(0, Math.floor((endDate - now) / 1000));
+    if (diff === 0) { bar.style.display = 'none'; return; }
+    var h = Math.floor(diff / 3600);
+    var m = Math.floor((diff % 3600) / 60);
+    var s = diff % 60;
+    document.getElementById('cd-hours').textContent = String(h).padStart(2, '0');
+    document.getElementById('cd-minutes').textContent = String(m).padStart(2, '0');
+    document.getElementById('cd-seconds').textContent = String(s).padStart(2, '0');
+    setTimeout(tick, 1000);
+  }
+  tick();
+})();
+</script>
+
+{% schema %}
+{
+  "name": "Announcement Bar",
+  "tag": "div",
+  "class": "announcement-bar-wrapper",
+  "settings": [],
+  "presets": [{ "name": "Announcement Bar" }]
+}
+{% endschema %}

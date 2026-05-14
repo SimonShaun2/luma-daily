@@ -1,0 +1,81 @@
+{
+  "sections": {
+    "announcement-bar": {
+      "type": "announcement-bar",
+      "settings": {}
+    },
+    "hero": {
+      "type": "hero",
+      "settings": {}
+    },
+    "press-logos": {
+      "type": "press-logos",
+      "settings": {}
+    },
+    "trust-bar": {
+      "type": "trust-bar",
+      "settings": {}
+    },
+    "problem-agitation": {
+      "type": "problem-agitation",
+      "settings": {}
+    },
+    "product-grid": {
+      "type": "product-grid",
+      "settings": {}
+    },
+    "quiz-cta": {
+      "type": "quiz-cta",
+      "settings": {}
+    },
+    "social-proof-stats": {
+      "type": "social-proof-stats",
+      "settings": {}
+    },
+    "bundles": {
+      "type": "bundles",
+      "settings": {}
+    },
+    "ingredients": {
+      "type": "ingredients",
+      "settings": {}
+    },
+    "reviews": {
+      "type": "reviews",
+      "settings": {}
+    },
+    "subscribe-save": {
+      "type": "subscribe-save",
+      "settings": {}
+    },
+    "ugc-carousel": {
+      "type": "ugc-carousel",
+      "settings": {}
+    },
+    "faq": {
+      "type": "faq",
+      "settings": {}
+    },
+    "final-cta": {
+      "type": "final-cta",
+      "settings": {}
+    }
+  },
+  "order": [
+    "announcement-bar",
+    "hero",
+    "press-logos",
+    "trust-bar",
+    "problem-agitation",
+    "product-grid",
+    "quiz-cta",
+    "social-proof-stats",
+    "bundles",
+    "ingredients",
+    "reviews",
+    "subscribe-save",
+    "ugc-carousel",
+    "faq",
+    "final-cta"
+  ]
+}

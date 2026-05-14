@@ -1,0 +1,16 @@
+{
+  "type": "footer",
+  "name": "Footer group",
+  "sections": {
+    "footer": {
+      "type": "footer",
+      "settings": {
+        "brand_name": "Luma Daily",
+        "tagline": "Daily wellness gummies for rituals people actually keep."
+      }
+    }
+  },
+  "order": [
+    "footer"
+  ]
+}

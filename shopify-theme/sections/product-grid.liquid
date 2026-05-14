@@ -1,0 +1,52 @@
+<section class="product-grid" id="products" aria-label="Products">
+  <div class="container">
+    <div class="luma-section-kicker">One daily ritual</div>
+    <h2 class="section-title">{{ section.settings.heading | default: 'Choose your daily support.' | escape }}</h2>
+    <p class="section-subhead">{{ section.settings.subhead | default: 'Six targeted formulas designed to fit morning, afternoon, and evening routines.' | escape }}</p>
+
+    <div class="product-filter-tabs" role="tablist" aria-label="Filter by formula">
+      <button class="filter-tab filter-tab--active" data-filter="all" role="tab" aria-selected="true">All</button>
+      <button class="filter-tab" data-filter="energy" role="tab" aria-selected="false">Energy</button>
+      <button class="filter-tab" data-filter="calm" role="tab" aria-selected="false">Calm</button>
+      <button class="filter-tab" data-filter="sleep" role="tab" aria-selected="false">Sleep</button>
+      <button class="filter-tab" data-filter="glow" role="tab" aria-selected="false">Glow</button>
+      <button class="filter-tab" data-filter="focus" role="tab" aria-selected="false">Focus</button>
+      <button class="filter-tab" data-filter="gut" role="tab" aria-selected="false">Gut</button>
+    </div>
+
+    <div class="product-carousel luma-card-grid" role="list">
+      {%- if section.settings.collection != blank and collections[section.settings.collection].products_count > 0 -%}
+        {%- for product in collections[section.settings.collection].products -%}
+          {% render 'product-card', product: product, show_subscribe_toggle: true %}
+        {%- endfor -%}
+      {%- else -%}
+        {%- assign energy_product = all_products['luma-energy-gummies'] -%}
+        {%- assign calm_product = all_products['luma-calm-gummies'] -%}
+        {%- assign sleep_product = all_products['luma-sleep-gummies'] -%}
+        {%- assign glow_product = all_products['luma-glow-gummies'] -%}
+        {%- assign focus_product = all_products['luma-focus-gummies'] -%}
+        {%- assign gut_product = all_products['luma-gut-gummies'] -%}
+
+        {% render 'static-luma-product-card', product: energy_product, handle: 'luma-energy-gummies', title: 'Luma Energy', tagline: 'Supports energy + focus*', flavor: 'Blood Orange Mango', image: 'https://d2xsxph8kpxj0f.cloudfront.net/310519663633783733/AnQGopwkGMamh4C9LsYVXo/ad_energy_v3-Y2AR6A5DmFnk7XuztAK88H.webp', tags: 'energy', badge: 'Wake Up. Show Up.' %}
+        {% render 'static-luma-product-card', product: calm_product, handle: 'luma-calm-gummies', title: 'Luma Calm', tagline: 'Supports calm + stress balance*', flavor: 'Raspberry Hibiscus', image: 'https://d2xsxph8kpxj0f.cloudfront.net/310519663633783733/AnQGopwkGMamh4C9LsYVXo/ad_calm_v3-ihzrHo2bsfLKhRVoDkSvjG.webp', tags: 'calm', badge: "Stressed? What's That?" %}
+        {% render 'static-luma-product-card', product: sleep_product, handle: 'luma-sleep-gummies', title: 'Luma Sleep', tagline: 'Supports restful sleep*', flavor: 'Blueberry Lavender', image: 'https://d2xsxph8kpxj0f.cloudfront.net/310519663633783733/AnQGopwkGMamh4C9LsYVXo/ad_sleep_v3-hR6GeaAiRC85gDeKxsHWqT.webp', tags: 'sleep', badge: 'Your Night. Reclaimed.' %}
+        {% render 'static-luma-product-card', product: glow_product, handle: 'luma-glow-gummies', title: 'Luma Glow', tagline: 'Supports healthy skin, hair + nails*', flavor: 'Strawberry Peach', image: 'https://d2xsxph8kpxj0f.cloudfront.net/310519663633783733/AnQGopwkGMamh4C9LsYVXo/ad_glow_v3-RSyybN2xTzLMSDCsN8Xi7c.webp', tags: 'glow', badge: 'Your Skin. Noticing.' %}
+        {% render 'static-luma-product-card', product: focus_product, handle: 'luma-focus-gummies', title: 'Luma Focus', tagline: 'Supports focus + mental clarity*', flavor: 'Spearmint Green Tea', image: 'https://d2xsxph8kpxj0f.cloudfront.net/310519663633783733/AnQGopwkGMamh4C9LsYVXo/ad_focus_v3-BiEeeBHkuXEMjNEHuqMyh8.webp', tags: 'focus', badge: 'Locked In.' %}
+        {% render 'static-luma-product-card', product: gut_product, handle: 'luma-gut-gummies', title: 'Luma Gut', tagline: 'Supports digestive wellness*', flavor: 'Ginger Chamomile', image: 'https://d2xsxph8kpxj0f.cloudfront.net/310519663633783733/AnQGopwkGMamh4C9LsYVXo/ad_gut_v3-fsPSGbUocmxHCL44SA7Lj9.webp', tags: 'gut', badge: 'Happy Gut. Happy Life.' %}
+      {%- endif -%}
+    </div>
+  </div>
+</section>
+
+{% schema %}
+{
+  "name": "Product Grid",
+  "tag": "section",
+  "settings": [
+    { "type": "text", "id": "heading", "label": "Section heading", "default": "Choose your daily support." },
+    { "type": "text", "id": "subhead", "label": "Section subheadline", "default": "Six targeted formulas designed to fit morning, afternoon, and evening routines." },
+    { "type": "collection", "id": "collection", "label": "Product collection" }
+  ],
+  "presets": [{ "name": "Product Grid" }]
+}
+{% endschema %}

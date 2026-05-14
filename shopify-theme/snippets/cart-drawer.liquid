@@ -1,0 +1,103 @@
+{% comment %}
+  Snippet: cart-drawer
+  Ported from: Home.tsx CartDrawer component
+  Usage: {% render 'cart-drawer' %}
+  Includes: quantity controls, subscribe toggle, free-shipping progress, GWP tier, upsell row, trust badges
+  JS: cart-enhancements.js handles all animations and AJAX cart updates
+{% endcomment %}
+
+<div id="cart-drawer" class="cart-drawer" aria-label="Shopping cart" aria-hidden="true" role="dialog">
+  <div class="cart-drawer__overlay" id="cart-overlay"></div>
+  <div class="cart-drawer__panel">
+
+    {%- comment -%} Header {%- endcomment -%}
+    <div class="cart-drawer__header">
+      <h2 class="cart-drawer__title">Your Cart <span class="cart-drawer__count" id="cart-count-badge">{{ cart.item_count }}</span></h2>
+      <button class="cart-drawer__close" aria-label="Close cart" id="cart-close-btn">✕</button>
+    </div>
+
+    {%- comment -%} Free shipping progress bar {%- endcomment -%}
+    <div class="cart-drawer__shipping-bar" id="shipping-progress-bar">
+      <div class="shipping-bar__track">
+        <div class="shipping-bar__fill" id="shipping-bar-fill" style="width: 0%"></div>
+      </div>
+      <p class="shipping-bar__label" id="shipping-bar-label">
+        Add <strong id="shipping-bar-remaining">{{ settings.free_shipping_threshold | money }}</strong> more for free shipping
+      </p>
+    </div>
+
+    {%- comment -%} Cart items {%- endcomment -%}
+    <div class="cart-drawer__items" id="cart-items-list">
+      {%- if cart.item_count == 0 -%}
+        <div class="cart-drawer__empty">
+          <p>Your cart is empty</p>
+          <a href="/collections/all" class="btn btn--primary">Shop All Formulas</a>
+        </div>
+      {%- else -%}
+        {%- for item in cart.items -%}
+          <div class="cart-item" data-key="{{ item.key }}" data-variant-id="{{ item.variant_id }}">
+            <a href="{{ item.url }}" class="cart-item__image-link">
+              <img src="{{ item.image | image_url: width: 100 }}" alt="{{ item.title | escape }}" width="100" height="100" class="cart-item__image">
+            </a>
+            <div class="cart-item__details">
+              <p class="cart-item__title">{{ item.product.title | escape }}</p>
+              <p class="cart-item__variant">{{ item.variant.title | escape }}</p>
+              {%- if item.selling_plan_allocation -%}
+                <span class="cart-item__subscribe-badge">Subscribe &amp; Save 15%</span>
+              {%- endif -%}
+              <div class="cart-item__qty-controls">
+                <button class="qty-btn qty-btn--minus" data-key="{{ item.key }}" aria-label="Decrease quantity">−</button>
+                <span class="qty-display">{{ item.quantity }}</span>
+                <button class="qty-btn qty-btn--plus" data-key="{{ item.key }}" aria-label="Increase quantity">+</button>
+              </div>
+            </div>
+            <div class="cart-item__price-col">
+              <span class="cart-item__price">{{ item.final_line_price | money }}</span>
+              <button class="cart-item__remove" data-key="{{ item.key }}" aria-label="Remove {{ item.title | escape }}">Remove</button>
+            </div>
+          </div>
+        {%- endfor -%}
+      {%- endif -%}
+    </div>
+
+    {%- comment -%} GWP tier banner (shown when cart >= gwp_threshold) {%- endcomment -%}
+    <div class="cart-drawer__gwp-banner" id="gwp-banner" style="display: none">
+      🎁 Free gift added to your order!
+    </div>
+
+    {%- comment -%} Upsell row {%- endcomment -%}
+    <div class="cart-drawer__upsell" id="cart-upsell-row">
+      <p class="cart-drawer__upsell-heading">Customers also love</p>
+      {%- assign upsell_collection = collections['best-sellers'] -%}
+      {%- for product in upsell_collection.products limit: 3 -%}
+        <div class="upsell-item">
+          <img src="{{ product.featured_image | image_url: width: 60 }}" alt="{{ product.title | escape }}" width="60" height="60">
+          <div class="upsell-item__info">
+            <span>{{ product.title | escape }}</span>
+            <span>{{ product.price | money }}</span>
+          </div>
+          <form action="/cart/add" method="post" class="upsell-item__form">
+            <input type="hidden" name="id" value="{{ product.selected_or_first_available_variant.id }}">
+            <button type="submit" class="btn btn--sm btn--primary">Add</button>
+          </form>
+        </div>
+      {%- endfor -%}
+    </div>
+
+    {%- comment -%} Footer {%- endcomment -%}
+    <div class="cart-drawer__footer" id="cart-footer">
+      <div class="cart-drawer__subtotal">
+        <span>Subtotal</span>
+        <span id="cart-subtotal">{{ cart.total_price | money }}</span>
+      </div>
+      <div class="cart-drawer__trust">
+        <span>🔒 Secure checkout</span>
+        <span>🚚 Free shipping over {{ settings.free_shipping_threshold | money }}</span>
+      </div>
+      <a href="/checkout" class="btn btn--primary btn--full btn--lg cart-drawer__checkout-btn" id="cart-checkout-btn">
+        Checkout
+      </a>
+    </div>
+
+  </div>
+</div>

@@ -1,0 +1,93 @@
+{% comment %}
+  Section: page-about
+  Ported from: Home.tsx About page
+  Design: Warm Editorial — asymmetric two-column, brand story, founder photo, values grid
+{% endcomment %}
+
+<section class="page-about section-cream">
+  <div class="container">
+
+    {%- comment -%} Hero row {%- endcomment -%}
+    <div class="page-about__hero">
+      <div class="page-about__copy">
+        <span class="hero__badge-pill">Our Story</span>
+        <h1 class="section-title">{{ section.settings.headline | default: 'Made for Real Life. Backed by Real Science.' }}</h1>
+        <p class="section-subhead">{{ section.settings.subhead | default: page.content }}</p>
+        <a href="/collections/all" class="btn btn--primary">Shop the Collection</a>
+      </div>
+      {%- if section.settings.founder_image -%}
+        <div class="page-about__image">
+          <img
+            src="{{ section.settings.founder_image | image_url: width: 600 }}"
+            alt="{{ section.settings.founder_image_alt | default: 'Luma Daily founder' | escape }}"
+            class="hero__image"
+            width="600"
+            height="600"
+            loading="lazy"
+          >
+        </div>
+      {%- endif -%}
+    </div>
+
+    {%- comment -%} Values grid {%- endcomment -%}
+    <div class="page-about__values">
+      <h2 class="section-title" style="text-align:center; margin-bottom: var(--space-10);">
+        {{ section.settings.values_headline | default: 'What We Stand For' }}
+      </h2>
+      <div class="ingredients__grid">
+        {%- for block in section.blocks -%}
+          {%- if block.type == 'value' -%}
+            <div class="ingredient-card" {{ block.shopify_attributes }}>
+              <div class="ingredient-card__icon">{{ block.settings.icon | default: '✦' }}</div>
+              <h3 class="ingredient-card__name">{{ block.settings.title | escape }}</h3>
+              <p class="ingredient-card__benefit">{{ block.settings.description | escape }}</p>
+            </div>
+          {%- endif -%}
+        {%- endfor -%}
+      </div>
+    </div>
+
+  </div>
+</section>
+
+<style>
+  .page-about__hero { display:grid; grid-template-columns:1fr 1fr; gap: var(--space-12); align-items:center; margin-bottom: var(--space-16); }
+  @media (max-width:768px) { .page-about__hero { grid-template-columns:1fr; } }
+  .page-about__values { padding-top: var(--space-16); border-top: 1px solid var(--color-cream-dark); }
+</style>
+
+{% schema %}
+{
+  "name": "About Page",
+  "tag": "section",
+  "settings": [
+    { "type": "text", "id": "headline", "label": "Headline" },
+    { "type": "richtext", "id": "subhead", "label": "Brand story" },
+    { "type": "image_picker", "id": "founder_image", "label": "Founder / brand image" },
+    { "type": "text", "id": "founder_image_alt", "label": "Image alt text" },
+    { "type": "text", "id": "values_headline", "label": "Values section headline", "default": "What We Stand For" }
+  ],
+  "blocks": [
+    {
+      "type": "value",
+      "name": "Brand Value",
+      "settings": [
+        { "type": "text", "id": "icon", "label": "Emoji icon", "default": "✦" },
+        { "type": "text", "id": "title", "label": "Value title" },
+        { "type": "text", "id": "description", "label": "Value description" }
+      ]
+    }
+  ],
+  "presets": [
+    {
+      "name": "About Page",
+      "blocks": [
+        { "type": "value", "settings": { "icon": "🌿", "title": "Clean Ingredients", "description": "No fillers, no artificial colors, no compromises." } },
+        { "type": "value", "settings": { "icon": "🔬", "title": "Science-Backed", "description": "Every formula is reviewed by our advisory board." } },
+        { "type": "value", "settings": { "icon": "♻️", "title": "Sustainable", "description": "Recyclable packaging and carbon-offset shipping." } },
+        { "type": "value", "settings": { "icon": "❤️", "title": "Community First", "description": "10% of profits go to women's wellness initiatives." } }
+      ]
+    }
+  ]
+}
+{% endschema %}

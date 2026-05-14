@@ -1,0 +1,72 @@
+{
+  "general": {
+    "add_to_cart": "Add to Cart",
+    "subscribe_save": "Subscribe & Save",
+    "one_time": "One-time",
+    "view_details": "View Details",
+    "close": "Close",
+    "loading": "Loading…",
+    "error": "Something went wrong. Please try again."
+  },
+  "cart": {
+    "title": "Your Cart",
+    "empty": "Your cart is empty",
+    "empty_cta": "Shop All Formulas",
+    "checkout": "Checkout",
+    "subtotal": "Subtotal",
+    "free_shipping_progress": "Add {{ amount }} more for free shipping",
+    "free_shipping_unlocked": "🎉 You've unlocked free shipping!",
+    "gwp_progress": "Add {{ amount }} more for a free gift",
+    "gwp_unlocked": "🎁 Free gift added to your order!",
+    "quantity_label": "Qty",
+    "remove": "Remove",
+    "upsell_heading": "Customers also love"
+  },
+  "checkout": {
+    "shipping_step": "Shipping",
+    "payment_step": "Payment",
+    "review_step": "Review",
+    "confirmation_step": "Confirmed",
+    "continue_to_payment": "Continue to Payment",
+    "place_order": "Place Order — ${{ total }}",
+    "order_confirmed": "Order Confirmed!",
+    "email_receipt_heading": "Get your receipt + 10% off your next order",
+    "email_receipt_cta": "Send My Receipt",
+    "referral_heading": "Share Luma Daily, earn rewards",
+    "referral_copy": "Your link:",
+    "referral_copy_btn": "Copy",
+    "referral_copied": "Copied!",
+    "loyalty_earned": "You earned {{ points }} Luma Points on this order",
+    "promo_toggle": "Have a promo code?",
+    "promo_apply": "Apply",
+    "promo_remove": "Remove",
+    "promo_checking": "Checking…",
+    "promo_invalid": "Invalid or expired code",
+    "redeem_points_toggle": "Redeem points ({{ available }} available)",
+    "redeem_points_apply": "Apply",
+    "redeem_points_remove": "Remove"
+  },
+  "upsell": {
+    "heading": "One-time offer — ships with your order",
+    "timer_label": "This offer expires in",
+    "accept": "Yes, add it — {{ price }}",
+    "decline": "No thanks",
+    "adding": "Adding…"
+  },
+  "exit_intent": {
+    "heading": "Wait — before you go",
+    "subhead": "Here's {{ discount }} off your first order",
+    "email_placeholder": "Enter your email",
+    "cta": "Claim My Discount",
+    "return_cta": "Return to my cart",
+    "success": "Check your inbox — your code is on its way!"
+  },
+  "quiz": {
+    "step_goal": "What's your main goal?",
+    "step_lifestyle": "Tell us about your lifestyle",
+    "step_sleep": "How's your sleep?",
+    "step_results": "Your personalised ritual",
+    "email_gate_heading": "See your results + get 15% off",
+    "email_gate_cta": "Show My Results"
+  }
+}

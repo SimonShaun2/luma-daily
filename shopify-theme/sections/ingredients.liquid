@@ -1,0 +1,57 @@
+<section class="ingredients" aria-label="Key ingredients">
+  <div class="container ingredients__split">
+    <div>
+      <div class="luma-section-kicker">Ingredients that make sense</div>
+      <h2 class="section-title">{{ section.settings.heading | default: 'Clean ingredients, clearly explained.' | escape }}</h2>
+      <p class="section-subhead">{{ section.settings.subhead | default: 'Daily formulas with transparent support benefits and no complicated supplement cabinet.' | escape }}</p>
+      <ul class="luma-check-list">
+        <li>Vegan and gluten-free</li>
+        <li>Third-party tested</li>
+        <li>No artificial colors or flavors</li>
+        <li>Built for daily consistency</li>
+      </ul>
+      <a href="/collections/all" class="btn btn--ghost">Shop formulas</a>
+    </div>
+
+    <div class="ingredients__grid">
+      {%- if section.blocks.size > 0 -%}
+        {%- for block in section.blocks -%}
+          <div class="ingredient-card" {{ block.shopify_attributes }}>
+            <span class="ingredient-card__icon" aria-hidden="true">{{ block.settings.emoji }}</span>
+            <h3 class="ingredient-card__name">{{ block.settings.name | escape }}</h3>
+            <p class="ingredient-card__benefit">{{ block.settings.benefit | escape }}</p>
+          </div>
+        {%- endfor -%}
+      {%- else -%}
+        <div class="ingredient-card"><span class="ingredient-card__icon">B12</span><h3 class="ingredient-card__name">Vitamin B12</h3><p class="ingredient-card__benefit">Supports energy metabolism.</p></div>
+        <div class="ingredient-card"><span class="ingredient-card__icon">Tea</span><h3 class="ingredient-card__name">L-Theanine</h3><p class="ingredient-card__benefit">Supports calm focus.</p></div>
+        <div class="ingredient-card"><span class="ingredient-card__icon">Mg</span><h3 class="ingredient-card__name">Magnesium</h3><p class="ingredient-card__benefit">Supports a restful nightly routine.</p></div>
+        <div class="ingredient-card"><span class="ingredient-card__icon">Bio</span><h3 class="ingredient-card__name">Biotin</h3><p class="ingredient-card__benefit">Supports healthy hair, skin, and nails.</p></div>
+        <div class="ingredient-card"><span class="ingredient-card__icon">Pre</span><h3 class="ingredient-card__name">Prebiotic Fiber</h3><p class="ingredient-card__benefit">Supports digestive wellness.</p></div>
+      {%- endif -%}
+    </div>
+  </div>
+</section>
+
+{% schema %}
+{
+  "name": "Ingredients",
+  "tag": "section",
+  "settings": [
+    { "type": "text", "id": "heading", "label": "Heading", "default": "Clean ingredients, clearly explained." },
+    { "type": "text", "id": "subhead", "label": "Subheadline", "default": "Daily formulas with transparent support benefits and no complicated supplement cabinet." }
+  ],
+  "blocks": [
+    {
+      "type": "ingredient",
+      "name": "Ingredient",
+      "settings": [
+        { "type": "text", "id": "emoji", "label": "Icon text" },
+        { "type": "text", "id": "name", "label": "Ingredient name" },
+        { "type": "text", "id": "benefit", "label": "Benefit copy" }
+      ]
+    }
+  ],
+  "presets": [{ "name": "Ingredients" }]
+}
+{% endschema %}

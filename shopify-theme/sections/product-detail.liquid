@@ -1,0 +1,61 @@
+<section class="product-detail section-cream" data-product-detail>
+  <div class="container product-detail__grid">
+    <div class="product-detail__media">
+      {%- if product.featured_image -%}
+        <img src="{{ product.featured_image | image_url: width: 900 }}" alt="{{ product.featured_image.alt | default: product.title | escape }}" width="900" height="900" loading="eager" class="product-detail__image">
+      {%- else -%}
+        <div class="product-detail__image product-card__image--placeholder"></div>
+      {%- endif -%}
+    </div>
+
+    <div class="product-detail__summary">
+      <div class="hero__social-proof">
+        <div class="hero__stars" aria-label="4.9 out of 5 stars">&#9733;&#9733;&#9733;&#9733;&#9733;</div>
+        <span class="hero__review-count">4.9 average - 10,000+ rituals started</span>
+      </div>
+      <h1 class="hero__headline product-detail__title">{{ product.title | escape }}</h1>
+      <p class="hero__subhead">
+        {{ product.metafields.custom.benefit | default: product.description | strip_html | truncate: 160 }}
+      </p>
+
+      <ul class="luma-check-list">
+        <li>Clean daily gummy formula</li>
+        <li>Built for a consistent wellness ritual</li>
+        <li>Vegan and gluten-free</li>
+        <li>Third-party tested</li>
+      </ul>
+
+      {%- assign current_variant = product.selected_or_first_available_variant -%}
+      {%- form 'product', product, class: 'product-detail__form product-card__atc-form' -%}
+        <input type="hidden" name="id" value="{{ current_variant.id }}">
+        <div class="product-card__purchase-toggle" role="group" aria-label="Purchase option">
+          <label class="toggle-option toggle-option--active">
+            <input type="radio" name="purchase_mode" value="subscribe" checked>
+            Subscribe &amp; Save <strong>{{ current_variant.price | times: 0.85 | round | money }}</strong>
+            <span class="toggle-option__badge">Save 15%</span>
+          </label>
+          <label class="toggle-option">
+            <input type="radio" name="purchase_mode" value="one-time">
+            One-time <strong>{{ current_variant.price | money }}</strong>
+          </label>
+        </div>
+        <label class="form-label" for="Quantity-{{ section.id }}">Quantity</label>
+        <input id="Quantity-{{ section.id }}" class="form-input product-detail__quantity" type="number" name="quantity" value="1" min="1">
+        <button type="submit" class="btn btn--primary btn--full btn--lg" {% unless current_variant.available %}disabled{% endunless %}>
+          {%- if current_variant.available -%}Start My Ritual - {{ current_variant.price | money }}{%- else -%}Sold Out{%- endif -%}
+        </button>
+      {%- endform -%}
+
+      <p class="product-detail__disclaimer">These statements have not been evaluated by the Food and Drug Administration. This product is not intended to diagnose, treat, cure, or prevent any disease.</p>
+    </div>
+  </div>
+</section>
+
+{% schema %}
+{
+  "name": "Product detail",
+  "tag": "section",
+  "settings": [],
+  "presets": [{ "name": "Product detail" }]
+}
+{% endschema %}

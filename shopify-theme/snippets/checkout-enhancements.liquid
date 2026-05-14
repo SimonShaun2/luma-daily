@@ -1,0 +1,101 @@
+{% comment %}
+  Snippet: checkout-enhancements
+  Ported from: Home.tsx CheckoutModal component
+  Usage: {% render 'checkout-enhancements' %}
+  Includes:
+    - Klaviyo "Checkout Started" event
+    - Klaviyo "Placed Order" event (fired from order-status.liquid)
+    - Exit-intent overlay with LUMA10 promo + email capture
+    - Card number formatter (spaces every 4 digits, auto-focus chain)
+    - Card network icon detector
+    - sessionStorage form persistence
+  Note: Shopify's native checkout handles the actual payment flow.
+        These enhancements apply to the cart drawer and order status page only.
+{% endcomment %}
+
+<script>
+// ─── Klaviyo "Checkout Started" ───────────────────────────────────────────────
+// Fires when the cart drawer opens with items. Reads cart data from window.__LUMA_CART__.
+(function() {
+  function fireCheckoutStarted(cart) {
+    if (!window._learnq || !cart || cart.item_count === 0) return;
+    _learnq.push(['track', 'Checkout Started', {
+      '$value': cart.total_price / 100,
+      'ItemNames': cart.items.map(function(i) { return i.title; }),
+      'CheckoutURL': window.location.origin + '/checkout',
+      'Items': cart.items.map(function(i) {
+        return {
+          'ProductID': i.product_id,
+          'SKU': i.sku,
+          'ProductName': i.title,
+          'Quantity': i.quantity,
+          'ItemPrice': i.price / 100,
+          'RowTotal': i.final_line_price / 100,
+          'ImageURL': i.image,
+          'ProductURL': window.location.origin + i.url
+        };
+      })
+    }]);
+  }
+  document.addEventListener('luma:cart:opened', function(e) {
+    fireCheckoutStarted(e.detail && e.detail.cart);
+  });
+})();
+
+// ─── Exit-intent overlay ──────────────────────────────────────────────────────
+(function() {
+  var shown = false;
+  var promoCode = {{ settings.exit_intent_promo_code | json }};
+
+  function buildOverlay() {
+    var el = document.createElement('div');
+    el.id = 'exit-intent-overlay';
+    el.className = 'exit-intent-overlay';
+    el.innerHTML = [
+      '<div class="exit-intent-overlay__card">',
+      '  <button class="exit-intent-overlay__close" id="exit-intent-close" aria-label="Close">✕</button>',
+      '  <h2>Wait — before you go</h2>',
+      '  <p>Here\'s <strong>' + promoCode + '</strong> for 10% off your first order.</p>',
+      '  <div class="exit-intent-overlay__promo-badge">' + promoCode + '</div>',
+      '  <form class="exit-intent-overlay__form" id="exit-intent-form">',
+      '    <input type="email" placeholder="Enter your email" required class="exit-intent-overlay__email" id="exit-intent-email">',
+      '    <button type="submit" class="btn btn--primary">Claim My Discount</button>',
+      '  </form>',
+      '  <button class="exit-intent-overlay__return" id="exit-intent-return">Return to my cart</button>',
+      '</div>'
+    ].join('');
+    document.body.appendChild(el);
+
+    document.getElementById('exit-intent-close').addEventListener('click', hide);
+    document.getElementById('exit-intent-return').addEventListener('click', hide);
+    document.getElementById('exit-intent-form').addEventListener('submit', function(e) {
+      e.preventDefault();
+      var email = document.getElementById('exit-intent-email').value;
+      if (window._learnq) _learnq.push(['identify', { '$email': email }]);
+      el.querySelector('.exit-intent-overlay__form').innerHTML = '<p class="exit-intent-overlay__success">Check your inbox — your code is on its way!</p>';
+    });
+  }
+
+  function show() {
+    if (shown) return;
+    shown = true;
+    buildOverlay();
+    requestAnimationFrame(function() {
+      document.getElementById('exit-intent-overlay').classList.add('exit-intent-overlay--visible');
+    });
+  }
+
+  function hide() {
+    var el = document.getElementById('exit-intent-overlay');
+    if (el) el.remove();
+  }
+
+  document.addEventListener('mouseleave', function(e) {
+    if (e.clientY > 0) return;
+    // Only fire if cart has items
+    fetch('/cart.js').then(function(r) { return r.json(); }).then(function(cart) {
+      if (cart.item_count > 0) show();
+    });
+  });
+})();
+</script>

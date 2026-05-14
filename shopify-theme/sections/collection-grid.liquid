@@ -1,0 +1,20 @@
+<section class="product-grid section-cream">
+  <div class="container">
+    <div class="product-carousel luma-card-grid" role="list">
+      {%- for product in collection.products -%}
+        {% render 'product-card', product: product, show_subscribe_toggle: true %}
+      {%- else -%}
+        <p>No products found in this collection yet.</p>
+      {%- endfor -%}
+    </div>
+  </div>
+</section>
+
+{% schema %}
+{
+  "name": "Collection grid",
+  "tag": "section",
+  "settings": [],
+  "presets": [{ "name": "Collection grid" }]
+}
+{% endschema %}

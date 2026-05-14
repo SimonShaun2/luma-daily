@@ -1,0 +1,82 @@
+<section class="hero luma-manus-hero section-cream" aria-label="Luma Daily hero">
+  <div class="hero__inner container">
+    <div class="hero__copy">
+      <div class="hero__badge">
+        <span class="hero__badge-pill">{{ section.settings.badge_text | escape }}</span>
+      </div>
+
+      <h1 class="hero__headline">{{ section.settings.headline | newline_to_br }}</h1>
+      <p class="hero__subhead">{{ section.settings.subhead | escape }}</p>
+
+      <div class="hero__social-proof">
+        <div class="hero__stars" aria-label="4.9 out of 5 stars">&#9733;&#9733;&#9733;&#9733;&#9733;</div>
+        <span class="hero__review-count">{{ section.settings.review_count | escape }}</span>
+      </div>
+
+      <div class="hero__ctas">
+        <a href="{{ section.settings.primary_cta_url | default: '/collections/all' }}" class="btn btn--primary btn--lg">
+          {{ section.settings.primary_cta_label | escape }}
+        </a>
+        <a href="{{ section.settings.secondary_cta_url | default: '/pages/quiz' }}" class="btn btn--ghost btn--lg">
+          {{ section.settings.secondary_cta_label | escape }}
+        </a>
+      </div>
+
+      <div class="hero__trust-pills">
+        <span class="trust-pill">Organic ACV</span>
+        <span class="trust-pill">Third-party tested</span>
+        <span class="trust-pill">Gluten-free</span>
+      </div>
+    </div>
+
+    <div class="hero__media">
+      {%- if section.settings.hero_image != blank -%}
+        <img
+          src="{{ section.settings.hero_image | image_url: width: 760 }}"
+          alt="{{ section.settings.hero_image.alt | default: 'Luma Daily customer ritual' | escape }}"
+          class="hero__image"
+          width="760"
+          height="760"
+          loading="eager"
+        >
+      {%- else -%}
+        <div class="hero__video-wrapper luma-hero-card">
+          <img
+            src="https://d2xsxph8kpxj0f.cloudfront.net/310519663633783733/AnQGopwkGMamh4C9LsYVXo/thumb_energy-BU5nytyV5C6nddBCV93s23.webp"
+            alt="Luma Daily customer testimonial"
+            class="hero__video-thumbnail"
+            width="760"
+            height="760"
+            loading="eager"
+          >
+          <a class="hero__play-btn" href="#ugc" aria-label="Jump to customer videos">
+            <svg viewBox="0 0 24 24" fill="currentColor" width="48" height="48" aria-hidden="true"><path d="M8 5v14l11-7z"/></svg>
+          </a>
+          <div class="luma-hero-product-card">
+            <span>Luma Energy</span>
+            <strong>Daily Ritual</strong>
+          </div>
+        </div>
+      {%- endif -%}
+    </div>
+  </div>
+</section>
+
+{% schema %}
+{
+  "name": "Hero",
+  "tag": "section",
+  "settings": [
+    { "type": "text", "id": "badge_text", "label": "Badge text", "default": "Gummies that actually fit your life" },
+    { "type": "textarea", "id": "headline", "label": "Headline", "default": "You've tried the pills.\nNothing stuck." },
+    { "type": "text", "id": "subhead", "label": "Subheadline", "default": "Meet daily wellness gummies built for energy, calm, sleep, glow, focus, and gut support - a ritual you can actually keep." },
+    { "type": "text", "id": "review_count", "label": "Review copy", "default": "12,400+ reviews" },
+    { "type": "text", "id": "primary_cta_label", "label": "Primary CTA label", "default": "Shop Now" },
+    { "type": "url", "id": "primary_cta_url", "label": "Primary CTA URL" },
+    { "type": "text", "id": "secondary_cta_label", "label": "Secondary CTA label", "default": "Find My Ritual" },
+    { "type": "url", "id": "secondary_cta_url", "label": "Secondary CTA URL" },
+    { "type": "image_picker", "id": "hero_image", "label": "Hero image override" }
+  ],
+  "presets": [{ "name": "Hero" }]
+}
+{% endschema %}

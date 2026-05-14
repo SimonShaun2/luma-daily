@@ -1,0 +1,92 @@
+<!doctype html>
+<html lang="{{ request.locale.iso_code }}">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#f5f0e8">
+
+  <title>
+    {{ page_title }}
+    {%- if current_tags %} &ndash; tagged &ldquo;{{ current_tags | join: ', ' }}&rdquo;{% endif -%}
+    {%- if current_page != 1 %} &ndash; Page {{ current_page }}{% endif -%}
+    {%- unless page_title contains shop.name %} &ndash; {{ shop.name }}{% endunless -%}
+  </title>
+
+  {% if page_description %}
+    <meta name="description" content="{{ page_description | escape }}">
+  {% endif %}
+
+  <link rel="canonical" href="{{ canonical_url }}">
+
+  {%- if settings.favicon != blank -%}
+    <link rel="icon" type="image/png" href="{{ settings.favicon | image_url: width: 32, height: 32 }}">
+  {%- endif -%}
+
+  <!-- Fonts: Playfair Display + DM Sans -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;0,900;1,400&family=DM+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
+  {{ 'theme.css' | asset_url | stylesheet_tag }}
+
+  <!-- ─── Klaviyo onsite SDK ─────────────────────────────────────────────────
+       Add your Klaviyo public API key in theme settings when ready.
+       Found in Klaviyo → Account → Settings → API Keys.
+  ──────────────────────────────────────────────────────────────────────────── -->
+  {%- if settings.klaviyo_public_key != blank -%}
+    <script async type="text/javascript"
+      src="https://static.klaviyo.com/onsite/js/klaviyo.js?company_id={{ settings.klaviyo_public_key }}">
+    </script>
+  {%- endif -%}
+
+  <!-- ─── Klaviyo Flow webhook URL (exposed to JS for confirmation email capture) ── -->
+  {%- if settings.klaviyo_webhook_url != blank -%}
+    <script>
+      window.__LUMA_KLAVIYO_WEBHOOK__ = {{ settings.klaviyo_webhook_url | json }};
+    </script>
+  {%- endif -%}
+
+  <!-- ─── Google Maps JS API (address autocomplete on checkout shipping step) ──
+       Add a Google Maps API key in theme settings when ready.
+       Google Cloud Console → APIs & Services → Credentials → Restrict to HTTP referrers.
+  ──────────────────────────────────────────────────────────────────────────── -->
+  {%- if settings.google_maps_api_key != blank -%}
+    <script async defer
+      src="https://maps.googleapis.com/maps/api/js?key={{ settings.google_maps_api_key }}&libraries=places">
+    </script>
+  {%- endif -%}
+
+  <!-- ─── Cart / checkout config (read by cart-enhancements.js) ─────────────── -->
+  <script>
+    window.__LUMA_CONFIG__ = {
+      freeShippingThreshold: {{ settings.free_shipping_threshold | default: 50 }},
+      gwpThreshold: {{ settings.gwp_threshold | default: 75 }},
+      gwpProductHandle: {{ settings.gwp_product_handle | default: '' | json }},
+      exitIntentPromoCode: {{ settings.exit_intent_promo_code | default: 'LUMA10' | json }},
+      urgencyBarText: {{ settings.urgency_bar_text | json }},
+      urgencyBarEndDate: {{ settings.urgency_bar_end_date | json }}
+    };
+  </script>
+
+  {{ content_for_header }}
+</head>
+
+<body class="{% if customer %}customer-logged-in{% endif %} template-{{ template.name | handle }}">
+
+  {%- sections 'header-group' -%}
+
+  <main id="MainContent" class="content-for-layout" role="main" tabindex="-1">
+    {{ content_for_layout }}
+  </main>
+
+  {% render 'cart-drawer' %}
+
+  {%- sections 'footer-group' -%}
+
+  <!-- Theme JS -->
+  <script src="{{ 'theme.js' | asset_url }}" defer></script>
+  <!-- Cart enhancement animations + logic (ported from React prototype) -->
+  <script src="{{ 'cart-enhancements.js' | asset_url }}" defer></script>
+
+</body>
+</html>

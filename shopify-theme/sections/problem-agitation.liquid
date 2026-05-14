@@ -1,0 +1,61 @@
+<section class="problem-agitation section-cream-dk" aria-label="Why Luma Daily">
+  <div class="container problem-agitation__inner">
+    <div class="luma-section-kicker">Not your old routine</div>
+    <h2 class="problem-agitation__headline">{{ section.settings.headline | escape }}</h2>
+    <p class="problem-agitation__body">{{ section.settings.body | escape }}</p>
+
+    <div class="problem-agitation__points">
+      {%- if section.blocks.size > 0 -%}
+        {%- for block in section.blocks -%}
+          <div class="problem-agitation__point" {{ block.shopify_attributes }}>
+            <span class="problem-agitation__point-icon" aria-hidden="true">{{ block.settings.emoji }}</span>
+            <div>
+              <strong>{{ block.settings.label | escape }}</strong>
+              <p>{{ block.settings.description | escape }}</p>
+            </div>
+          </div>
+        {%- endfor -%}
+      {%- else -%}
+        <div class="problem-agitation__point">
+          <span class="problem-agitation__point-icon" aria-hidden="true">1</span>
+          <div><strong>Hard to remember</strong><p>A routine only works when it is easy enough to repeat.</p></div>
+        </div>
+        <div class="problem-agitation__point">
+          <span class="problem-agitation__point-icon" aria-hidden="true">2</span>
+          <div><strong>Too many bottles</strong><p>Luma keeps daily wellness simple, targeted, and good-tasting.</p></div>
+        </div>
+        <div class="problem-agitation__point">
+          <span class="problem-agitation__point-icon" aria-hidden="true">3</span>
+          <div><strong>No clear plan</strong><p>The ritual builder guides customers to the formulas that fit their day.</p></div>
+        </div>
+        <div class="problem-agitation__point">
+          <span class="problem-agitation__point-icon" aria-hidden="true">4</span>
+          <div><strong>Not enjoyable</strong><p>Premium gummy formulas make consistency feel like a small daily treat.</p></div>
+        </div>
+      {%- endif -%}
+    </div>
+  </div>
+</section>
+
+{% schema %}
+{
+  "name": "Problem Agitation",
+  "tag": "section",
+  "settings": [
+    { "type": "text", "id": "headline", "label": "Headline", "default": "Why is nothing working?" },
+    { "type": "textarea", "id": "body", "label": "Body copy", "default": "Most routines fail because they are hard to remember, hard to enjoy, or hard to match to your actual day. Luma Daily turns supplement support into one simple ritual." }
+  ],
+  "blocks": [
+    {
+      "type": "point",
+      "name": "Pain Point",
+      "settings": [
+        { "type": "text", "id": "emoji", "label": "Icon" },
+        { "type": "text", "id": "label", "label": "Label" },
+        { "type": "text", "id": "description", "label": "Description" }
+      ]
+    }
+  ],
+  "presets": [{ "name": "Problem Agitation" }]
+}
+{% endschema %}

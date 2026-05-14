@@ -1,0 +1,107 @@
+{% comment %}
+  Section: page-ingredients
+  Ported from: Home.tsx Ingredients page + ingredients section
+  Design: Warm Editorial — sage-tinted ingredient cards, expandable detail panels
+{% endcomment %}
+
+<section class="page-ingredients section-cream">
+  <div class="container">
+
+    <div style="text-align:center; max-width:640px; margin:0 auto var(--space-12);">
+      <span class="hero__badge-pill">Transparency First</span>
+      <h1 class="section-title">{{ section.settings.headline | default: 'Every Ingredient, Explained' }}</h1>
+      <p class="section-subhead" style="margin:0 auto;">{{ section.settings.subhead | default: 'We source only the highest-quality, clinically studied ingredients — and we tell you exactly why each one is in your formula.' }}</p>
+    </div>
+
+    <div class="ingredients__grid">
+      {%- for block in section.blocks -%}
+        {%- if block.type == 'ingredient' -%}
+          <div class="ingredient-card ingredient-card--expandable" {{ block.shopify_attributes }}>
+            <div class="ingredient-card__icon">{{ block.settings.icon | default: '🌿' }}</div>
+            <h3 class="ingredient-card__name">{{ block.settings.name | escape }}</h3>
+            <p class="ingredient-card__benefit">{{ block.settings.benefit | escape }}</p>
+            {%- if block.settings.detail != blank -%}
+              <details class="ingredient-card__detail">
+                <summary class="ingredient-card__detail-toggle">Learn more</summary>
+                <p class="ingredient-card__detail-body">{{ block.settings.detail | escape }}</p>
+              </details>
+            {%- endif -%}
+          </div>
+        {%- endif -%}
+      {%- endfor -%}
+    </div>
+
+    {%- comment -%} Science callout banner {%- endcomment -%}
+    <div class="ingredients__science-banner">
+      <span class="ingredients__science-icon">🔬</span>
+      <div>
+        <p class="ingredients__science-title">{{ section.settings.science_title | default: 'Clinically Studied Doses' }}</p>
+        <p class="ingredients__science-body">{{ section.settings.science_body | default: 'Every active ingredient is dosed at the amount used in peer-reviewed clinical trials — not a token sprinkle.' }}</p>
+      </div>
+      <a href="{{ section.settings.science_cta_url | default: '/pages/about' }}" class="btn btn--ghost btn--sm">
+        {{ section.settings.science_cta_label | default: 'Read Our Research' }}
+      </a>
+    </div>
+
+  </div>
+</section>
+
+<style>
+  .ingredient-card--expandable { cursor:default; }
+  .ingredient-card__detail { margin-top: var(--space-3); }
+  .ingredient-card__detail-toggle { font-size:13px; font-weight:600; color: var(--color-amber); cursor:pointer; list-style:none; }
+  .ingredient-card__detail-toggle::-webkit-details-marker { display:none; }
+  .ingredient-card__detail-body { font-size:13px; color: var(--color-brown); margin-top: var(--space-2); line-height:1.55; }
+  .ingredients__science-banner {
+    display: flex;
+    align-items: center;
+    gap: var(--space-5);
+    background: var(--color-sage-light);
+    border-radius: var(--radius-lg);
+    padding: var(--space-6);
+    margin-top: var(--space-12);
+    flex-wrap: wrap;
+  }
+  .ingredients__science-icon { font-size:32px; flex-shrink:0; }
+  .ingredients__science-title { font-size:16px; font-weight:700; margin-bottom: var(--space-1); }
+  .ingredients__science-body { font-size:14px; color: var(--color-brown); }
+  .ingredients__science-banner .btn { margin-left:auto; }
+</style>
+
+{% schema %}
+{
+  "name": "Ingredients Page",
+  "tag": "section",
+  "settings": [
+    { "type": "text", "id": "headline", "label": "Headline" },
+    { "type": "text", "id": "subhead", "label": "Subheadline" },
+    { "type": "text", "id": "science_title", "label": "Science callout title" },
+    { "type": "text", "id": "science_body", "label": "Science callout body" },
+    { "type": "url",  "id": "science_cta_url", "label": "Science CTA URL" },
+    { "type": "text", "id": "science_cta_label", "label": "Science CTA label", "default": "Read Our Research" }
+  ],
+  "blocks": [
+    {
+      "type": "ingredient",
+      "name": "Ingredient",
+      "settings": [
+        { "type": "text", "id": "icon",    "label": "Emoji icon",   "default": "🌿" },
+        { "type": "text", "id": "name",    "label": "Ingredient name" },
+        { "type": "text", "id": "benefit", "label": "One-line benefit" },
+        { "type": "textarea", "id": "detail", "label": "Expanded detail (optional)" }
+      ]
+    }
+  ],
+  "presets": [
+    {
+      "name": "Ingredients Page",
+      "blocks": [
+        { "type": "ingredient", "settings": { "icon": "🍄", "name": "Lion's Mane", "benefit": "Supports memory & focus", "detail": "500mg per serving — the dose used in a 2019 double-blind RCT showing improved cognitive function in adults over 50." } },
+        { "type": "ingredient", "settings": { "icon": "🌸", "name": "Ashwagandha KSM-66", "benefit": "Reduces cortisol & stress", "detail": "300mg — the clinically validated extract standardized to ≥5% withanolides." } },
+        { "type": "ingredient", "settings": { "icon": "☀️", "name": "Vitamin D3 + K2", "benefit": "Bone, immune & mood support", "detail": "2000 IU D3 paired with 100mcg MK-7 K2 for optimal calcium metabolism." } },
+        { "type": "ingredient", "settings": { "icon": "🫐", "name": "Elderberry Extract", "benefit": "Immune defense", "detail": "200mg standardized to 17% polyphenols — studied for reducing cold duration." } }
+      ]
+    }
+  ]
+}
+{% endschema %}

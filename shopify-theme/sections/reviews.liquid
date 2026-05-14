@@ -1,0 +1,54 @@
+<section class="reviews section-cream-dk" aria-label="Customer reviews">
+  <div class="container">
+    <div class="reviews__header">
+      <div>
+        <div class="luma-section-kicker">Real people, real rituals</div>
+        <h2 class="section-title">{{ section.settings.heading | default: 'Daily rituals people actually keep.' | escape }}</h2>
+      </div>
+      <div class="reviews__summary">
+        <span class="reviews__overall-stars" aria-label="{{ section.settings.overall_rating }} out of 5">&#9733;&#9733;&#9733;&#9733;&#9733;</span>
+        <span class="reviews__overall-score">{{ section.settings.overall_rating | default: '4.9' }}</span>
+        <span class="reviews__overall-count">{{ section.settings.review_count | default: '2,847' }} reviews</span>
+      </div>
+    </div>
+    <div class="reviews__grid">
+      {%- if section.blocks.size > 0 -%}
+        {%- for block in section.blocks -%}
+          <div class="review-card" {{ block.shopify_attributes }}>
+            <div class="review-card__stars" aria-label="{{ block.settings.rating }} stars">&#9733;&#9733;&#9733;&#9733;&#9733;</div>
+            <p class="review-card__body">{{ block.settings.body | escape }}</p>
+            <div class="review-card__author"><strong>{{ block.settings.name | escape }}</strong><span class="review-card__verified">Verified customer</span></div>
+          </div>
+        {%- endfor -%}
+      {%- else -%}
+        <div class="review-card"><div class="review-card__stars">&#9733;&#9733;&#9733;&#9733;&#9733;</div><p class="review-card__body">"Luma Daily is the first routine I have actually kept. The flavors are easy to love and the ritual feels simple."</p><div class="review-card__author"><strong>Sarah M.</strong><span class="review-card__verified">Verified customer</span></div></div>
+        <div class="review-card"><div class="review-card__stars">&#9733;&#9733;&#9733;&#9733;&#9733;</div><p class="review-card__body">"The quiz helped me understand what to take and when. Energy in the morning, calm later, sleep at night."</p><div class="review-card__author"><strong>Marcus W.</strong><span class="review-card__verified">Verified customer</span></div></div>
+        <div class="review-card"><div class="review-card__stars">&#9733;&#9733;&#9733;&#9733;&#9733;</div><p class="review-card__body">"The Full Ritual made my supplement shelf feel organized for once. Easy, clean, and good-tasting."</p><div class="review-card__author"><strong>Priya K.</strong><span class="review-card__verified">Verified customer</span></div></div>
+      {%- endif -%}
+    </div>
+  </div>
+</section>
+
+{% schema %}
+{
+  "name": "Reviews",
+  "tag": "section",
+  "settings": [
+    { "type": "text", "id": "heading", "label": "Heading", "default": "Daily rituals people actually keep." },
+    { "type": "text", "id": "overall_rating", "label": "Overall rating", "default": "4.9" },
+    { "type": "text", "id": "review_count", "label": "Review count", "default": "2,847" }
+  ],
+  "blocks": [
+    {
+      "type": "review",
+      "name": "Review",
+      "settings": [
+        { "type": "range", "id": "rating", "label": "Rating", "min": 1, "max": 5, "step": 1, "default": 5 },
+        { "type": "textarea", "id": "body", "label": "Review body" },
+        { "type": "text", "id": "name", "label": "Reviewer name" }
+      ]
+    }
+  ],
+  "presets": [{ "name": "Reviews" }]
+}
+{% endschema %}

@@ -1,0 +1,19 @@
+extends: theme-check:recommended
+
+ignore:
+  - node_modules/**
+  - .git/**
+  - .shopify/**
+  - .theme/**
+
+MatchingTranslations:
+  enabled: true
+
+UnusedAssign:
+  enabled: true
+
+AssetSizeCSS:
+  enabled: true
+
+AssetSizeJavaScript:
+  enabled: true

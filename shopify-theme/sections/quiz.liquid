@@ -1,0 +1,62 @@
+<section class="quiz-page section-cream" data-luma-quiz>
+  <div class="container quiz-page__inner">
+    <div class="quiz-progress"><span data-quiz-step-label>Step 1 of 4</span><div class="quiz-progress__track"><span data-quiz-progress style="width:0%"></span></div><span data-quiz-percent>0%</span></div>
+
+    <div class="quiz-step is-active" data-step="1">
+      <h1 class="section-title">What's your biggest wellness goal right now?</h1>
+      <p class="section-subhead">Select the one that feels most true today.</p>
+      <div class="quiz-options">
+        <button class="quiz-option" data-answer="energy" data-product="luma-energy-gummies"><strong>More energy</strong><span>Support energy + focus for your day.</span></button>
+        <button class="quiz-option" data-answer="calm" data-product="luma-calm-gummies"><strong>Less stress</strong><span>Support calm + stress balance.</span></button>
+        <button class="quiz-option" data-answer="sleep" data-product="luma-sleep-gummies"><strong>Restful sleep</strong><span>Support a consistent nighttime routine.</span></button>
+        <button class="quiz-option" data-answer="glow" data-product="luma-glow-gummies"><strong>Healthier skin</strong><span>Support healthy skin, hair + nails.</span></button>
+        <button class="quiz-option" data-answer="gut" data-product="luma-gut-gummies"><strong>Digestive wellness</strong><span>Support digestive wellness daily.</span></button>
+      </div>
+    </div>
+
+    <div class="quiz-step" data-step="2">
+      <h1 class="section-title">When during the day do you take supplements?</h1>
+      <p class="section-subhead">This helps us time your ritual perfectly.</p>
+      <div class="quiz-options">
+        <button class="quiz-option" data-answer="morning"><strong>Morning</strong><span>With breakfast or coffee.</span></button>
+        <button class="quiz-option" data-answer="midday"><strong>Midday</strong><span>Lunch or afternoon break.</span></button>
+        <button class="quiz-option" data-answer="evening"><strong>Evening</strong><span>After dinner or before bed.</span></button>
+        <button class="quiz-option" data-answer="flexible"><strong>Flexible</strong><span>Whenever I remember.</span></button>
+      </div>
+    </div>
+
+    <div class="quiz-step" data-step="3">
+      <h1 class="section-title">How full should your ritual feel?</h1>
+      <p class="section-subhead">Pick the level of support you want.</p>
+      <div class="quiz-options">
+        <button class="quiz-option" data-answer="simple"><strong>Simple</strong><span>One focused gummy plus optional add-ons.</span></button>
+        <button class="quiz-option" data-answer="balanced"><strong>Balanced</strong><span>Energy, calm, and sleep across the day.</span></button>
+        <button class="quiz-option" data-answer="full"><strong>Full Ritual</strong><span>All Luma gummies in one complete routine.</span></button>
+      </div>
+    </div>
+
+    <div class="quiz-step" data-step="4">
+      <h1 class="section-title">Would you like subscription savings?</h1>
+      <p class="section-subhead">Keep your ritual stocked without thinking about it.</p>
+      <div class="quiz-options">
+        <button class="quiz-option" data-answer="yes"><strong>Yes, save 20%</strong><span>Subscribe to keep your ritual stocked.</span></button>
+        <button class="quiz-option" data-answer="maybe"><strong>Maybe later</strong><span>Build the bundle first and decide at checkout.</span></button>
+      </div>
+    </div>
+
+    <div class="quiz-actions">
+      <button class="btn btn--ghost" type="button" data-quiz-back disabled>Back</button>
+      <button class="btn btn--primary" type="button" data-quiz-next disabled>Next</button>
+    </div>
+    <p class="quiz-page__note">Results add available Shopify products to cart and open checkout-ready cart drawer.</p>
+  </div>
+</section>
+
+{% schema %}
+{
+  "name": "Quiz",
+  "tag": "section",
+  "settings": [],
+  "presets": [{ "name": "Quiz" }]
+}
+{% endschema %}

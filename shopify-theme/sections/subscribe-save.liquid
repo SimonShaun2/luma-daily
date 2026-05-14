@@ -1,0 +1,39 @@
+<section class="subscribe-save" aria-label="Subscribe and save">
+  <div class="container subscribe-save__inner luma-subscribe-feature">
+    <div>
+      <div class="luma-section-kicker">Subscribe and save</div>
+      <h2 class="section-title">{{ section.settings.subscribe_heading | default: 'Subscribe once. Keep your ritual stocked.' | escape }}</h2>
+      <p class="section-subhead">The easiest routine is the one that shows up before you run out.</p>
+      <ul class="luma-check-list">
+        <li>Save on recurring rituals</li>
+        <li>Pause or adjust anytime</li>
+        <li>Priority restock access</li>
+        <li>Free shipping threshold support</li>
+      </ul>
+      <a href="{{ section.settings.subscribe_cta_url | default: '/collections/all' }}" class="btn btn--primary">
+        {{ section.settings.subscribe_cta_label | default: 'Choose my ritual' | escape }}
+      </a>
+    </div>
+    <img
+      src="https://takelumadaily.manus.space/manus-storage/bundle_daily3_noprice_7a4e331a.png"
+      alt="Luma Daily bundle"
+      class="luma-subscribe-feature__image"
+      width="620"
+      height="620"
+      loading="lazy"
+    >
+  </div>
+</section>
+
+{% schema %}
+{
+  "name": "Subscribe & Save",
+  "tag": "section",
+  "settings": [
+    { "type": "text", "id": "subscribe_heading", "label": "Subscribe heading", "default": "Subscribe once. Keep your ritual stocked." },
+    { "type": "text", "id": "subscribe_cta_label", "label": "Subscribe CTA label", "default": "Choose my ritual" },
+    { "type": "url", "id": "subscribe_cta_url", "label": "Subscribe CTA URL" }
+  ],
+  "presets": [{ "name": "Subscribe & Save" }]
+}
+{% endschema %}

@@ -1,0 +1,20 @@
+<section class="section-cream collection-hero">
+  <div class="container">
+    <div class="luma-section-kicker">Shop Luma Daily</div>
+    <h1 class="hero__headline">{{ collection.title | default: 'All formulas' | escape }}</h1>
+    {%- if collection.description != blank -%}
+      <p class="section-subhead">{{ collection.description | strip_html }}</p>
+    {%- else -%}
+      <p class="section-subhead">Choose your formulas or take the quiz to build a daily ritual.</p>
+    {%- endif -%}
+  </div>
+</section>
+
+{% schema %}
+{
+  "name": "Collection hero",
+  "tag": "section",
+  "settings": [],
+  "presets": [{ "name": "Collection hero" }]
+}
+{% endschema %}

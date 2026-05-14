@@ -1,0 +1,28 @@
+{%- assign target_url = '/products/' | append: handle -%}
+{%- if product != blank -%}
+  {%- assign target_url = product.url -%}
+{%- endif -%}
+
+<div class="bundle-card luma-static-bundle" role="listitem">
+  <a href="{{ target_url }}" class="bundle-card__image-link" tabindex="-1" aria-hidden="true">
+    <img src="{{ image }}" alt="{{ title | escape }}" class="bundle-card__image" width="640" height="640" loading="lazy">
+  </a>
+  <div class="bundle-card__body">
+    <span class="product-card__flavor-badge">{{ savings | escape }}</span>
+    <h3 class="bundle-card__title"><a href="{{ target_url }}">{{ title | escape }}</a></h3>
+    <p class="bundle-card__tagline">{{ subtitle | escape }}</p>
+    <div class="bundle-card__price">
+      <span class="bundle-card__price-current">{% if product != blank %}{{ product.price | money }}{% else %}{{ price }}{% endif %}</span>
+      <span class="bundle-card__price-subscribe">{{ compare }}</span>
+    </div>
+    {%- if product != blank and product.selected_or_first_available_variant != blank -%}
+      <form action="/cart/add" method="post" class="bundle-card__atc-form">
+        <input type="hidden" name="id" value="{{ product.selected_or_first_available_variant.id }}">
+        <input type="hidden" name="quantity" value="1">
+        <button type="submit" class="btn btn--primary btn--full">Buy this bundle</button>
+      </form>
+    {%- else -%}
+      <a href="{{ target_url }}" class="btn btn--primary btn--full">View bundle</a>
+    {%- endif -%}
+  </div>
+</div>
